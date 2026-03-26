@@ -306,7 +306,7 @@ main { background: var(--bg); overflow-y: auto; display: flex; flex-direction: c
       </div>
       <div class="email-body-wrap">
         <div class="email-meta">
-          <p><strong>Para:</strong> cliente@empresa.com</p>
+          <p><strong>Para:</strong> <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="1a7976737f746e7f5a7f776a687f697b34797577">[email&#160;protected]</a></p>
           <p><strong>Asunto:</strong> Propiedad en venta &mdash; Gran oportunidad</p>
         </div>
         <div class="email-body-text">Estimado/a,<br><br>Le escribo para compartirle informacion sobre una propiedad que podria ser de su interes...</div>
@@ -357,7 +357,7 @@ main { background: var(--bg); overflow-y: auto; display: flex; flex-direction: c
 
 <div class="toast" id="toast">OK</div>
 
-<script type="module">
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script type="module">
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
 /* ── Supabase ── */
@@ -533,6 +533,11 @@ function buildSocialIcons(forHTML) {
 /* ── Build signature ── */
 function buildSignature(forHTML) {
   if (!currentTpl || !currentTenant) return '';
+  const isHorizontal = currentTpl.template_id === 't3' || currentTpl.template_id === 't4';
+  return isHorizontal ? buildHorizontal(forHTML) : buildVertical(forHTML);
+}
+
+function buildVertical(forHTML) {
   const name=v('f-name')||'Tu Nombre', role=v('f-role')||'Agente Inmobiliaria';
   const email=v('f-email'), phone=v('f-phone'), wa=v('f-whatsapp');
   const icons = buildSocialIcons(forHTML);
@@ -551,18 +556,29 @@ function buildSignature(forHTML) {
   if (currentTpl.extra_website) rows += `<tr><td style="padding-bottom:4px;font-family:Arial,sans-serif;font-size:12px;color:#444;white-space:nowrap">&#127760;&nbsp;<a href="${currentTpl.extra_website}" style="color:#111;text-decoration:none">${currentTpl.extra_website.replace('https://','')}</a></td></tr>`;
   if (web) rows += `<tr><td style="padding-bottom:4px;font-family:Arial,sans-serif;font-size:12px;color:#444;white-space:nowrap">&#127760;&nbsp;<a href="${web}" style="color:#111;text-decoration:none">${webLabel}</a></td></tr>`;
 
-  return `<table cellpadding="0" cellspacing="0" border="0" style="font-family:Arial,sans-serif">
-<tr>
-  <td style="padding-right:16px;vertical-align:top;padding-top:2px">${photo}</td>
-  <td style="vertical-align:top">
-    <img src="${logo}" height="38" style="display:block;margin-bottom:8px" alt="logo">
-    <p style="margin:0 0 1px;font-size:16px;font-weight:700;color:#111;font-family:Arial,sans-serif">${name}</p>
-    <p style="margin:0 0 9px;font-size:12px;color:#777;font-style:italic;font-family:Arial,sans-serif">${role}</p>
-    <table cellpadding="0" cellspacing="0" border="0" style="margin-bottom:8px">${rows}</table>
-    ${icons?`<div style="display:flex;align-items:center;gap:2px;margin-top:4px">${icons}</div>`:''}
-  </td>
-</tr>
-</table>`;
+  return `<table cellpadding="0" cellspacing="0" border="0" style="font-family:Arial,sans-serif"><tr><td style="padding-right:16px;vertical-align:top;padding-top:2px">${photo}</td><td style="vertical-align:top"><img src="${logo}" height="38" style="display:block;margin-bottom:8px" alt="logo"><p style="margin:0 0 1px;font-size:16px;font-weight:700;color:#111;font-family:Arial,sans-serif">${name}</p><p style="margin:0 0 9px;font-size:12px;color:#777;font-style:italic;font-family:Arial,sans-serif">${role}</p><table cellpadding="0" cellspacing="0" border="0" style="margin-bottom:8px">${rows}</table>${icons?`<div style="display:flex;align-items:center;gap:2px;margin-top:4px">${icons}</div>`:''}</td></tr></table>`;
+}
+
+function buildHorizontal(forHTML) {
+  const name=v('f-name')||'Tu Nombre', role=v('f-role')||'Agente Inmobiliaria';
+  const email=v('f-email'), phone=v('f-phone'), wa=v('f-whatsapp');
+  const icons = buildSocialIcons(forHTML);
+  const logo  = currentTpl.logo_url || currentTenant.logo_url || '';
+  const web   = currentTenant.website || '';
+  const webLabel = web.replace('https://','').replace('http://','');
+
+  const photo = photoDataUrl
+    ? `<img src="${photoDataUrl}" width="68" height="68" style="border-radius:50%;object-fit:cover;display:block;border:1.5px solid #ddd" alt="${name}">`
+    : `<div style="width:68px;height:68px;border-radius:50%;background:#f5f5f5;border:1.5px solid #ddd;display:table-cell;text-align:center;vertical-align:middle;font-size:24px;color:#ccc">?</div>`;
+
+  let contact = '';
+  if (phone) contact += `<p style="margin:0 0 4px;font-family:Arial,sans-serif;font-size:11px;color:#555">&#128222;&nbsp;${phone}</p>`;
+  if (wa)    contact += `<p style="margin:0 0 4px;font-family:Arial,sans-serif;font-size:11px"><a href="https://wa.me/${wa.replace(/\D/g,'')}" style="color:#25D366;text-decoration:none">&#128241;&nbsp;${wa}</a></p>`;
+  if (email) contact += `<p style="margin:0 0 4px;font-family:Arial,sans-serif;font-size:11px;color:#555">&#9993;&nbsp;<a href="mailto:${email}" style="color:#555;text-decoration:none">${email}</a></p>`;
+  if (currentTpl.extra_website) contact += `<p style="margin:0 0 4px;font-family:Arial,sans-serif;font-size:11px;color:#555">&#127760;&nbsp;<a href="${currentTpl.extra_website}" style="color:#555;text-decoration:none">${currentTpl.extra_website.replace('https://','')}</a></p>`;
+  if (web) contact += `<p style="margin:0;font-family:Arial,sans-serif;font-size:11px;color:#555">&#127760;&nbsp;<a href="${web}" style="color:#555;text-decoration:none">${webLabel}</a></p>`;
+
+  return `<table cellpadding="0" cellspacing="0" border="0" style="font-family:Arial,sans-serif"><tr><td style="vertical-align:middle;padding-right:14px">${photo}</td><td style="vertical-align:middle;padding-right:14px;border-right:1px solid #e0e0e0"><p style="margin:0 0 2px;font-size:14px;font-weight:700;color:#111;font-family:Arial,sans-serif">${name}</p><p style="margin:0 0 7px;font-size:11px;color:#999;font-family:Arial,sans-serif;letter-spacing:.4px;text-transform:uppercase">${role}</p>${icons?`<div style="display:flex;align-items:center;gap:3px">${icons}</div>`:''}</td><td style="vertical-align:middle;padding-left:14px;padding-right:14px;border-right:1px solid #e0e0e0">${contact}</td><td style="vertical-align:middle;padding-left:18px"><img src="${logo}" height="48" style="display:block" alt="logo"></td></tr></table>`;
 }
 
 /* ── Render saved ── */
@@ -832,15 +848,4 @@ window.app = {
     for(const s of steps){
       if(s.tip) html+=`<div class="gtip">&#128161;&nbsp;<strong>Consejo:</strong> ${s.tip}</div>`;
       else { html+=`<div class="gstep"><div class="gnum">${n}</div><div class="gtext">${s.t}</div></div>`;n++; }
-    }
-    document.getElementById('guide-content').innerHTML=html;
-  }
-};
-
-document.getElementById('guide-overlay').addEventListener('click',function(e){
-  if(e.target===this) window.app.closeGuide();
-});
-
-</script>
-</body>
-</html>
+  
