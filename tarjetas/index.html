@@ -1,1 +1,598 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tarjetas de Presentación — PropTools</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #f0f2f5; --surface: #fff; --surface2: #f5f6f8;
+  --border: #e2e4e9; --text: #111318; --muted: #6b7280; --radius: 12px;
+}
+body { font-family: -apple-system,'Segoe UI',Arial,sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
 
+/* LOGIN */
+.login-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--bg); padding: 24px; }
+.login-box { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 40px; width: 100%; max-width: 400px; box-shadow: 0 4px 24px rgba(0,0,0,.06); }
+.login-logo { display: flex; align-items: center; gap: 10px; margin-bottom: 28px; }
+.login-logo img { height: 22px; }
+.login-logo span { font-size: 15px; font-weight: 700; }
+.login-box h2 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
+.login-box p { font-size: 13px; color: var(--muted); margin-bottom: 28px; line-height: 1.5; }
+.form-field { margin-bottom: 14px; }
+.form-field label { font-size: 11px; font-weight: 600; color: var(--muted); display: block; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; }
+.form-field input { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; color: var(--text); font-family: inherit; font-size: 14px; outline: none; transition: border-color .15s; }
+.form-field input:focus { border-color: #000; }
+.btn-login { width: 100%; background: #000; color: #fff; border: none; border-radius: 8px; padding: 12px; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer; transition: background .15s; margin-top: 4px; }
+.btn-login:hover { background: #222; }
+.btn-login:disabled { background: #aaa; cursor: not-allowed; }
+.login-error { font-size: 12px; color: #ef4444; margin-top: 10px; text-align: center; display: none; }
+.login-footer { margin-top: 20px; text-align: center; font-size: 12px; color: var(--muted); }
+
+/* APP */
+.app-screen { display: none; min-height: 100vh; grid-template-columns: 380px 1fr; grid-template-rows: auto 1fr; }
+.app-screen.visible { display: grid; }
+header { grid-column: 1/-1; padding: 12px 28px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 14px; background: var(--surface); }
+header h1 { font-size: 16px; font-weight: 700; }
+.header-divider { width: 1px; height: 22px; background: var(--border); flex-shrink: 0; }
+.header-sub { font-size: 12px; color: var(--muted); }
+.header-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
+.header-right img { height: 22px; display: block; }
+.db-status { font-size: 11px; padding: 4px 10px; border-radius: 20px; display: inline-flex; align-items: center; gap: 5px; border: 1px solid var(--border); background: var(--surface2); }
+.db-dot { width: 7px; height: 7px; border-radius: 50%; background: #f0a500; }
+.db-dot.ok { background: #22c55e; }
+.db-dot.err { background: #ef4444; }
+.btn-logout { font-family: inherit; font-size: 11px; font-weight: 600; padding: 5px 12px; border-radius: 7px; border: 1px solid var(--border); background: var(--surface2); color: var(--muted); cursor: pointer; transition: all .15s; }
+.btn-logout:hover { border-color: #ef4444; color: #ef4444; background: #fff5f5; }
+
+/* SIDEBAR */
+aside { background: var(--surface); border-right: 1px solid var(--border); overflow-y: auto; padding: 20px 18px; display: flex; flex-direction: column; gap: 20px; }
+.section-label { font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+.template-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.tpl-btn { background: var(--surface2); border: 2px solid var(--border); border-radius: 10px; padding: 8px; cursor: pointer; transition: all .15s; font-family: inherit; overflow: hidden; position: relative; }
+.tpl-btn img { width: 100%; border-radius: 6px; display: block; }
+.tpl-btn-label { font-size: 10px; font-weight: 600; color: var(--muted); text-align: center; margin-top: 6px; line-height: 1.3; }
+.tpl-btn:hover { border-color: #555; }
+.tpl-btn.active { border-color: #000; }
+.tpl-btn.active .tpl-btn-label { color: #000; font-weight: 700; }
+.field-group { display: flex; flex-direction: column; gap: 8px; }
+label { font-size: 11px; font-weight: 600; color: var(--muted); display: block; margin-bottom: 3px; }
+input[type="text"],input[type="url"],input[type="tel"],input[type="email"] { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 7px; padding: 8px 10px; color: var(--text); font-family: inherit; font-size: 13px; outline: none; transition: border-color .15s; }
+input:focus { border-color: #000; }
+input::placeholder { color: var(--muted); opacity: .45; }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.upload-area { background: var(--surface2); border: 2px dashed var(--border); border-radius: var(--radius); padding: 12px; display: flex; align-items: center; gap: 11px; cursor: pointer; transition: border-color .15s; }
+.upload-area:hover { border-color: #888; }
+.upload-preview { width: 44px; height: 44px; border-radius: 50%; background: #e0e0e0; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; }
+.upload-preview img { width: 100%; height: 100%; object-fit: cover; }
+.upload-text { font-size: 12px; color: var(--muted); line-height: 1.5; }
+.upload-text strong { color: var(--text); display: block; font-size: 13px; }
+input[type="file"] { display: none; }
+
+/* MAIN */
+main { background: var(--bg); overflow-y: auto; display: flex; flex-direction: column; }
+.preview-toolbar { padding: 18px 28px 0; display: flex; align-items: center; justify-content: space-between; }
+.preview-toolbar h2 { font-size: 16px; font-weight: 700; }
+.toolbar-btns { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+.btn { font-family: inherit; font-size: 12px; font-weight: 600; padding: 8px 16px; border-radius: 7px; border: none; cursor: pointer; transition: all .15s; display: flex; align-items: center; gap: 6px; }
+.btn-accent { background: #000; color: #fff; }
+.btn-accent:hover { background: #222; box-shadow: 0 3px 12px rgba(0,0,0,.2); }
+.btn-ghost { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+.btn-ghost:hover { border-color: #888; }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+
+/* PREVIEW AREA */
+.preview-area { padding: 20px 28px 28px; display: flex; gap: 32px; justify-content: center; align-items: flex-start; flex-wrap: wrap; }
+.card-wrapper { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.card-label { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); }
+.card-canvas-wrap {
+  border-radius: 12px; overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0,0,0,.15);
+  position: relative;
+}
+canvas { display: block; }
+
+/* TOAST */
+.toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px); background: #000; color: #fff; padding: 10px 22px; border-radius: 100px; font-weight: 700; font-size: 13px; transition: transform .3s cubic-bezier(.34,1.56,.64,1); pointer-events: none; z-index: 1100; }
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-screen" id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">
+      <img src="https://res.cloudinary.com/dlgrhr6lh/image/upload/v1774471912/logo_veintiuno_snlwr8.png" alt="Veintiuno">
+      <span>PropTools</span>
+    </div>
+    <h2>Iniciar sesi&oacute;n</h2>
+    <p>Ingres&aacute; con tu cuenta para acceder al generador de tarjetas.</p>
+    <div class="form-field">
+      <label>Correo electr&oacute;nico</label>
+      <input type="email" id="login-email" placeholder="tu@correo.com">
+    </div>
+    <div class="form-field">
+      <label>Contrase&ntilde;a</label>
+      <input type="password" id="login-password" placeholder="••••••••">
+    </div>
+    <button class="btn-login" id="btn-login">Ingresar</button>
+    <div class="login-error" id="login-error"></div>
+    <div class="login-footer">Desarrollado por Veintiuno &mdash; PropTools</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div class="app-screen" id="app-screen">
+  <header>
+    <div>
+      <h1>Tarjetas de Presentaci&oacute;n</h1>
+      <span class="header-sub" id="header-tenant">Cargando...</span>
+    </div>
+    <div class="header-divider"></div>
+    <div class="db-status">
+      <div class="db-dot ok" id="db-dot"></div>
+      <span id="db-status-text">Conectado</span>
+    </div>
+    <div class="header-right">
+      <img src="https://res.cloudinary.com/dlgrhr6lh/image/upload/v1774471912/logo_veintiuno_snlwr8.png" alt="Veintiuno">
+      <button class="btn-logout" id="btn-logout">Cerrar sesi&oacute;n</button>
+    </div>
+  </header>
+
+  <aside>
+    <div>
+      <p class="section-label">Template</p>
+      <div class="template-grid" id="template-grid"></div>
+    </div>
+
+    <div>
+      <p class="section-label">Foto de perfil</p>
+      <label for="photo-upload">
+        <div class="upload-area" id="upload-area">
+          <div class="upload-preview" id="photo-preview">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+          </div>
+          <div class="upload-text">
+            <strong id="upload-title">Subir foto</strong>
+            <span id="upload-status">PNG con fondo transparente ideal</span>
+          </div>
+        </div>
+      </label>
+      <input type="file" id="photo-upload" accept="image/*">
+    </div>
+
+    <div>
+      <p class="section-label">Informacion personal</p>
+      <div class="field-group">
+        <div><label>Nombre completo</label><input type="text" id="f-name" placeholder="Ana Garcia"></div>
+        <div><label>Cargo</label><input type="text" id="f-role" placeholder="Agente Inmobiliaria"></div>
+        <div><label>Correo electronico</label><input type="email" id="f-email" placeholder="ana@empresa.com"></div>
+        <div class="field-row">
+          <div><label>Telefono</label><input type="tel" id="f-phone" placeholder="+506 2222 0000"></div>
+          <div><label>WhatsApp</label><input type="tel" id="f-whatsapp" placeholder="+506 8888 0000"></div>
+        </div>
+        <div><label>Instagram</label><input type="text" id="f-instagram" placeholder="@tu_cuenta"></div>
+        <div><label>Direcci&oacute;n de oficina</label><input type="text" id="f-address" placeholder="CC Boulevard, San Rafael, Escaz&uacute;."></div>
+      </div>
+    </div>
+  </aside>
+
+  <main>
+    <div class="preview-toolbar">
+      <h2>Vista previa</h2>
+      <div class="toolbar-btns">
+        <button class="btn btn-ghost" id="btn-download-pdf">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Descargar PDF
+        </button>
+        <button class="btn btn-ghost" id="btn-download-png">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          Descargar PNG
+        </button>
+      </div>
+    </div>
+
+    <div class="preview-area">
+      <div class="card-wrapper">
+        <div class="card-label">Frente</div>
+        <div class="card-canvas-wrap">
+          <canvas id="canvas-front" width="354" height="638"></canvas>
+        </div>
+      </div>
+      <div class="card-wrapper">
+        <div class="card-label">Reverso</div>
+        <div class="card-canvas-wrap">
+          <canvas id="canvas-back" width="354" height="638"></canvas>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+const sb = createClient(
+  'https://zsldwaiwcvziqfajcmph.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpzbGR3YWl3Y3Z6aXFmYWpjbXBoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1NjQ4NzcsImV4cCI6MjA5MDE0MDg3N30.eFlAAk-fPHI8r8YQPjP8kYnohziRpGu9whGpgfaW-KU'
+);
+
+/* ── Estado ── */
+let currentUser=null, currentProfile=null, currentTenant=null;
+let currentTpl=null, photoImg=null, photoDataUrl=null;
+
+/* Tarjetas 9x5cm a 300 DPI = 1063x591px — mostramos a 60% = 638x354 */
+const CARD_W=1063, CARD_H=591;
+const DISPLAY_W=638, DISPLAY_H=354;
+const SCALE = DISPLAY_W/CARD_W;
+
+/* Templates hardcoded — frente y reverso por marca */
+const TEMPLATES = [
+  {
+    id: 'remax-central',
+    label: 'REMAX Central',
+    front_url: 'https://res.cloudinary.com/dlgrhr6lh/image/upload/v1774576398/frente-remax_zhorik.png',
+    back_url:  'https://res.cloudinary.com/dlgrhr6lh/image/upload/v1774576399/reverso-remax_agzjhe.png',
+    has_sunrise: false,
+    website: 'www.remaxcentralcr.com',
+    address: 'CC Boulevard, San Rafael, Escaz\u00fa.\nSan Jos\u00e9, Costa Rica.'
+  },
+  {
+    id: 'team-sunrise',
+    label: 'Team Sunrise',
+    front_url: 'https://res.cloudinary.com/dlgrhr6lh/image/upload/v1774576399/frente-sunrise_tl2bst.png',
+    back_url:  'https://res.cloudinary.com/dlgrhr6lh/image/upload/v1774576401/reverso-sunrise_fofnuw.png',
+    has_sunrise: true,
+    website: 'www.sunrisecr.com',
+    website2: 'www.remaxcentralcr.com',
+    address: 'CC Boulevard, San Rafael, Escaz\u00fa.\nSan Jos\u00e9, Costa Rica.'
+  }
+];
+
+/* ── Helpers ── */
+const el   = id => document.getElementById(id);
+const v    = id => { const e=el(id); return e?e.value.trim():''; };
+
+function toast(msg) {
+  const t=el('toast'); t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+function loadImg(url) {
+  return new Promise((res,rej) => {
+    const img = new Image(); img.crossOrigin='anonymous';
+    img.onload=()=>res(img); img.onerror=()=>rej(new Error('No se pudo cargar: '+url));
+    img.src = url;
+  });
+}
+
+/* ── Auth ── */
+async function doLogin() {
+  const email=v('login-email'), password=el('login-password').value;
+  const errEl=el('login-error'), btn=el('btn-login');
+  errEl.style.display='none';
+  if(!email||!password){errEl.textContent='Completa todos los campos.';errEl.style.display='block';return;}
+  btn.disabled=true; btn.textContent='Ingresando...';
+  const {data,error}=await sb.auth.signInWithPassword({email,password});
+  if(error){errEl.textContent='Correo o contrase\u00f1a incorrectos.';errEl.style.display='block';btn.disabled=false;btn.textContent='Ingresar';return;}
+  currentUser=data.session.user; await loadContext();
+}
+
+async function doLogout() {
+  await sb.auth.signOut();
+  el('login-screen').style.display='flex';
+  el('app-screen').classList.remove('visible');
+  currentUser=currentProfile=currentTenant=null;
+}
+
+async function loadContext() {
+  try {
+    const {data:profile,error:pErr}=await sb.from('users').select('*,tenants(*)').eq('auth_id',currentUser.id).single();
+    if(pErr||!profile) throw new Error('Usuario no encontrado.');
+    currentProfile=profile; currentTenant=profile.tenants;
+    el('header-tenant').textContent=currentTenant.name;
+    el('login-screen').style.display='none';
+    el('app-screen').classList.add('visible');
+    el('btn-login').disabled=false; el('btn-login').textContent='Ingresar';
+    buildTemplateGrid();
+    setTemplate(TEMPLATES[0]);
+  } catch(e) {
+    el('login-error').textContent=e.message; el('login-error').style.display='block';
+    el('btn-login').disabled=false; el('btn-login').textContent='Ingresar';
+    await sb.auth.signOut();
+  }
+}
+
+/* ── Templates ── */
+function buildTemplateGrid() {
+  const grid=el('template-grid');
+  grid.innerHTML = TEMPLATES.map(t=>`
+    <button class="tpl-btn" data-id="${t.id}">
+      <img src="${t.front_url}" alt="${t.label}" crossorigin="anonymous">
+      <div class="tpl-btn-label">${t.label}</div>
+    </button>`).join('');
+  grid.querySelectorAll('.tpl-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const tpl=TEMPLATES.find(t=>t.id===btn.dataset.id);
+      if(tpl) setTemplate(tpl);
+    });
+  });
+}
+
+function setTemplate(tpl) {
+  currentTpl=tpl;
+  document.querySelectorAll('.tpl-btn').forEach(b=>b.classList.remove('active'));
+  const btn=document.querySelector(`.tpl-btn[data-id="${tpl.id}"]`);
+  if(btn) btn.classList.add('active');
+  renderCards();
+}
+
+/* ══════════════════════════════
+   CANVAS RENDERING
+══════════════════════════════ */
+
+/* Utilidad para texto wrapeado en canvas */
+function wrapText(ctx, text, x, y, maxW, lineH) {
+  const words=text.split(' '); let line='';
+  for(let i=0;i<words.length;i++){
+    const test=line+words[i]+' ';
+    if(ctx.measureText(test).width>maxW&&i>0){ctx.fillText(line.trim(),x,y);line=words[i]+' ';y+=lineH;}
+    else line=test;
+  }
+  ctx.fillText(line.trim(),x,y);
+  return y;
+}
+
+async function renderFront(canvas) {
+  const ctx=canvas.getContext('2d');
+  const W=canvas.width, H=canvas.height;
+  ctx.clearRect(0,0,W,H);
+
+  if(!currentTpl) return;
+
+  /* Fondo */
+  try {
+    const bg=await loadImg(currentTpl.front_url);
+    ctx.drawImage(bg,0,0,W,H);
+  } catch(e){ ctx.fillStyle='#1a2744'; ctx.fillRect(0,0,W,H); }
+
+  /* Foto del agente */
+  if(photoImg) {
+    /* Área blanca del frente: aproximadamente x=60,y=80 w=470,h=470 a full res */
+    /* A display scale: */
+    const px=Math.round(60*SCALE), py=Math.round(80*SCALE);
+    const pw=Math.round(470*SCALE), ph=Math.round(470*SCALE);
+    /* Clip redondeado */
+    ctx.save();
+    const r=Math.round(28*SCALE);
+    ctx.beginPath();
+    ctx.moveTo(px+r,py);
+    ctx.lineTo(px+pw-r,py);
+    ctx.quadraticCurveTo(px+pw,py,px+pw,py+r);
+    ctx.lineTo(px+pw,py+ph-r);
+    ctx.quadraticCurveTo(px+pw,py+ph,px+pw-r,py+ph);
+    ctx.lineTo(px+r,py+ph);
+    ctx.quadraticCurveTo(px,py+ph,px,py+ph-r);
+    ctx.lineTo(px,py+r);
+    ctx.quadraticCurveTo(px,py,px+r,py);
+    ctx.closePath();
+    ctx.clip();
+    /* Dibujar foto cubriendo el área */
+    const ratio=photoImg.width/photoImg.height;
+    let sw=pw, sh=ph;
+    if(ratio>pw/ph) sw=sh*ratio; else sh=sw/ratio;
+    const sx=px+(pw-sw)/2, sy=py+(ph-sh)/2;
+    ctx.drawImage(photoImg,sx,sy,sw,sh);
+    ctx.restore();
+  }
+
+  /* Nombre en banda azul inferior */
+  const name=v('f-name')||'TU NOMBRE';
+  const bandY=Math.round(556*SCALE);
+  const bandH=Math.round(82*SCALE);
+
+  /* Texto nombre */
+  const fontSize=Math.round(36*SCALE);
+  ctx.font=`800 ${fontSize}px 'Arial Black',Arial,sans-serif`;
+  ctx.fillStyle='#ffffff';
+  ctx.textAlign='center';
+  ctx.textBaseline='middle';
+
+  if(currentTpl.has_sunrise) {
+    /* Dos líneas: nombre y TEAM SUNRISE */
+    ctx.fillText(name.toUpperCase(), W/2, bandY+Math.round(18*SCALE));
+    const subSize=Math.round(18*SCALE);
+    ctx.font=`600 ${subSize}px Arial,sans-serif`;
+    ctx.fillStyle='rgba(255,255,255,0.85)';
+    ctx.fillText('TEAM SUNRISE', W/2, bandY+Math.round(48*SCALE));
+  } else {
+    ctx.fillText(name.toUpperCase(), W/2, bandY+bandH/2);
+  }
+}
+
+async function renderBack(canvas) {
+  const ctx=canvas.getContext('2d');
+  const W=canvas.width, H=canvas.height;
+  ctx.clearRect(0,0,W,H);
+
+  if(!currentTpl) return;
+
+  /* Fondo */
+  try {
+    const bg=await loadImg(currentTpl.back_url);
+    ctx.drawImage(bg,0,0,W,H);
+  } catch(e){ ctx.fillStyle='#fff'; ctx.fillRect(0,0,W,H); }
+
+  /* QR Code — generado con qrcode.js */
+  const wa=v('f-whatsapp')||'+50600000000';
+  const waClean=wa.replace(/\D/g,'');
+  const qrUrl=`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=https://wa.me/${waClean}&bgcolor=ffffff&color=000000&format=png`;
+  try {
+    const qrImg=await loadImg(qrUrl);
+    /* QR área: centrado arriba, ~x=80,y=30, w=430,h=430 a full res */
+    const qx=Math.round(80*SCALE), qy=Math.round(28*SCALE);
+    const qw=Math.round(430*SCALE), qh=Math.round(430*SCALE);
+    ctx.drawImage(qrImg,qx,qy,qw,qh);
+  } catch(e){ console.warn('QR error',e); }
+
+  /* Datos de contacto — área inferior */
+  const phone=v('f-phone')||'';
+  const email=v('f-email')||'';
+  const instagram=v('f-instagram')||'';
+
+  /* Posición base del área de texto: ~y=510 a full res */
+  let ty=Math.round(508*SCALE);
+  const lineH=Math.round(26*SCALE);
+  const fontSize=Math.round(20*SCALE);
+
+  ctx.font=`600 ${fontSize}px Arial,sans-serif`;
+  ctx.fillStyle='#111111';
+  ctx.textAlign='center';
+  ctx.textBaseline='top';
+
+  if(phone) { ctx.fillText(phone, W/2, ty); ty+=lineH; }
+  if(email) { ctx.fillText(email, W/2, ty); ty+=lineH; }
+  if(instagram) {
+    ctx.fillText(instagram.startsWith('@')?instagram:'@'+instagram, W/2, ty);
+    ty+=lineH+Math.round(8*SCALE);
+  }
+
+  /* Websites */
+  const smallSize=Math.round(16*SCALE);
+  ctx.font=`500 ${smallSize}px Arial,sans-serif`;
+  ctx.fillStyle='#333333';
+  ty+=Math.round(4*SCALE);
+
+  if(currentTpl.has_sunrise) { ctx.fillText('www.sunrisecr.com', W/2, ty); ty+=Math.round(22*SCALE); }
+  ctx.fillText('www.remaxcentralcr.com', W/2, ty); ty+=Math.round(22*SCALE);
+
+  const addr=v('f-address')||currentTpl.address||'';
+  if(addr) {
+    const addrLines=addr.split('\n');
+    for(const line of addrLines) { ctx.fillText(line, W/2, ty); ty+=Math.round(22*SCALE); }
+  }
+}
+
+async function renderCards() {
+  await Promise.all([
+    renderFront(el('canvas-front')),
+    renderBack(el('canvas-back'))
+  ]);
+}
+
+/* ── Upload photo ── */
+function uploadPhoto(file) {
+  if(!file) return;
+  const reader=new FileReader();
+  reader.onload=async e=>{
+    photoDataUrl=e.target.result;
+    photoImg=await loadImg(e.target.result);
+    el('photo-preview').innerHTML=`<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover" alt="">`;
+    el('upload-title').textContent='Foto cargada';
+    el('upload-status').textContent='Click para cambiar';
+    el('upload-area').style.borderColor='#22c55e';
+    renderCards();
+  };
+  reader.readAsDataURL(file);
+}
+
+/* ── Download PDF ── */
+async function downloadPDF() {
+  const btn=el('btn-download-pdf');
+  btn.disabled=true; btn.textContent='Generando PDF...';
+  try {
+    /* Cargar jsPDF */
+    if(!window.jsPDF) {
+      await new Promise((res,rej)=>{
+        const s=document.createElement('script');
+        s.src='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+        s.onload=res; s.onerror=rej; document.head.appendChild(s);
+      });
+    }
+    const {jsPDF}=window.jspdf;
+
+    /* Renderizar a canvas de alta resolución */
+    const frontHR=document.createElement('canvas');
+    frontHR.width=CARD_W; frontHR.height=CARD_H;
+    const backHR=document.createElement('canvas');
+    backHR.width=CARD_W; backHR.height=CARD_H;
+
+    /* Escalar renderizado */
+    const savedScale=window.__cardScale;
+    const origW=el('canvas-front').width;
+    el('canvas-front').width=CARD_W; el('canvas-front').height=CARD_H;
+    el('canvas-back').width=CARD_W;  el('canvas-back').height=CARD_H;
+    window.__cardScale=1;
+    await renderCards();
+
+    const frontData=el('canvas-front').toDataURL('image/png');
+    const backData=el('canvas-back').toDataURL('image/png');
+
+    /* Restaurar display */
+    el('canvas-front').width=DISPLAY_W; el('canvas-front').height=DISPLAY_H;
+    el('canvas-back').width=DISPLAY_W;  el('canvas-back').height=DISPLAY_H;
+    await renderCards();
+
+    /* Crear PDF — 9cm x 5cm landscape */
+    const pdf=new jsPDF({ orientation:'landscape', unit:'cm', format:[9,5] });
+    pdf.addImage(frontData,'PNG',0,0,9,5);
+    pdf.addPage([9,5],'landscape');
+    pdf.addImage(backData,'PNG',0,0,9,5);
+
+    const name=v('f-name')||'tarjeta';
+    const slug=name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+    pdf.save(`tarjeta-${slug}.pdf`);
+    toast('PDF descargado');
+  } catch(e){ console.error(e); toast('Error al generar PDF: '+e.message); }
+  finally { btn.disabled=false; btn.textContent='Descargar PDF'; }
+}
+
+/* ── Download PNG ── */
+async function downloadPNG() {
+  const btn=el('btn-download-png');
+  btn.disabled=true; btn.textContent='Generando...';
+  try {
+    /* Frente */
+    const frontA=document.createElement('a');
+    frontA.href=el('canvas-front').toDataURL('image/png');
+    const name=v('f-name')||'tarjeta';
+    const slug=name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+    frontA.download=`tarjeta-${slug}-frente.png`; frontA.click();
+    await new Promise(r=>setTimeout(r,500));
+    /* Reverso */
+    const backA=document.createElement('a');
+    backA.href=el('canvas-back').toDataURL('image/png');
+    backA.download=`tarjeta-${slug}-reverso.png`; backA.click();
+    toast('PNG descargado');
+  } catch(e){ toast('Error: '+e.message); }
+  finally { btn.disabled=false; btn.textContent='Descargar PNG'; }
+}
+
+/* ── Event listeners ── */
+el('btn-login').addEventListener('click', doLogin);
+el('login-password').addEventListener('keydown', e=>{if(e.key==='Enter')doLogin();});
+el('btn-logout').addEventListener('click', doLogout);
+el('photo-upload').addEventListener('change', e=>uploadPhoto(e.target.files[0]));
+el('btn-download-pdf').addEventListener('click', downloadPDF);
+el('btn-download-png').addEventListener('click', downloadPNG);
+
+/* Actualizar preview en tiempo real */
+['f-name','f-role','f-email','f-phone','f-whatsapp','f-instagram','f-address']
+  .forEach(id=>{ const inp=el(id); if(inp) inp.addEventListener('input',renderCards); });
+
+/* ── Init ── */
+sb.auth.getSession().then(({data:{session}})=>{
+  if(session){currentUser=session.user;loadContext();}
+});
+
+</script>
+</body>
+</html>
