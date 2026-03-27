@@ -396,33 +396,35 @@ async function renderFront(canvas) {
   /* 2. Foto del agente */
   if(photoImg) {
     /*
-      Analizando la imagen: el área blanca redondeada ocupa
-      desde ~x=40, y=65 hasta ~x=550, y=830 (a CARD_W=591, CARD_H=1063)
-      Centro del área: x=295, y=447
-      Área: w=510, h=765
+      Mirando el frente: el área blanca tiene:
+      - Esquina sup-izq: recta (toca el borde)
+      - Esquina sup-der: recta (toca el borde)
+      - Esquina inf-der: recta
+      - Esquina inf-izq: redondeada grande
+      El área blanca ocupa prácticamente todo menos la banda azul inferior y la franja azul izquierda
+      Full res (591x1063):
+        x: desde 0 hasta 591 (ancho completo)
+        y: desde 0 hasta ~870 (donde empieza la banda azul)
+      Solo esquina inf-izq redondeada (~r=60)
     */
-    const ax = Math.round(40  * SCALE);
-    const ay = Math.round(65  * SCALE);
-    const aw = Math.round(510 * SCALE);
-    const ah = Math.round(760 * SCALE);
-    const r  = Math.round(32  * SCALE);
+    const ax = 0;
+    const ay = 0;
+    const aw = W;
+    const ah = Math.round(870 * SCALE);
+    const r  = Math.round(60 * SCALE);
 
     ctx.save();
-    /* Clip con esquina redondeada */
     ctx.beginPath();
-    ctx.moveTo(ax+r, ay);
-    ctx.lineTo(ax+aw-r, ay);
-    ctx.quadraticCurveTo(ax+aw, ay, ax+aw, ay+r);
-    ctx.lineTo(ax+aw, ay+ah-r);
-    ctx.quadraticCurveTo(ax+aw, ay+ah, ax+aw-r, ay+ah);
-    ctx.lineTo(ax+r, ay+ah);
+    ctx.moveTo(ax, ay);                          /* sup-izq: recta */
+    ctx.lineTo(ax+aw, ay);                       /* sup-der: recta */
+    ctx.lineTo(ax+aw, ay+ah);                    /* inf-der: recta */
+    ctx.lineTo(ax+r, ay+ah);                     /* inf-izq: redondeada */
     ctx.quadraticCurveTo(ax, ay+ah, ax, ay+ah-r);
-    ctx.lineTo(ax, ay+r);
-    ctx.quadraticCurveTo(ax, ay, ax+r, ay);
+    ctx.lineTo(ax, ay);
     ctx.closePath();
     ctx.clip();
 
-    /* Escalar foto para cubrir el área (cover) */
+    /* Cover */
     const ratio = photoImg.width / photoImg.height;
     let sw=aw, sh=ah;
     if(ratio > aw/ah) sw=sh*ratio; else sh=sw/ratio;
@@ -433,10 +435,10 @@ async function renderFront(canvas) {
   /* 3. Nombre en la banda azul inferior */
   const name = v('f-name') || 'TU NOMBRE';
 
-  /* Fuente: Gotham Narrow Bold — convertimos 16pt a px: 16pt * (96/72) = ~21.3px a full res */
-  const ptToFullPx = pt => pt * (96/72);
-  const fullFontSize = ptToFullPx(16); /* ~21.3px a full res */
-  const displayFontSize = Math.round(fullFontSize * SCALE);
+  /* Gotham Narrow Bold 16pt — pero a 300dpi la tarjeta es 591px ancho
+     16pt a 300dpi = 16*(300/72) = 66.7px. Ajustamos al display scale. */
+  const nameFullPx = Math.round(16 * (300/72)); /* ~67px a full res */
+  const displayFontSize = Math.max(Math.round(nameFullPx * SCALE), 18);
 
   const fontName = fontsReady ? 'GothamNarrowBold' : 'Arial Black, Arial';
   ctx.font = `bold ${displayFontSize}px ${fontName}`;
@@ -444,33 +446,26 @@ async function renderFront(canvas) {
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
 
-  /* Banda: empieza en front_band_y (full res) */
   const bandY = Math.round(currentTpl.front_band_y * SCALE);
   const bandH = Math.round(currentTpl.front_band_h * SCALE);
-  const bandCenterX = W / 2; /* Centrado en el ancho total para ambos templates */
+  const bandCenterX = W / 2;
 
   if(currentTpl.is_sunrise) {
-    /* Sunrise: nombre en 1 línea, centrado verticalmente en la porción superior de la banda
-       (TEAM SUNRISE ya está en la imagen en la parte inferior de la banda) */
-    const nameY = bandY + Math.round(bandH * 0.28);
+    const nameY = bandY + Math.round(bandH * 0.30);
     ctx.fillText(name.toUpperCase(), bandCenterX, nameY);
   } else {
-    /* REMAX Central: nombre en 2 líneas centrado vertical y horizontalmente en la banda */
     const parts = name.toUpperCase().trim().split(' ');
     let line1, line2;
-    if(parts.length === 1) {
-      line1 = parts[0]; line2 = '';
-    } else if(parts.length === 2) {
-      line1 = parts[0]; line2 = parts[1];
-    } else {
-      /* Dividir por la mitad */
-      const mid = Math.ceil(parts.length / 2);
-      line1 = parts.slice(0, mid).join(' ');
-      line2 = parts.slice(mid).join(' ');
+    if(parts.length === 1)      { line1=parts[0]; line2=''; }
+    else if(parts.length === 2) { line1=parts[0]; line2=parts[1]; }
+    else {
+      const mid=Math.ceil(parts.length/2);
+      line1=parts.slice(0,mid).join(' ');
+      line2=parts.slice(mid).join(' ');
     }
-    const lineSpacing = displayFontSize * 1.2;
-    const totalTextH = line2 ? lineSpacing * 2 : lineSpacing;
-    const startY = bandY + (bandH - totalTextH) / 2 + lineSpacing / 2;
+    const lineSpacing = displayFontSize * 1.25;
+    const totalH = line2 ? lineSpacing*2 : lineSpacing;
+    const startY = bandY + (bandH - totalH)/2 + lineSpacing/2;
     ctx.fillText(line1, bandCenterX, startY);
     if(line2) ctx.fillText(line2, bandCenterX, startY + lineSpacing);
   }
@@ -493,77 +488,72 @@ async function renderBack(canvas) {
     ctx.drawImage(bg,0,0,W,H);
   } catch(e){ ctx.fillStyle='#fff'; ctx.fillRect(0,0,W,H); }
 
-  /*
-    ÁREA BLANCA del reverso:
-    Mirando la imagen: hay una franja azul oscura a la izquierda ~x=0 a x=60 (full res)
-    El área blanca va de x=60 a x=591
-    Centro del área blanca: x = 60 + (591-60)/2 = 60 + 265 = 325 (full res)
+  /* 2. QR code
+     Full res (591x1063):
+     - La línea azul izquierda termina ~x=62
+     - Área blanca: x=62 a x=591, centro en x=326
+     - QR: tamaño reducido ~320px, con espacio arriba ~80px desde el borde
+     - Debajo del QR hay el logo REMAX que ya está en la imagen (~y=540-700)
+     - Texto editable va entre logo y websites (~y=710-800)
   */
-  const whiteStartX = currentTpl.back_white_x; /* full res */
+  const whiteStartX = currentTpl.back_white_x;
   const whiteWidth  = CARD_W - whiteStartX;
   const whiteCenterX = Math.round((whiteStartX + whiteWidth/2) * SCALE);
 
-  /* 2. QR code — centrado en área blanca, parte superior */
   const wa = v('f-whatsapp') || '';
   const waClean = wa.replace(/\D/g,'');
-  const qrData = waClean ? `https://wa.me/${waClean}` : 'https://proptools.com';
-  const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(qrData)}&bgcolor=ffffff&color=000000&format=png&margin=4`;
+  const qrData = waClean ? `https://wa.me/${waClean}` : 'https://wa.me/50600000000';
+  const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(qrData)}&bgcolor=ffffff&color=000000&format=png&margin=2`;
 
   try {
     const qrImg = await loadImg(qrApiUrl);
-    /* QR: full res ~y=40, size=460px */
-    const qSize = Math.round(460 * SCALE);
+    /* QR más pequeño: 320px full res, con gap de 80px arriba */
+    const qSize = Math.round(320 * SCALE);
     const qx    = whiteCenterX - qSize/2;
-    const qy    = Math.round(40 * SCALE);
+    const qy    = Math.round(80 * SCALE);
     ctx.drawImage(qrImg, qx, qy, qSize, qSize);
   } catch(e) { console.warn('[QR]', e); }
 
-  /* 3. Texto de contacto */
-  /*
-    Fuentes:
-    - Teléfono: Gotham Light, 9pt → 9*(96/72) = 12px a full res
-    - Email e Instagram: Gotham Light, 5pt → 5*(96/72) = 6.67px a full res
-
-    Área de texto: debajo del QR, ~y=515 full res
+  /* 3. Texto editable
+     Posición: entre el logo REMAX Central (~y=700 full res) y los websites (~y=870)
+     Solo: teléfono (9pt Gotham Light), email (5pt), instagram (5pt)
+     Centrado en el área blanca
   */
-  const ptToFullPx = pt => pt * (96/72);
-  const phoneFullPx = Math.round(ptToFullPx(9));
-  const smallFullPx = Math.round(ptToFullPx(5));
+  const phone     = v('f-whatsapp') || '';
+  const email     = v('f-email')    || '';
+  const insta     = v('f-instagram')|| '';
 
-  const phonePx = Math.max(Math.round(phoneFullPx * SCALE), 9); /* mínimo 9px display */
-  const smallPx = Math.max(Math.round(smallFullPx * SCALE), 7); /* mínimo 7px display */
-
+  /* Tamaños — 300 DPI base
+     9pt  = 9*(300/72)  = 37.5px full res → display: 37.5*SCALE
+     5pt  = 5*(300/72)  = 20.8px full res → display: 20.8*SCALE
+     Mínimos para legibilidad en pantalla: 13px y 10px
+  */
+  const phonePx = Math.max(Math.round(9  * (300/72) * SCALE), 13);
+  const smallPx = Math.max(Math.round(5  * (300/72) * SCALE), 10);
   const fontBase = fontsReady ? 'GothamLight' : 'Arial';
-
-  let ty = Math.round(515 * SCALE);
-  const lineGap = Math.round(8 * SCALE);
 
   ctx.textAlign    = 'center';
   ctx.textBaseline = 'top';
   ctx.fillStyle    = '#111111';
 
-  /* Teléfono */
-  const phone = v('f-whatsapp') || '';
+  /* Espacio entre logo y websites: ~y=710 a y=860 full res */
+  let ty = Math.round(715 * SCALE);
+  const gapPhone = Math.round(10 * SCALE);
+  const gapSmall = Math.round(7  * SCALE);
+
   if(phone) {
     ctx.font = `300 ${phonePx}px ${fontBase}`;
     ctx.fillText(phone, whiteCenterX, ty);
-    ty += phonePx + lineGap;
+    ty += phonePx + gapPhone;
   }
-
-  /* Email */
-  const email = v('f-email') || '';
   if(email) {
     ctx.font = `300 ${smallPx}px ${fontBase}`;
     ctx.fillText(email, whiteCenterX, ty);
-    ty += smallPx + lineGap;
+    ty += smallPx + gapSmall;
   }
-
-  /* Instagram */
-  const insta = v('f-instagram') || '';
   if(insta) {
     ctx.font = `300 ${smallPx}px ${fontBase}`;
-    const instaHandle = insta.startsWith('@') ? insta : '@'+insta;
-    ctx.fillText(instaHandle, whiteCenterX, ty);
+    ctx.fillText(insta.startsWith('@') ? insta : '@'+insta, whiteCenterX, ty);
   }
 }
 
