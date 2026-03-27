@@ -190,7 +190,7 @@ main { background: var(--bg); overflow-y: auto; display: flex; flex-direction: c
       <input type="password" id="login-password" placeholder="••••••••"
         onkeydown="if(event.key==='Enter') window.auth.login()">
     </div>
-    <button class="btn-login" id="btn-login" onclick="window.auth.login()">Ingresar</button>
+    <button class="btn-login" id="btn-login">Ingresar</button>
     <div class="login-error" id="login-error"></div>
     <div class="login-footer">Desarrollado por Veintiuno &mdash; PropTools</div>
   </div>
@@ -866,4 +866,3 @@ window.app = {
     for(const s of steps){
       if(s.tip) html+=`<div class="gtip">&#128161;&nbsp;<strong>Consejo:</strong> ${s.tip}</div>`;
       else { html+=`<div class="gstep"><div class="gnum">${n}</div><div class="gtext">${s.t}</div></div>`;n++; }
-  
