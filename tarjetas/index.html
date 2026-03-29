@@ -11,8 +11,6 @@
   --border: #e2e4e9; --text: #111318; --muted: #6b7280; --radius: 12px;
 }
 body { font-family: -apple-system,'Segoe UI',Arial,sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
-
-/* LOGIN */
 .login-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--bg); padding: 24px; }
 .login-box { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 40px; width: 100%; max-width: 400px; box-shadow: 0 4px 24px rgba(0,0,0,.06); }
 .login-logo { display: flex; align-items: center; gap: 10px; margin-bottom: 28px; }
@@ -24,13 +22,11 @@ body { font-family: -apple-system,'Segoe UI',Arial,sans-serif; background: var(-
 .form-field label { font-size: 11px; font-weight: 600; color: var(--muted); display: block; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; }
 .form-field input { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; color: var(--text); font-family: inherit; font-size: 14px; outline: none; transition: border-color .15s; }
 .form-field input:focus { border-color: #000; }
-.btn-login { width: 100%; background: #000; color: #fff; border: none; border-radius: 8px; padding: 12px; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer; transition: background .15s; margin-top: 4px; }
+.btn-login { width: 100%; background: #000; color: #fff; border: none; border-radius: 8px; padding: 12px; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer; margin-top: 4px; }
 .btn-login:hover { background: #222; }
 .btn-login:disabled { background: #aaa; cursor: not-allowed; }
 .login-error { font-size: 12px; color: #ef4444; margin-top: 10px; text-align: center; display: none; }
 .login-footer { margin-top: 20px; text-align: center; font-size: 12px; color: var(--muted); }
-
-/* APP */
 .app-screen { display: none; min-height: 100vh; grid-template-columns: 360px 1fr; grid-template-rows: auto 1fr; }
 .app-screen.visible { display: grid; }
 header { grid-column: 1/-1; padding: 12px 28px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 14px; background: var(--surface); }
@@ -41,16 +37,14 @@ header h1 { font-size: 16px; font-weight: 700; }
 .header-right img { height: 22px; display: block; }
 .db-status { font-size: 11px; padding: 4px 10px; border-radius: 20px; display: inline-flex; align-items: center; gap: 5px; border: 1px solid var(--border); background: var(--surface2); }
 .db-dot { width: 7px; height: 7px; border-radius: 50%; background: #22c55e; }
-.btn-logout { font-family: inherit; font-size: 11px; font-weight: 600; padding: 5px 12px; border-radius: 7px; border: 1px solid var(--border); background: var(--surface2); color: var(--muted); cursor: pointer; transition: all .15s; }
-.btn-logout:hover { border-color: #ef4444; color: #ef4444; background: #fff5f5; }
-
-/* SIDEBAR */
+.btn-logout { font-family: inherit; font-size: 11px; font-weight: 600; padding: 5px 12px; border-radius: 7px; border: 1px solid var(--border); background: var(--surface2); color: var(--muted); cursor: pointer; }
+.btn-logout:hover { border-color: #ef4444; color: #ef4444; }
 aside { background: var(--surface); border-right: 1px solid var(--border); overflow-y: auto; padding: 20px 18px; display: flex; flex-direction: column; gap: 20px; }
 .section-label { font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
 .template-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.tpl-btn { background: var(--surface2); border: 2px solid var(--border); border-radius: 10px; padding: 8px; cursor: pointer; transition: all .15s; font-family: inherit; overflow: hidden; }
+.tpl-btn { background: var(--surface2); border: 2px solid var(--border); border-radius: 10px; padding: 8px; cursor: pointer; transition: all .15s; font-family: inherit; }
 .tpl-btn img { width: 100%; border-radius: 6px; display: block; }
-.tpl-btn-label { font-size: 10px; font-weight: 600; color: var(--muted); text-align: center; margin-top: 6px; line-height: 1.3; }
+.tpl-btn-label { font-size: 10px; font-weight: 600; color: var(--muted); text-align: center; margin-top: 6px; }
 .tpl-btn:hover { border-color: #555; }
 .tpl-btn.active { border-color: #000; }
 .tpl-btn.active .tpl-btn-label { color: #000; font-weight: 700; }
@@ -66,8 +60,24 @@ input::placeholder { color: var(--muted); opacity: .45; }
 .upload-text { font-size: 12px; color: var(--muted); line-height: 1.5; }
 .upload-text strong { color: var(--text); display: block; font-size: 13px; }
 input[type="file"] { display: none; }
-
-/* MAIN */
+.save-bar { display: flex; gap: 7px; align-items: center; }
+.save-bar input[type="text"] { flex: 1; padding: 7px 10px; font-size: 12px; }
+.btn-save { font-family: inherit; font-size: 12px; font-weight: 600; padding: 7px 14px; border-radius: 7px; border: none; cursor: pointer; background: #000; color: #fff; white-space: nowrap; flex-shrink: 0; }
+.btn-save:hover { background: #333; }
+.btn-save:disabled { background: #aaa; cursor: not-allowed; }
+.saved-list { display: flex; flex-direction: column; gap: 6px; }
+.saved-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 9px; padding: 10px 12px; display: flex; align-items: center; gap: 8px; }
+.saved-item-info { flex: 1; min-width: 0; }
+.saved-item-name { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.saved-item-meta { font-size: 11px; color: var(--muted); margin-top: 1px; }
+.saved-item-actions { display: flex; gap: 5px; flex-shrink: 0; }
+.icon-btn { width: 28px; height: 28px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .15s; }
+.icon-btn:hover { border-color: #999; background: #f0f0f0; }
+.icon-btn.del:hover { border-color: #ef4444; background: #fff5f5; }
+.saved-empty { font-size: 12px; color: var(--muted); text-align: center; padding: 16px 0; font-style: italic; }
+.font-status { font-size: 11px; color: var(--muted); padding: 4px 0; display: flex; align-items: center; gap: 6px; }
+.font-dot { width: 7px; height: 7px; border-radius: 50%; background: #f0a500; flex-shrink: 0; }
+.font-dot.ok { background: #22c55e; }
 main { background: var(--bg); overflow-y: auto; display: flex; flex-direction: column; }
 .preview-toolbar { padding: 18px 28px 0; display: flex; align-items: center; justify-content: space-between; }
 .preview-toolbar h2 { font-size: 16px; font-weight: 700; }
@@ -81,32 +91,9 @@ main { background: var(--bg); overflow-y: auto; display: flex; flex-direction: c
 .card-label { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); }
 .card-canvas-wrap { border-radius: 10px; overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,.15); }
 canvas { display: block; }
-
-/* FONT LOADING STATUS */
-.font-status { font-size: 11px; color: var(--muted); padding: 6px 0; display: flex; align-items: center; gap: 6px; }
-.font-dot { width: 7px; height: 7px; border-radius: 50%; background: #f0a500; flex-shrink: 0; }
-.font-dot.ok { background: #22c55e; }
-
-.save-bar { display: flex; gap: 7px; align-items: center; }
-.save-bar input[type="text"] { flex: 1; padding: 7px 10px; font-size: 12px; }
-.btn-save { font-family: inherit; font-size: 12px; font-weight: 600; padding: 7px 14px; border-radius: 7px; border: none; cursor: pointer; background: #000; color: #fff; white-space: nowrap; flex-shrink: 0; transition: background .15s; }
-.btn-save:hover { background: #333; }
-.btn-save:disabled { background: #aaa; cursor: not-allowed; }
-.saved-list { display: flex; flex-direction: column; gap: 6px; }
-.saved-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 9px; padding: 10px 12px; display: flex; align-items: center; gap: 8px; }
-.saved-item-info { flex: 1; min-width: 0; }
-.saved-item-name { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.saved-item-meta { font-size: 11px; color: var(--muted); margin-top: 1px; }
-.saved-item-actions { display: flex; gap: 5px; flex-shrink: 0; }
-.icon-btn { width: 28px; height: 28px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .15s; }
-.icon-btn:hover { border-color: #999; background: #f0f0f0; }
-.icon-btn.del:hover { border-color: #ef4444; background: #fff5f5; }
-.saved-empty { font-size: 12px; color: var(--muted); text-align: center; padding: 16px 0; font-style: italic; }
-
 .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px); background: #000; color: #fff; padding: 10px 22px; border-radius: 100px; font-weight: 700; font-size: 13px; transition: transform .3s cubic-bezier(.34,1.56,.64,1); pointer-events: none; z-index: 1100; }
 .toast.show { transform: translateX(-50%) translateY(0); }
 ::-webkit-scrollbar { width: 5px; }
-::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 </style>
 </head>
@@ -121,14 +108,8 @@ canvas { display: block; }
     </div>
     <h2>Iniciar sesi&oacute;n</h2>
     <p>Ingres&aacute; con tu cuenta para acceder al generador de tarjetas.</p>
-    <div class="form-field">
-      <label>Correo electr&oacute;nico</label>
-      <input type="email" id="login-email" placeholder="tu@correo.com">
-    </div>
-    <div class="form-field">
-      <label>Contrase&ntilde;a</label>
-      <input type="password" id="login-password" placeholder="••••••••">
-    </div>
+    <div class="form-field"><label>Correo</label><input type="email" id="login-email" placeholder="tu@correo.com"></div>
+    <div class="form-field"><label>Contrase&ntilde;a</label><input type="password" id="login-password" placeholder="••••••••"></div>
     <button class="btn-login" id="btn-login">Ingresar</button>
     <div class="login-error" id="login-error"></div>
     <div class="login-footer">Desarrollado por Veintiuno &mdash; PropTools</div>
@@ -138,15 +119,9 @@ canvas { display: block; }
 <!-- APP -->
 <div class="app-screen" id="app-screen">
   <header>
-    <div>
-      <h1>Tarjetas de Presentaci&oacute;n</h1>
-      <span class="header-sub" id="header-tenant">Cargando...</span>
-    </div>
+    <div><h1>Tarjetas de Presentaci&oacute;n</h1><span class="header-sub" id="header-tenant">Cargando...</span></div>
     <div class="header-divider"></div>
-    <div class="db-status">
-      <div class="db-dot" id="db-dot"></div>
-      <span id="db-status-text">Conectado</span>
-    </div>
+    <div class="db-status"><div class="db-dot" id="db-dot"></div><span id="db-status-text">Conectado</span></div>
     <div class="header-right">
       <img src="https://res.cloudinary.com/dlgrhr6lh/image/upload/v1774471912/logo_veintiuno_snlwr8.png" alt="Veintiuno">
       <button class="btn-logout" id="btn-logout">Cerrar sesi&oacute;n</button>
@@ -157,12 +132,8 @@ canvas { display: block; }
     <div>
       <p class="section-label">Template</p>
       <div class="template-grid" id="template-grid"></div>
-      <div class="font-status" id="font-status">
-        <div class="font-dot" id="font-dot"></div>
-        <span id="font-status-text">Cargando fuentes...</span>
-      </div>
+      <div class="font-status"><div class="font-dot" id="font-dot"></div><span id="font-status-text">Cargando fuentes...</span></div>
     </div>
-
     <div>
       <p class="section-label">Foto de perfil</p>
       <label for="photo-upload">
@@ -170,15 +141,11 @@ canvas { display: block; }
           <div class="upload-preview" id="photo-preview">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
           </div>
-          <div class="upload-text">
-            <strong id="upload-title">Subir foto</strong>
-            <span id="upload-status">PNG con fondo transparente ideal</span>
-          </div>
+          <div class="upload-text"><strong id="upload-title">Subir foto</strong><span id="upload-status">PNG con fondo transparente ideal</span></div>
         </div>
       </label>
       <input type="file" id="photo-upload" accept="image/*">
     </div>
-
     <div>
       <p class="section-label">Informacion</p>
       <div class="field-group">
@@ -188,7 +155,6 @@ canvas { display: block; }
         <div><label>Instagram</label><input type="text" id="f-instagram" placeholder="@tu_cuenta"></div>
       </div>
     </div>
-
     <div>
       <p class="section-label">Guardar tarjeta</p>
       <div class="save-bar">
@@ -196,7 +162,6 @@ canvas { display: block; }
         <button class="btn-save" id="btn-save-card">Guardar</button>
       </div>
     </div>
-
     <div>
       <p class="section-label">Tarjetas guardadas</p>
       <div class="saved-list" id="saved-list"><p class="saved-empty">Cargando...</p></div>
@@ -217,20 +182,9 @@ canvas { display: block; }
         </button>
       </div>
     </div>
-
     <div class="preview-area">
-      <div class="card-wrapper">
-        <div class="card-label">Frente</div>
-        <div class="card-canvas-wrap">
-          <canvas id="canvas-front" width="354" height="638"></canvas>
-        </div>
-      </div>
-      <div class="card-wrapper">
-        <div class="card-label">Reverso</div>
-        <div class="card-canvas-wrap">
-          <canvas id="canvas-back" width="354" height="638"></canvas>
-        </div>
-      </div>
+      <div class="card-wrapper"><div class="card-label">Frente</div><div class="card-canvas-wrap"><canvas id="canvas-front" width="354" height="638"></canvas></div></div>
+      <div class="card-wrapper"><div class="card-label">Reverso</div><div class="card-canvas-wrap"><canvas id="canvas-back" width="354" height="638"></canvas></div></div>
     </div>
   </main>
 </div>
@@ -245,390 +199,387 @@ const sb = createClient(
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpzbGR3YWl3Y3Z6aXFmYWpjbXBoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1NjQ4NzcsImV4cCI6MjA5MDE0MDg3N30.eFlAAk-fPHI8r8YQPjP8kYnohziRpGu9whGpgfaW-KU'
 );
 
-/* ══════════════════════════════
-   DIMENSIONES
-   Tarjeta: 9x5cm a 300dpi = 1063x591px (landscape)
-   Pero el diseño está en portrait = 591x1063px
-   Display a ~60%: 354x638
-══════════════════════════════ */
-const CARD_W  = 591;   /* ancho portrait */
-const CARD_H  = 1063;  /* alto portrait */
-const DISP_W  = 354;
-const DISP_H  = 638;
-const SCALE   = DISP_W / CARD_W;
+/* ── Dimensiones ── */
+const CARD_W=591, CARD_H=1063, DISP_W=354, DISP_H=638;
+const SCALE=DISP_W/CARD_W;
 
-/* ── TEMPLATES ── */
+/* ── Templates ── */
 const TEMPLATES = [
   {
-    id: 'remax-central',
-    label: 'REMAX Central',
-    front_url: 'https://res.cloudinary.com/dlgrhr6lh/image/upload/v1774576398/frente-remax_zhorik.png',
-    back_url:  'https://res.cloudinary.com/dlgrhr6lh/image/upload/v1774576399/reverso-remax_agzjhe.png',
-    is_sunrise: false,
-    front_photo_x: 46, front_photo_w: 545, front_photo_h: 826,
-    front_band_y: 826, front_band_h: 189,
-    back_white_x: 46, back_white_cx: 319,
-    back_text_start_y: 735, back_text_end_y: 880,
+    id:'remax-central', label:'REMAX Central',
+    front_url:'https://res.cloudinary.com/dlgrhr6lh/image/upload/v1774576398/frente-remax_zhorik.png',
+    back_url:'https://res.cloudinary.com/dlgrhr6lh/image/upload/v1774576399/reverso-remax_agzjhe.png',
+    is_sunrise:false,
+    /* Foto: área blanca medida pixel a pixel
+       Borde izq: x=79 (estable desde y=88)
+       Borde der: x=590
+       Borde sup: y=28 en x=79 (redondeado)
+       Borde inf: y=825
+       Radio sup-izq: ~60px, Radio inf-izq: ~89px */
+    photo:{x:79,y:28,w:511,h:797,rTL:60,rTR:0,rBR:0,rBL:89},
+    /* Banda nombre: y=826 a y=1015, h=189 */
+    band:{y:826,h:189},
+    /* Reverso: área blanca x=46, centro x=319 */
+    back:{wx:46,cx:319,textY:730,textEndY:880},
   },
   {
-    id: 'team-sunrise',
-    label: 'Team Sunrise',
-    front_url: 'https://res.cloudinary.com/dlgrhr6lh/image/upload/v1774576399/frente-sunrise_tl2bst.png',
-    back_url:  'https://res.cloudinary.com/dlgrhr6lh/image/upload/v1774576401/reverso-sunrise_fofnuw.png',
-    is_sunrise: true,
-    front_photo_x: 46, front_photo_w: 545, front_photo_h: 826,
-    front_band_y: 826, front_band_h: 114,
-    back_white_x: 46, back_white_cx: 319,
-    back_text_start_y: 735, back_text_end_y: 855,
+    id:'team-sunrise', label:'Team Sunrise',
+    front_url:'https://res.cloudinary.com/dlgrhr6lh/image/upload/v1774576399/frente-sunrise_tl2bst.png',
+    back_url:'https://res.cloudinary.com/dlgrhr6lh/image/upload/v1774576401/reverso-sunrise_fofnuw.png',
+    is_sunrise:true,
+    photo:{x:79,y:28,w:511,h:797,rTL:60,rTR:0,rBR:0,rBL:89},
+    band:{y:826,h:114},
+    back:{wx:46,cx:319,textY:730,textEndY:855},
   }
 ];
 
 /* ── Estado ── */
-let currentUser=null, currentProfile=null, currentTenant=null;
-let currentTpl=TEMPLATES[0], photoImg=null;
+let currentUser=null,currentProfile=null,currentTenant=null;
+let currentTpl=TEMPLATES[0], photoImg=null, photoDataUrl=null;
 let fontsReady=false;
+const CARD_COL='tarjetas';
 
 /* ── Helpers ── */
-const el  = id => document.getElementById(id);
-const v   = id => { const e=el(id); return e?e.value.trim():''; };
+const el  = id=>document.getElementById(id);
+const v   = id=>{const e=el(id);return e?e.value.trim():''};
+const setV= (id,val)=>{const e=el(id);if(e)e.value=val||''};
+const esc = s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 
-function toast(msg) {
-  const t=el('toast'); t.textContent=msg; t.classList.add('show');
+function toast(msg){
+  const t=el('toast');t.textContent=msg;t.classList.add('show');
   setTimeout(()=>t.classList.remove('show'),2800);
 }
-
-function loadImg(url) {
-  return new Promise((res,rej) => {
-    const img=new Image(); img.crossOrigin='anonymous';
-    img.onload=()=>res(img);
-    img.onerror=()=>rej(new Error('Error cargando: '+url));
+function loadImg(url){
+  return new Promise((res,rej)=>{
+    const img=new Image();img.crossOrigin='anonymous';
+    img.onload=()=>res(img);img.onerror=()=>rej(new Error('No se pudo cargar: '+url));
     img.src=url;
   });
 }
 
-/* ── Cargar fuentes Gotham via FontFace API ── */
-async function loadFonts() {
-  try {
+/* ── Fuentes Gotham ── */
+async function loadFonts(){
+  try{
     el('font-dot').className='font-dot';
-    el('font-status-text').textContent='Cargando fuentes Gotham...';
-
-    const boldFont = new FontFace(
-      'GothamNarrowBold',
-      'url(https://res.cloudinary.com/dlgrhr6lh/raw/upload/v1774650941/Gotham_Narrow_Bold_arzjpl.otf)',
-      { weight:'700', style:'normal' }
-    );
-    const lightFont = new FontFace(
-      'GothamLight',
-      'url(https://res.cloudinary.com/dlgrhr6lh/raw/upload/v1774650942/Gotham-Light_fqu7wc.otf)',
-      { weight:'300', style:'normal' }
-    );
-
-    const [b, l] = await Promise.all([boldFont.load(), lightFont.load()]);
-    document.fonts.add(b);
-    document.fonts.add(l);
-
-    fontsReady = true;
+    el('font-status-text').textContent='Cargando fuentes...';
+    const [b,l]=await Promise.all([
+      new FontFace('GothamNarrowBold','url(https://res.cloudinary.com/dlgrhr6lh/raw/upload/v1774650941/Gotham_Narrow_Bold_arzjpl.otf)',{weight:'700'}).load(),
+      new FontFace('GothamLight','url(https://res.cloudinary.com/dlgrhr6lh/raw/upload/v1774650942/Gotham-Light_fqu7wc.otf)',{weight:'300'}).load()
+    ]);
+    document.fonts.add(b);document.fonts.add(l);
+    fontsReady=true;
     el('font-dot').className='font-dot ok';
     el('font-status-text').textContent='Fuentes Gotham listas';
     renderCards();
-  } catch(e) {
-    console.warn('[fonts]', e);
-    el('font-status-text').textContent='Fuentes no disponibles (usando alternativa)';
-    fontsReady = false;
+  }catch(e){
+    console.warn('[fonts]',e);
+    el('font-status-text').textContent='Usando fuente alternativa';
     renderCards();
   }
 }
 
 /* ── Auth ── */
-async function doLogin() {
-  const email=v('login-email'), password=el('login-password').value;
-  const errEl=el('login-error'), btn=el('btn-login');
+async function doLogin(){
+  const email=v('login-email'),password=el('login-password').value;
+  const errEl=el('login-error'),btn=el('btn-login');
   errEl.style.display='none';
   if(!email||!password){errEl.textContent='Completa todos los campos.';errEl.style.display='block';return;}
-  btn.disabled=true; btn.textContent='Ingresando...';
-  const {data,error}=await sb.auth.signInWithPassword({email,password});
+  btn.disabled=true;btn.textContent='Ingresando...';
+  const{data,error}=await sb.auth.signInWithPassword({email,password});
   if(error){errEl.textContent='Correo o contrase\u00f1a incorrectos.';errEl.style.display='block';btn.disabled=false;btn.textContent='Ingresar';return;}
-  currentUser=data.session.user;
-  await loadContext();
+  currentUser=data.session.user;await loadContext();
 }
-
-async function doLogout() {
+async function doLogout(){
   await sb.auth.signOut();
   el('login-screen').style.display='flex';
   el('app-screen').classList.remove('visible');
 }
-
-async function loadContext() {
-  try {
-    const {data:profile,error}=await sb.from('users').select('*,tenants(*)').eq('auth_id',currentUser.id).single();
-    if(error||!profile) throw new Error('Usuario no encontrado.');
-    currentProfile=profile; currentTenant=profile.tenants;
+async function loadContext(){
+  try{
+    const{data:p,error:pErr}=await sb.from('users').select('*,tenants(*)').eq('auth_id',currentUser.id).single();
+    if(pErr||!p)throw new Error('Usuario no encontrado.');
+    currentProfile=p;currentTenant=p.tenants;
     el('header-tenant').textContent=currentTenant.name;
     el('login-screen').style.display='none';
     el('app-screen').classList.add('visible');
-    el('btn-login').disabled=false; el('btn-login').textContent='Ingresar';
-    buildGrid();
-    setTpl(TEMPLATES[0]);
-    await loadSavedCards();
-    loadFonts();
-  } catch(e) {
-    el('login-error').textContent=e.message;
-    el('login-error').style.display='block';
-    el('btn-login').disabled=false; el('btn-login').textContent='Ingresar';
+    el('btn-login').disabled=false;el('btn-login').textContent='Ingresar';
+    buildGrid();setTpl(TEMPLATES[0]);
+    await loadSaved();loadFonts();
+  }catch(e){
+    el('login-error').textContent=e.message;el('login-error').style.display='block';
+    el('btn-login').disabled=false;el('btn-login').textContent='Ingresar';
     await sb.auth.signOut();
   }
 }
 
-/* ── Template grid ── */
-function buildGrid() {
-  el('template-grid').innerHTML = TEMPLATES.map(t=>`
+/* ── Grid templates ── */
+function buildGrid(){
+  el('template-grid').innerHTML=TEMPLATES.map(t=>`
     <button class="tpl-btn" data-id="${t.id}">
-      <img src="${t.front_url}" alt="${t.label}" crossorigin="anonymous">
+      <img src="${t.front_url}" crossorigin="anonymous" alt="${t.label}">
       <div class="tpl-btn-label">${t.label}</div>
     </button>`).join('');
   el('template-grid').querySelectorAll('.tpl-btn').forEach(btn=>{
-    btn.addEventListener('click',()=>{
-      const tpl=TEMPLATES.find(t=>t.id===btn.dataset.id);
-      if(tpl) setTpl(tpl);
-    });
+    btn.addEventListener('click',()=>{const t=TEMPLATES.find(x=>x.id===btn.dataset.id);if(t)setTpl(t);});
   });
 }
-
-function setTpl(tpl) {
+function setTpl(tpl){
   currentTpl=tpl;
   document.querySelectorAll('.tpl-btn').forEach(b=>b.classList.remove('active'));
   const btn=document.querySelector(`.tpl-btn[data-id="${tpl.id}"]`);
-  if(btn) btn.classList.add('active');
+  if(btn)btn.classList.add('active');
   renderCards();
 }
 
 /* ══════════════════════════════
-   CANVAS — FRENTE
+   RENDER FRENTE
 ══════════════════════════════ */
-async function renderFront(canvas) {
+async function renderFront(canvas){
   const ctx=canvas.getContext('2d');
-  const W=canvas.width, H=canvas.height;
+  const W=canvas.width,H=canvas.height;
   ctx.clearRect(0,0,W,H);
-  if(!currentTpl) return;
+  if(!currentTpl)return;
 
   /* 1. Fondo */
-  try {
-    const bg=await loadImg(currentTpl.front_url);
-    ctx.drawImage(bg,0,0,W,H);
-  } catch(e){ ctx.fillStyle='#1a2744'; ctx.fillRect(0,0,W,H); }
+  try{const bg=await loadImg(currentTpl.front_url);ctx.drawImage(bg,0,0,W,H);}
+  catch(e){ctx.fillStyle='#1a2744';ctx.fillRect(0,0,W,H);}
 
-  /* 2. Foto — coordenadas medidas pixel a pixel del PSD
-     Área blanca EXACTA: x=46, y=75, w=544, h=750 (hasta y=825)
-     Esquina sup-izq: recta
-     Esquina sup-der: recta (llega hasta x=590 desde y=0)
-     Esquina inf-der: recta
-     Esquina inf-izq: redondeada grande r≈89px
+  /* 2. Foto del agente
+     Área blanca medida pixel a pixel:
+     x=79, y=28, w=511, h=797
+     rTL=60 (sup-izq), rTR=0 (sup-der), rBR=0 (inf-der), rBL=89 (inf-izq)
   */
-  if(photoImg) {
-    const ax = Math.round(46  * SCALE);
-    const ay = Math.round(75  * SCALE);
-    const aw = Math.round(544 * SCALE);
-    const ah = Math.round(750 * SCALE);
-    const rBig = Math.round(89 * SCALE);
+  if(photoImg){
+    const p=currentTpl.photo;
+    const ax=Math.round(p.x*SCALE), ay=Math.round(p.y*SCALE);
+    const aw=Math.round(p.w*SCALE), ah=Math.round(p.h*SCALE);
+    const rTL=Math.round(p.rTL*SCALE);
+    const rBL=Math.round(p.rBL*SCALE);
 
     ctx.save();
     ctx.beginPath();
-    ctx.moveTo(ax, ay);              /* sup-izq: recta */
-    ctx.lineTo(ax+aw, ay);           /* sup-der: recta */
-    ctx.lineTo(ax+aw, ay+ah);        /* inf-der: recta */
-    ctx.lineTo(ax+rBig, ay+ah);      /* inf-izq: redondeada */
-    ctx.quadraticCurveTo(ax, ay+ah, ax, ay+ah-rBig);
-    ctx.lineTo(ax, ay);
+    /* sup-izq: redondeada */
+    ctx.moveTo(ax+rTL,ay);
+    /* sup-der: recta */
+    ctx.lineTo(ax+aw,ay);
+    /* inf-der: recta */
+    ctx.lineTo(ax+aw,ay+ah);
+    /* inf-izq: redondeada */
+    ctx.lineTo(ax+rBL,ay+ah);
+    ctx.quadraticCurveTo(ax,ay+ah,ax,ay+ah-rBL);
+    /* izq: recta hasta esquina sup-izq redondeada */
+    ctx.lineTo(ax,ay+rTL);
+    ctx.quadraticCurveTo(ax,ay,ax+rTL,ay);
     ctx.closePath();
     ctx.clip();
 
-    /* Cover — alinear arriba para no cortar cabeza */
-    const ratio = photoImg.width / photoImg.height;
-    const areaRatio = aw / ah;
-    let sw, sh, sx, sy;
-    if(ratio > areaRatio) { sh=ah; sw=sh*ratio; sx=ax+(aw-sw)/2; sy=ay; }
-    else                  { sw=aw; sh=sw/ratio; sx=ax; sy=ay; }
-    ctx.drawImage(photoImg, sx, sy, sw, sh);
+    const ratio=photoImg.width/photoImg.height;
+    const areaRatio=aw/ah;
+    let sw,sh,sx,sy;
+    if(ratio>areaRatio){sh=ah;sw=sh*ratio;sx=ax+(aw-sw)/2;sy=ay;}
+    else{sw=aw;sh=sw/ratio;sx=ax;sy=ay;}
+    ctx.drawImage(photoImg,sx,sy,sw,sh);
     ctx.restore();
   }
 
-  /* 3. Nombre en banda azul — coordenadas exactas
-     REMAX:   banda y=826 h=189 → nombre en 2 líneas centrado
-     Sunrise: banda y=826 h=114 → nombre en 1 línea (TEAM SUNRISE ya está en imagen en y=940)
-  */
-  const name = v('f-name') || 'TU NOMBRE';
-  const bandY = Math.round(currentTpl.front_band_y * SCALE);
-  const bandH = Math.round(currentTpl.front_band_h * SCALE);
-  const fontName = fontsReady ? 'GothamNarrowBold' : 'Arial Black, Arial';
-  ctx.fillStyle = '#ffffff';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
+  /* 3. Nombre en banda azul */
+  const name=v('f-name')||'TU NOMBRE';
+  const bandY=Math.round(currentTpl.band.y*SCALE);
+  const bandH=Math.round(currentTpl.band.h*SCALE);
+  const fn=fontsReady?'GothamNarrowBold':'Arial Black,Arial';
+  ctx.fillStyle='#ffffff';ctx.textAlign='center';ctx.textBaseline='middle';
 
-  if(currentTpl.is_sunrise) {
-    let fs = 28;
-    ctx.font = `bold ${fs}px ${fontName}`;
-    while(fs > 11 && ctx.measureText(name.toUpperCase()).width > W*0.92) { fs--; ctx.font=`bold ${fs}px ${fontName}`; }
-    ctx.fillText(name.toUpperCase(), W/2, bandY + bandH/2);
-  } else {
-    const parts = name.toUpperCase().trim().split(' ');
-    let line1, line2;
-    if(parts.length===1)      { line1=parts[0]; line2=''; }
-    else if(parts.length===2) { line1=parts[0]; line2=parts[1]; }
-    else { const m=Math.ceil(parts.length/2); line1=parts.slice(0,m).join(' '); line2=parts.slice(m).join(' '); }
-    let fs = 28;
-    ctx.font = `bold ${fs}px ${fontName}`;
-    const longest = (line1.length>=(line2||'').length) ? line1 : line2;
-    while(fs > 11 && ctx.measureText(longest).width > W*0.88) { fs--; ctx.font=`bold ${fs}px ${fontName}`; }
-    const lh = fs * 1.25;
-    const totalH = line2 ? lh*2 : lh;
-    const startY = bandY + (bandH-totalH)/2 + lh/2;
-    ctx.fillText(line1, W/2, startY);
-    if(line2) ctx.fillText(line2, W/2, startY+lh);
+  if(currentTpl.is_sunrise){
+    let fs=30;
+    ctx.font=`bold ${fs}px ${fn}`;
+    while(fs>11&&ctx.measureText(name.toUpperCase()).width>W*0.92){fs--;ctx.font=`bold ${fs}px ${fn}`;}
+    ctx.fillText(name.toUpperCase(),W/2,bandY+bandH/2);
+  }else{
+    const parts=name.toUpperCase().trim().split(' ');
+    let l1,l2;
+    if(parts.length===1){l1=parts[0];l2='';}
+    else if(parts.length===2){l1=parts[0];l2=parts[1];}
+    else{const m=Math.ceil(parts.length/2);l1=parts.slice(0,m).join(' ');l2=parts.slice(m).join(' ');}
+    let fs=30;
+    ctx.font=`bold ${fs}px ${fn}`;
+    const lng=l1.length>=(l2||'').length?l1:l2;
+    while(fs>11&&ctx.measureText(lng).width>W*0.88){fs--;ctx.font=`bold ${fs}px ${fn}`;}
+    const lh=fs*1.25,totalH=l2?lh*2:lh;
+    const startY=bandY+(bandH-totalH)/2+lh/2;
+    ctx.fillText(l1,W/2,startY);
+    if(l2)ctx.fillText(l2,W/2,startY+lh);
   }
 }
 
 /* ══════════════════════════════
-   CANVAS — REVERSO
-   Solo: QR (WhatsApp), teléfono, email, instagram
-   Centrado en el área blanca (no en el ancho total)
+   RENDER REVERSO
+   QR con logo WhatsApp en centro
 ══════════════════════════════ */
-async function renderBack(canvas) {
+async function renderBack(canvas){
   const ctx=canvas.getContext('2d');
-  const W=canvas.width, H=canvas.height;
+  const W=canvas.width,H=canvas.height;
   ctx.clearRect(0,0,W,H);
-  if(!currentTpl) return;
+  if(!currentTpl)return;
 
   /* 1. Fondo */
-  try {
-    const bg=await loadImg(currentTpl.back_url);
-    ctx.drawImage(bg,0,0,W,H);
-  } catch(e){ ctx.fillStyle='#fff'; ctx.fillRect(0,0,W,H); }
+  try{const bg=await loadImg(currentTpl.back_url);ctx.drawImage(bg,0,0,W,H);}
+  catch(e){ctx.fillStyle='#fff';ctx.fillRect(0,0,W,H);}
 
-  /* 2. QR code — bajado a y=100 para más espacio arriba
-     Área blanca: x=46, centro x=319
-     Logo REMAX en imagen: y=520-715
-     Gap arriba (100) ≈ Gap abajo hasta logo (520-470=50) → QR size=370, bottom=470
+  /* 2. QR con logo WhatsApp
+     Área blanca: x=46, centro=319
+     QR top=100 para dejar espacio arriba, size=350
+     Logo WA en el centro del QR (25% del tamaño del QR)
   */
-  const whiteStartX = currentTpl.back_white_x;
-  const whiteWidth  = CARD_W - whiteStartX;
-  const whiteCenterX = Math.round((whiteStartX + whiteWidth/2) * SCALE);
+  const whiteStartX=currentTpl.back.wx;
+  const whiteWidth=CARD_W-whiteStartX;
+  const whiteCenterX=Math.round((whiteStartX+whiteWidth/2)*SCALE);
 
-  const wa = v('f-whatsapp') || '';
-  const waClean = wa.replace(/\D/g,'');
-  const qrData = waClean ? `https://wa.me/${waClean}` : 'https://wa.me/50600000000';
-  const qrApiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(qrData)}&bgcolor=ffffff&color=000000&format=png&margin=1`;
+  const wa=v('f-whatsapp')||'';
+  const waClean=wa.replace(/\D/g,'');
+  const qrData=waClean?`https://wa.me/${waClean}`:'https://wa.me/50600000000';
+  const qrApiUrl=`https://api.qrserver.com/v1/create-qr-code/?size=600x600&data=${encodeURIComponent(qrData)}&bgcolor=ffffff&color=000000&format=png&margin=2`;
 
-  try {
-    const qrImg = await loadImg(qrApiUrl);
-    const qSize = Math.round(360 * SCALE);
-    const qx    = whiteCenterX - qSize/2;
-    const qy    = Math.round(100 * SCALE);
-    ctx.drawImage(qrImg, qx, qy, qSize, qSize);
-  } catch(e) { console.warn('[QR]', e); }
+  const qSize=Math.round(350*SCALE);
+  const qx=whiteCenterX-qSize/2;
+  const qy=Math.round(100*SCALE);
 
-  /* 3. Texto editable — entre logo (y≈715) y websites (y=885/855)
-     Teléfono más grande, email e instagram MISMO tamaño con ícono
-  */
-  const phone = v('f-whatsapp') || '';
-  const email = v('f-email')    || '';
-  const insta = v('f-instagram')|| '';
-  const fontBase = fontsReady ? 'GothamLight' : 'Arial';
+  try{
+    const qrImg=await loadImg(qrApiUrl);
+    ctx.drawImage(qrImg,qx,qy,qSize,qSize);
 
-  ctx.textAlign    = 'center';
-  ctx.textBaseline = 'top';
-  ctx.fillStyle    = '#111111';
+    /* Logo WhatsApp en el centro del QR */
+    const logoSize=Math.round(qSize*0.22);
+    const logoX=qx+qSize/2-logoSize/2;
+    const logoY=qy+qSize/2-logoSize/2;
 
-  const maxTextW = Math.round(whiteWidth * 0.82 * SCALE);
-  let ty = Math.round(768 * SCALE);
-  const lineGapLarge = Math.round(20 * SCALE);
-  const lineGapSmall = Math.round(14 * SCALE);
-
-  /* Teléfono */
-  if(phone) {
-    let fs = Math.max(Math.round(46 * SCALE), 16);
-    ctx.font = `300 ${fs}px ${fontBase}`;
-    while(fs > 13 && ctx.measureText(phone).width > maxTextW) { fs--; ctx.font=`300 ${fs}px ${fontBase}`; }
-    ctx.fillText(phone, whiteCenterX, ty);
-    ty += fs + lineGapLarge;
-  }
-
-  /* Email e Instagram — mismo tamaño base, dinámico por el más largo */
-  const instaHandle = insta ? (insta.startsWith('@') ? insta : '@'+insta) : '';
-  let smallFs = Math.max(Math.round(26 * SCALE), 10);
-  ctx.font = `300 ${smallFs}px ${fontBase}`;
-  const longestSmall = email.length > instaHandle.length ? email : instaHandle;
-  while(smallFs > 9 && ctx.measureText(longestSmall).width > maxTextW - Math.round(smallFs*1.4)) {
-    smallFs--; ctx.font=`300 ${smallFs}px ${fontBase}`;
-  }
-
-  if(email) {
-    ctx.font = `300 ${smallFs}px ${fontBase}`;
-    ctx.fillText(email, whiteCenterX, ty);
-    ty += smallFs + lineGapSmall;
-  }
-
-  if(instaHandle) {
-    ctx.font = `300 ${smallFs}px ${fontBase}`;
-    /* Ícono Instagram SVG dibujado en canvas */
-    const iconSize = Math.round(smallFs * 1.1);
-    const textW = ctx.measureText(instaHandle).width;
-    const totalW = iconSize + Math.round(4*SCALE) + textW;
-    const startX = whiteCenterX - totalW/2;
-    const iconY  = ty + (smallFs - iconSize)/2;
-
-    /* Dibujar ícono Instagram como path en canvas */
-    const is = iconSize;
-    const ix = startX;
-    const iy = iconY;
-    const ir = is * 0.2; /* radio esquinas */
-
+    /* Fondo blanco circular */
+    const bgR=logoSize/2+Math.round(3*SCALE);
     ctx.save();
-    /* Gradiente Instagram */
-    const grad = ctx.createLinearGradient(ix, iy+is, ix+is, iy);
-    grad.addColorStop(0,   '#f09433');
-    grad.addColorStop(0.25,'#e6683c');
-    grad.addColorStop(0.5, '#dc2743');
-    grad.addColorStop(0.75,'#cc2366');
-    grad.addColorStop(1,   '#bc1888');
-    ctx.fillStyle = grad;
-    /* Fondo redondeado */
+    ctx.fillStyle='#ffffff';
     ctx.beginPath();
-    ctx.moveTo(ix+ir, iy);
-    ctx.lineTo(ix+is-ir, iy); ctx.quadraticCurveTo(ix+is, iy, ix+is, iy+ir);
-    ctx.lineTo(ix+is, iy+is-ir); ctx.quadraticCurveTo(ix+is, iy+is, ix+is-ir, iy+is);
-    ctx.lineTo(ix+ir, iy+is); ctx.quadraticCurveTo(ix, iy+is, ix, iy+is-ir);
-    ctx.lineTo(ix, iy+ir); ctx.quadraticCurveTo(ix, iy, ix+ir, iy);
-    ctx.closePath(); ctx.fill();
-    /* Círculo blanco (lente) */
-    ctx.strokeStyle='#fff'; ctx.lineWidth=is*0.1;
-    ctx.beginPath(); ctx.arc(ix+is/2, iy+is/2, is*0.28, 0, Math.PI*2); ctx.stroke();
-    /* Punto blanco (flash) */
-    ctx.fillStyle='#fff';
-    ctx.beginPath(); ctx.arc(ix+is*0.72, iy+is*0.28, is*0.07, 0, Math.PI*2); ctx.fill();
+    ctx.arc(qx+qSize/2,qy+qSize/2,bgR,0,Math.PI*2);
+    ctx.fill();
     ctx.restore();
 
-    /* Texto instagram */
-    ctx.fillStyle = '#111111';
-    ctx.textAlign = 'left';
-    ctx.font = `300 ${smallFs}px ${fontBase}`;
-    ctx.fillText(instaHandle, startX + iconSize + Math.round(4*SCALE), ty);
-    ctx.textAlign = 'center';
+    /* Círculo verde WhatsApp */
+    ctx.save();
+    ctx.fillStyle='#25D366';
+    ctx.beginPath();
+    ctx.arc(qx+qSize/2,qy+qSize/2,logoSize/2,0,Math.PI*2);
+    ctx.fill();
+
+    /* Ícono WhatsApp (teléfono) dibujado en canvas */
+    const cx=qx+qSize/2, cy=qy+qSize/2;
+    const s=logoSize;
+    ctx.fillStyle='#ffffff';
+    ctx.strokeStyle='#ffffff';
+    ctx.lineWidth=s*0.08;
+    ctx.lineCap='round';
+
+    /* Burbuja de chat */
+    const bx=cx-s*0.28, by=cy-s*0.28;
+    const bw=s*0.56, bh=s*0.52;
+    const br=s*0.12;
+    ctx.beginPath();
+    ctx.moveTo(bx+br,by);
+    ctx.lineTo(bx+bw-br,by);ctx.quadraticCurveTo(bx+bw,by,bx+bw,by+br);
+    ctx.lineTo(bx+bw,by+bh-br);ctx.quadraticCurveTo(bx+bw,by+bh,bx+bw-br,by+bh);
+    ctx.lineTo(bx+s*0.18,by+bh);
+    ctx.lineTo(bx+s*0.08,by+bh+s*0.14);
+    ctx.lineTo(bx+s*0.28,by+bh);
+    ctx.lineTo(bx+br,by+bh);ctx.quadraticCurveTo(bx,by+bh,bx,by+bh-br);
+    ctx.lineTo(bx,by+br);ctx.quadraticCurveTo(bx,by,bx+br,by);
+    ctx.closePath();ctx.fill();
+
+    /* Teléfono dentro de la burbuja */
+    ctx.fillStyle='#25D366';
+    ctx.font=`bold ${s*0.32}px Arial`;
+    ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText('✆',cx,cy-s*0.04);
+    ctx.restore();
+  }catch(e){console.warn('[QR]',e);}
+
+  /* 3. Texto editable
+     Zona entre logo REMAX (~y=715) y websites
+     REMAX: textY=730, Sunrise: textY=730 también pero textEndY=855
+     Subido desde 768 a 730 para dar más espacio en Sunrise
+  */
+  const phone=v('f-whatsapp')||'';
+  const email=v('f-email')||'';
+  const insta=v('f-instagram')||'';
+  const fontBase=fontsReady?'GothamLight':'Arial';
+
+  ctx.textAlign='center';ctx.textBaseline='top';ctx.fillStyle='#111111';
+
+  const maxW=Math.round(whiteWidth*0.82*SCALE);
+  let ty=Math.round(currentTpl.back.textY*SCALE);
+  const gapL=Math.round(18*SCALE);
+  const gapS=Math.round(12*SCALE);
+
+  /* Teléfono */
+  if(phone){
+    let fs=Math.max(Math.round(44*SCALE),16);
+    ctx.font=`300 ${fs}px ${fontBase}`;
+    while(fs>13&&ctx.measureText(phone).width>maxW){fs--;ctx.font=`300 ${fs}px ${fontBase}`;}
+    ctx.fillText(phone,whiteCenterX,ty);
+    ty+=fs+gapL;
+  }
+
+  /* Email e Instagram — mismo tamaño, determinado por el texto más largo */
+  const instaHandle=insta?(insta.startsWith('@')?insta:'@'+insta):'';
+  let smFs=Math.max(Math.round(26*SCALE),10);
+  ctx.font=`300 ${smFs}px ${fontBase}`;
+  const longest=email.length>instaHandle.length?email:instaHandle;
+  while(smFs>9&&ctx.measureText(longest).width>maxW-Math.round(smFs*1.5)){smFs--;ctx.font=`300 ${smFs}px ${fontBase}`;}
+
+  if(email){
+    ctx.font=`300 ${smFs}px ${fontBase}`;
+    ctx.fillText(email,whiteCenterX,ty);
+    ty+=smFs+gapS;
+  }
+
+  if(instaHandle){
+    const iconSz=Math.round(smFs*1.1);
+    const textW=(() => { ctx.font=`300 ${smFs}px ${fontBase}`; return ctx.measureText(instaHandle).width; })();
+    const totalW=iconSz+Math.round(4*SCALE)+textW;
+    const startX=whiteCenterX-totalW/2;
+    const iconY=ty+(smFs-iconSz)/2;
+
+    /* Ícono Instagram */
+    const ix=startX,iy=iconY,is=iconSz,ir=is*0.22;
+    ctx.save();
+    const grad=ctx.createLinearGradient(ix,iy+is,ix+is,iy);
+    grad.addColorStop(0,'#f09433');grad.addColorStop(0.25,'#e6683c');
+    grad.addColorStop(0.5,'#dc2743');grad.addColorStop(0.75,'#cc2366');grad.addColorStop(1,'#bc1888');
+    ctx.fillStyle=grad;
+    ctx.beginPath();
+    ctx.moveTo(ix+ir,iy);ctx.lineTo(ix+is-ir,iy);ctx.quadraticCurveTo(ix+is,iy,ix+is,iy+ir);
+    ctx.lineTo(ix+is,iy+is-ir);ctx.quadraticCurveTo(ix+is,iy+is,ix+is-ir,iy+is);
+    ctx.lineTo(ix+ir,iy+is);ctx.quadraticCurveTo(ix,iy+is,ix,iy+is-ir);
+    ctx.lineTo(ix,iy+ir);ctx.quadraticCurveTo(ix,iy,ix+ir,iy);ctx.closePath();ctx.fill();
+    ctx.strokeStyle='#fff';ctx.lineWidth=is*0.1;
+    ctx.beginPath();ctx.arc(ix+is/2,iy+is/2,is*0.28,0,Math.PI*2);ctx.stroke();
+    ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(ix+is*0.72,iy+is*0.28,is*0.07,0,Math.PI*2);ctx.fill();
+    ctx.restore();
+
+    ctx.fillStyle='#111111';ctx.textAlign='left';
+    ctx.font=`300 ${smFs}px ${fontBase}`;
+    ctx.fillText(instaHandle,startX+iconSz+Math.round(4*SCALE),ty);
+    ctx.textAlign='center';
   }
 }
 
-async function renderCards() {
-  await Promise.all([
-    renderFront(el('canvas-front')),
-    renderBack(el('canvas-back'))
-  ]);
+async function renderCards(){
+  await Promise.all([renderFront(el('canvas-front')),renderBack(el('canvas-back'))]);
 }
 
 /* ── Upload foto ── */
-function uploadPhoto(file) {
-  if(!file) return;
+function uploadPhoto(file){
+  if(!file)return;
   const reader=new FileReader();
   reader.onload=async e=>{
     photoImg=await loadImg(e.target.result);
+    photoDataUrl=e.target.result;
     el('photo-preview').innerHTML=`<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover" alt="">`;
     el('upload-title').textContent='Foto cargada';
     el('upload-status').textContent='Click para cambiar';
@@ -638,76 +589,11 @@ function uploadPhoto(file) {
   reader.readAsDataURL(file);
 }
 
-/* ── Descargar PDF ── */
-async function downloadPDF() {
-  const btn=el('btn-download-pdf');
-  btn.disabled=true; btn.textContent='Generando PDF...';
-  try {
-    if(!window.jspdf) {
-      await new Promise((res,rej)=>{
-        const s=document.createElement('script');
-        s.src='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
-        s.onload=res; s.onerror=rej; document.head.appendChild(s);
-      });
-    }
-    const {jsPDF}=window.jspdf;
-
-    /* Renderizar a alta resolución */
-    const hiFront=document.createElement('canvas');
-    hiFront.width=CARD_W; hiFront.height=CARD_H;
-    const hiBack=document.createElement('canvas');
-    hiBack.width=CARD_W; hiBack.height=CARD_H;
-
-    /* Temporalmente cambiar dimensiones del canvas visible para renderizar en hi-res */
-    const origFW=el('canvas-front').width, origFH=el('canvas-front').height;
-    el('canvas-front').width=CARD_W; el('canvas-front').height=CARD_H;
-    el('canvas-back').width=CARD_W;  el('canvas-back').height=CARD_H;
-    await renderCards();
-    const frontData=el('canvas-front').toDataURL('image/png');
-    const backData=el('canvas-back').toDataURL('image/png');
-    el('canvas-front').width=origFW; el('canvas-front').height=origFH;
-    el('canvas-back').width=origFW;  el('canvas-back').height=origFH;
-    await renderCards();
-
-    /* PDF: 5cm x 9cm portrait (landscape invertido) */
-    const pdf=new jsPDF({orientation:'portrait', unit:'cm', format:[5,9]});
-    pdf.addImage(frontData,'PNG',0,0,5,9);
-    pdf.addPage([5,9],'portrait');
-    pdf.addImage(backData,'PNG',0,0,5,9);
-
-    const slug=(v('f-name')||'tarjeta').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
-    pdf.save(`tarjeta-${slug}.pdf`);
-    toast('PDF descargado ✓');
-  } catch(e){ console.error(e); toast('Error: '+e.message); }
-  finally{ btn.disabled=false; btn.textContent='Descargar PDF'; }
-}
-
-/* ── Descargar PNG ── */
-async function downloadPNG() {
-  const btn=el('btn-download-png');
-  btn.disabled=true; btn.textContent='Generando...';
-  try {
-    const slug=(v('f-name')||'tarjeta').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
-    const a1=document.createElement('a');
-    a1.href=el('canvas-front').toDataURL('image/png');
-    a1.download=`tarjeta-${slug}-frente.png`; a1.click();
-    await new Promise(r=>setTimeout(r,400));
-    const a2=document.createElement('a');
-    a2.href=el('canvas-back').toDataURL('image/png');
-    a2.download=`tarjeta-${slug}-reverso.png`; a2.click();
-    toast('PNG descargado ✓');
-  } catch(e){ toast('Error: '+e.message); }
-  finally{ btn.disabled=false; btn.textContent='Descargar PNG'; }
-}
-
-/* ── Guardar / cargar tarjetas ── */
-const CARD_COL = 'tarjetas';
-const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-
-function renderSavedList(items) {
-  const c = el('saved-list');
-  if(!items||!items.length){ c.innerHTML='<p class="saved-empty">No hay tarjetas guardadas</p>'; return; }
-  c.innerHTML = items.map(s=>`
+/* ── Guardar / cargar ── */
+function renderSaved(items){
+  const c=el('saved-list');
+  if(!items||!items.length){c.innerHTML='<p class="saved-empty">No hay tarjetas guardadas</p>';return;}
+  c.innerHTML=items.map(s=>`
     <div class="saved-item">
       <div class="saved-item-info">
         <div class="saved-item-name">${esc(s.save_name)}</div>
@@ -726,76 +612,124 @@ function renderSavedList(items) {
   c.querySelectorAll('[data-del]').forEach(b=>b.addEventListener('click',()=>delCard(b.dataset.del,b.dataset.name)));
 }
 
-async function loadSavedCards() {
-  if(!currentProfile) return;
-  try {
-    const {data} = await sb.from(CARD_COL).select('*').eq('user_id',currentProfile.id).order('updated_at',{ascending:false});
-    renderSavedList(data||[]);
-  } catch(e) { el('saved-list').innerHTML='<p class="saved-empty">Error al cargar</p>'; }
+async function loadSaved(){
+  if(!currentProfile)return;
+  try{
+    const{data}=await sb.from(CARD_COL).select('*').eq('user_id',currentProfile.id).order('updated_at',{ascending:false});
+    renderSaved(data||[]);
+  }catch(e){console.error('[loadSaved]',e);el('saved-list').innerHTML='<p class="saved-empty">Error al cargar</p>';}
 }
 
-async function saveCard() {
-  if(!currentProfile) return;
-  const saveName = v('f-savename');
-  if(!saveName){ toast('Escrib\u00e9 un nombre para la tarjeta'); return; }
-  const btn = el('btn-save-card'); btn.disabled=true; btn.textContent='Guardando...';
-  const record = {
-    tenant_id: currentTenant.id, user_id: currentProfile.id,
-    save_name: saveName, template: currentTpl?.id||'',
-    photo_url: photoDataUrl||null,
-    name: v('f-name'), whatsapp: v('f-whatsapp'),
-    email: v('f-email'), instagram: v('f-instagram'),
-    updated_at: new Date().toISOString()
+async function saveCard(){
+  if(!currentProfile){toast('Sin sesi\u00f3n activa');return;}
+  const saveName=v('f-savename');
+  if(!saveName){toast('Escrib\u00e9 un nombre para la tarjeta');return;}
+  const btn=el('btn-save-card');btn.disabled=true;btn.textContent='Guardando...';
+  const record={
+    tenant_id:currentTenant.id,user_id:currentProfile.id,
+    save_name:saveName,template:currentTpl?.id||'',
+    photo_url:photoDataUrl||null,
+    name:v('f-name'),whatsapp:v('f-whatsapp'),
+    email:v('f-email'),instagram:v('f-instagram'),
+    updated_at:new Date().toISOString()
   };
-  try {
-    const {data:ex} = await sb.from(CARD_COL).select('id').eq('user_id',currentProfile.id).eq('save_name',saveName).maybeSingle();
-    if(ex) { await sb.from(CARD_COL).update(record).eq('id',ex.id); toast('Tarjeta actualizada: '+saveName); }
-    else   { await sb.from(CARD_COL).insert(record); toast('Tarjeta guardada: '+saveName); }
+  try{
+    const{data:ex}=await sb.from(CARD_COL).select('id').eq('user_id',currentProfile.id).eq('save_name',saveName).maybeSingle();
+    if(ex){await sb.from(CARD_COL).update(record).eq('id',ex.id);toast('Tarjeta actualizada: '+saveName);}
+    else{await sb.from(CARD_COL).insert(record);toast('Tarjeta guardada: '+saveName);}
     el('f-savename').value='';
-    await loadSavedCards();
-  } catch(e){ toast('Error: '+e.message); }
-  finally{ btn.disabled=false; btn.textContent='Guardar'; }
+    await loadSaved();
+  }catch(e){console.error('[saveCard]',e);toast('Error: '+e.message);}
+  finally{btn.disabled=false;btn.textContent='Guardar';}
 }
 
-async function loadCard(id) {
-  const {data:s} = await sb.from(CARD_COL).select('*').eq('id',id).single();
-  if(!s) return;
-  const tpl = TEMPLATES.find(t=>t.id===s.template);
-  if(tpl) setTpl(tpl);
-  photoDataUrl = s.photo_url||null;
-  if(photoDataUrl) {
-    photoImg = await loadImg(photoDataUrl);
+async function loadCard(id){
+  const{data:s}=await sb.from(CARD_COL).select('*').eq('id',id).single();
+  if(!s)return;
+  const tpl=TEMPLATES.find(t=>t.id===s.template);
+  if(tpl)setTpl(tpl);
+  photoDataUrl=s.photo_url||null;
+  if(photoDataUrl){
+    photoImg=await loadImg(photoDataUrl);
     el('photo-preview').innerHTML=`<img src="${photoDataUrl}" style="width:100%;height:100%;object-fit:cover" alt="">`;
-    el('upload-title').textContent='Foto cargada'; el('upload-status').textContent='Click para cambiar'; el('upload-area').style.borderColor='#22c55e';
+    el('upload-title').textContent='Foto cargada';el('upload-status').textContent='Click para cambiar';
+    el('upload-area').style.borderColor='#22c55e';
+  }else{
+    photoImg=null;photoDataUrl=null;
+    el('photo-preview').innerHTML='<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>';
+    el('upload-title').textContent='Subir foto';el('upload-status').textContent='PNG con fondo transparente ideal';
+    el('upload-area').style.borderColor='';
   }
-  ['name','whatsapp','email','instagram'].forEach(k=>{ const e=el('f-'+k); if(e) e.value=s[k]||''; });
-  el('f-savename').value=s.save_name||'';
-  renderCards(); toast('Tarjeta cargada: '+s.save_name);
+  ['name','whatsapp','email','instagram'].forEach(k=>setV('f-'+k,s[k]));
+  setV('f-savename',s.save_name);
+  renderCards();toast('Tarjeta cargada: '+s.save_name);
 }
 
-async function delCard(id, name) {
+async function delCard(id,name){
   await sb.from(CARD_COL).delete().eq('id',id);
   toast('Tarjeta eliminada: '+name);
-  await loadSavedCards();
+  await loadSaved();
 }
 
+/* ── Descargar PDF ── */
+async function downloadPDF(){
+  const btn=el('btn-download-pdf');btn.disabled=true;btn.textContent='Generando PDF...';
+  try{
+    if(!window.jspdf){
+      await new Promise((res,rej)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';s.onload=res;s.onerror=rej;document.head.appendChild(s);});
+    }
+    const{jsPDF}=window.jspdf;
+    const origW=el('canvas-front').width,origH=el('canvas-front').height;
+    el('canvas-front').width=CARD_W;el('canvas-front').height=CARD_H;
+    el('canvas-back').width=CARD_W;el('canvas-back').height=CARD_H;
+    await renderCards();
+    const fd=el('canvas-front').toDataURL('image/png');
+    const bd=el('canvas-back').toDataURL('image/png');
+    el('canvas-front').width=origW;el('canvas-front').height=origH;
+    el('canvas-back').width=origW;el('canvas-back').height=origH;
+    await renderCards();
+    const pdf=new jsPDF({orientation:'portrait',unit:'cm',format:[5,9]});
+    pdf.addImage(fd,'PNG',0,0,5,9);
+    pdf.addPage([5,9],'portrait');
+    pdf.addImage(bd,'PNG',0,0,5,9);
+    const slug=(v('f-name')||'tarjeta').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+    pdf.save(`tarjeta-${slug}.pdf`);
+    toast('PDF descargado ✓');
+  }catch(e){console.error(e);toast('Error: '+e.message);}
+  finally{btn.disabled=false;btn.textContent='Descargar PDF';}
+}
+
+/* ── Descargar PNG ── */
+async function downloadPNG(){
+  const btn=el('btn-download-png');btn.disabled=true;btn.textContent='Generando...';
+  try{
+    const slug=(v('f-name')||'tarjeta').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+    const a1=document.createElement('a');a1.href=el('canvas-front').toDataURL('image/png');a1.download=`tarjeta-${slug}-frente.png`;a1.click();
+    await new Promise(r=>setTimeout(r,400));
+    const a2=document.createElement('a');a2.href=el('canvas-back').toDataURL('image/png');a2.download=`tarjeta-${slug}-reverso.png`;a2.click();
+    toast('PNG descargado ✓');
+  }catch(e){toast('Error: '+e.message);}
+  finally{btn.disabled=false;btn.textContent='Descargar PNG';}
+}
+
+const CARD_COL='tarjetas';
+
 /* ── Event listeners ── */
-el('btn-login').addEventListener('click', doLogin);
-el('login-password').addEventListener('keydown', e=>{if(e.key==='Enter')doLogin();});
-el('btn-logout').addEventListener('click', doLogout);
-el('photo-upload').addEventListener('change', e=>uploadPhoto(e.target.files[0]));
-el('btn-download-pdf').addEventListener('click', downloadPDF);
-el('btn-download-png').addEventListener('click', downloadPNG);
-el('btn-save-card').addEventListener('click', saveCard);
+el('btn-login').addEventListener('click',doLogin);
+el('login-password').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+el('btn-logout').addEventListener('click',doLogout);
+el('photo-upload').addEventListener('change',e=>uploadPhoto(e.target.files[0]));
+el('btn-download-pdf').addEventListener('click',downloadPDF);
+el('btn-download-png').addEventListener('click',downloadPNG);
+el('btn-save-card').addEventListener('click',saveCard);
 ['f-name','f-whatsapp','f-email','f-instagram'].forEach(id=>{
-  const inp=el(id); if(inp) inp.addEventListener('input', renderCards);
+  const inp=el(id);if(inp)inp.addEventListener('input',renderCards);
 });
 
 /* ── Init ── */
 sb.auth.getSession().then(({data:{session}})=>{
-  if(session){currentUser=session.user; loadContext();}
+  if(session){currentUser=session.user;loadContext();}
 });
-
 </script>
 </body>
 </html>
