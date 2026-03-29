@@ -354,7 +354,7 @@ async function renderFront(canvas){
   */
   if(photoImg){
     const s=SCALE;
-    const ax=46*s, ay=155*s, aw=545*s, ah=670*s;
+    const ax=46*s, ay=155*s, aw=545*s, ah=671*s;  /* y=155 a y=826 */
     const rTL=Math.round(80*s);  /* radio esquina sup-izq */
     const rBL=Math.round(89*s);  /* radio esquina inf-izq */
 
@@ -451,28 +451,7 @@ async function renderBack(canvas){
     const qrImg=await loadImg(qrApiUrl);
     ctx.drawImage(qrImg,qx,qy,qSize,qSize);
 
-    /* Logo WhatsApp verde en el centro del QR */
-    const lsz=Math.round(qSize*0.20);
-    const lcx=qx+qSize/2;
-    const lcy=qy+qSize/2;
-    try{
-      const waLogo=await loadImg('https://res.cloudinary.com/dlgrhr6lh/image/upload/v1774813924/Whatsapp-Logo_tp63ib.png');
-      const pad=Math.round(lsz*0.18);
-      ctx.fillStyle='#ffffff';
-      ctx.fillRect(lcx-lsz/2-pad, lcy-lsz/2-pad, lsz+pad*2, lsz+pad*2);
-      ctx.drawImage(waLogo, lcx-lsz/2, lcy-lsz/2, lsz, lsz);
-    }catch(e){
-      /* Fallback: logo verde dibujado en canvas si no carga la imagen */
-      const lsz2=Math.round(qSize*0.20), pad=Math.round(lsz2*0.18);
-      ctx.fillStyle='#ffffff';
-      ctx.fillRect(lcx-lsz2/2-pad,lcy-lsz2/2-pad,lsz2+pad*2,lsz2+pad*2);
-      ctx.fillStyle='#25D366';
-      ctx.beginPath();ctx.arc(lcx,lcy,lsz2/2,0,Math.PI*2);ctx.fill();
-      ctx.fillStyle='#ffffff';
-      ctx.font=`bold ${Math.round(lsz2*0.55)}px Arial`;
-      ctx.textAlign='center';ctx.textBaseline='middle';
-      ctx.fillText('✆',lcx,lcy);
-    }
+    /* Sin logo en el centro — QR limpio para mejor lectura */
   }catch(e){console.warn('[QR]',e);}
 
   /* Texto: teléfono en y=760, email e instagram debajo */
@@ -494,7 +473,7 @@ async function renderBack(canvas){
     ctx.font=`300 ${fs}px ${fontBase}`;
     while(fs>13&&ctx.measureText(phone).width>maxW){fs--;ctx.font=`300 ${fs}px ${fontBase}`;}
     ctx.fillText(phone,whiteCenterX,ty);
-    ty+=fs+gapL;
+    ty+=fs+gapS;  /* mismo gap que email/instagram, sin separación extra */
   }
 
   /* Email e Instagram — mismo tamaño, determinado por el texto más largo */
