@@ -345,34 +345,48 @@ async function renderFront(canvas){
   catch(e){ctx.fillStyle='#1a2744';ctx.fillRect(0,0,W,H);}
 
   /* 2. Foto del agente
-     Área blanca medida pixel a pixel:
-     x=79, y=28, w=511, h=797
-     rTL=60 (sup-izq), rTR=0 (sup-der), rBR=0 (inf-der), rBL=89 (inf-izq)
+     Path medido pixel a pixel del PSD:
+     - Borde izquierdo SUPERIOR (y=90 a y=160): x=79
+     - Curva esquina sup-izq: de (79,90) curva hacia (46,280)
+     - Borde izquierdo INFERIOR (y=280 a y=710): x=46
+     - Curva esquina inf-izq: de (46,720) curva hacia (93,825)
+     - Borde inferior: y=825
+     - Borde derecho: x=590
+     - Borde superior: y=28
+     - Top-right corner: recta (x=590 va desde y=0)
+     - Top-left: curva de (79,90) hacia arriba a (459,28) 
+     
+     Simplificamos con bezier curves usando los puntos clave medidos:
   */
   if(photoImg){
-    const p=currentTpl.photo;
-    const ax=Math.round(p.x*SCALE), ay=Math.round(p.y*SCALE);
-    const aw=Math.round(p.w*SCALE), ah=Math.round(p.h*SCALE);
-    const rTL=Math.round(p.rTL*SCALE);
-    const rBL=Math.round(p.rBL*SCALE);
-
+    const s = SCALE;
     ctx.save();
     ctx.beginPath();
-    /* sup-izq: redondeada */
-    ctx.moveTo(ax+rTL,ay);
-    /* sup-der: recta */
-    ctx.lineTo(ax+aw,ay);
-    /* inf-der: recta */
-    ctx.lineTo(ax+aw,ay+ah);
-    /* inf-izq: redondeada */
-    ctx.lineTo(ax+rBL,ay+ah);
-    ctx.quadraticCurveTo(ax,ay+ah,ax,ay+ah-rBL);
-    /* izq: recta hasta esquina sup-izq redondeada */
-    ctx.lineTo(ax,ay+rTL);
-    ctx.quadraticCurveTo(ax,ay,ax+rTL,ay);
+
+    // Empezar desde top-right
+    ctx.moveTo(590*s, 28*s);
+    // Top edge (recta)
+    // Top-left area: el blanco en y=28 empieza en x=459 (logo REMAX ocupa x=0..459)
+    // Pero la foto debe ir debajo del logo, empezamos desde donde está el área blanca de la foto
+    // La foto empieza en x=79 a y=90 (abajo del logo)
+    // Usamos el borde completo disponible:
+    ctx.lineTo(590*s, 825*s);  // borde derecho
+    ctx.lineTo(93*s, 825*s);   // borde inferior hasta curva inf-izq
+    // Curva inf-izq (radio ~89px)
+    ctx.quadraticCurveTo(46*s, 825*s, 46*s, 736*s);
+    ctx.lineTo(46*s, 280*s);   // borde izq inferior
+    // Transición curva de (46,280) a (79,160)
+    ctx.quadraticCurveTo(46*s, 160*s, 79*s, 130*s);
+    ctx.lineTo(79*s, 90*s);    // borde izq superior
+    // Curva sup-izq de (79,90) hacia arriba y a la derecha
+    ctx.quadraticCurveTo(79*s, 28*s, 459*s, 28*s);
+    // Top edge
+    ctx.lineTo(590*s, 28*s);
     ctx.closePath();
     ctx.clip();
 
+    // Cover — fill el área disponible, alinear arriba
+    const ax=46*s, ay=28*s, aw=544*s, ah=797*s;
     const ratio=photoImg.width/photoImg.height;
     const areaRatio=aw/ah;
     let sw,sh,sx,sy;
@@ -447,55 +461,52 @@ async function renderBack(canvas){
     const qrImg=await loadImg(qrApiUrl);
     ctx.drawImage(qrImg,qx,qy,qSize,qSize);
 
-    /* Logo WhatsApp en el centro del QR */
-    const logoSize=Math.round(qSize*0.22);
-    const logoX=qx+qSize/2-logoSize/2;
-    const logoY=qy+qSize/2-logoSize/2;
+    /* Logo WhatsApp en el centro del QR — igual al de la app oficial
+       Círculo blanco de fondo + círculo verde + ícono teléfono blanco */
+    const logoSize = Math.round(qSize * 0.20);
+    const lx = qx + qSize/2 - logoSize/2;
+    const ly = qy + qSize/2 - logoSize/2;
+    const lcx = qx + qSize/2;
+    const lcy = qy + qSize/2;
 
-    /* Fondo blanco circular */
-    const bgR=logoSize/2+Math.round(3*SCALE);
     ctx.save();
-    ctx.fillStyle='#ffffff';
-    ctx.beginPath();
-    ctx.arc(qx+qSize/2,qy+qSize/2,bgR,0,Math.PI*2);
-    ctx.fill();
-    ctx.restore();
+    // Fondo blanco (cuadrado limpio para el módulo del QR)
+    const bgPad = Math.round(logoSize * 0.15);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(lx - bgPad, ly - bgPad, logoSize + bgPad*2, logoSize + bgPad*2);
 
-    /* Círculo verde WhatsApp */
-    ctx.save();
-    ctx.fillStyle='#25D366';
+    // Círculo verde
+    ctx.fillStyle = '#25D366';
     ctx.beginPath();
-    ctx.arc(qx+qSize/2,qy+qSize/2,logoSize/2,0,Math.PI*2);
+    ctx.arc(lcx, lcy, logoSize/2, 0, Math.PI*2);
     ctx.fill();
 
-    /* Ícono WhatsApp (teléfono) dibujado en canvas */
-    const cx=qx+qSize/2, cy=qy+qSize/2;
-    const s=logoSize;
-    ctx.fillStyle='#ffffff';
-    ctx.strokeStyle='#ffffff';
-    ctx.lineWidth=s*0.08;
-    ctx.lineCap='round';
-
-    /* Burbuja de chat */
-    const bx=cx-s*0.28, by=cy-s*0.28;
-    const bw=s*0.56, bh=s*0.52;
-    const br=s*0.12;
+    // Burbuja de chat blanca (forma del ícono oficial WhatsApp)
+    const r = logoSize/2;
+    ctx.fillStyle = '#ffffff';
     ctx.beginPath();
-    ctx.moveTo(bx+br,by);
-    ctx.lineTo(bx+bw-br,by);ctx.quadraticCurveTo(bx+bw,by,bx+bw,by+br);
-    ctx.lineTo(bx+bw,by+bh-br);ctx.quadraticCurveTo(bx+bw,by+bh,bx+bw-br,by+bh);
-    ctx.lineTo(bx+s*0.18,by+bh);
-    ctx.lineTo(bx+s*0.08,by+bh+s*0.14);
-    ctx.lineTo(bx+s*0.28,by+bh);
-    ctx.lineTo(bx+br,by+bh);ctx.quadraticCurveTo(bx,by+bh,bx,by+bh-br);
-    ctx.lineTo(bx,by+br);ctx.quadraticCurveTo(bx,by,bx+br,by);
-    ctx.closePath();ctx.fill();
+    // Burbuja principal
+    const bx = lcx - r*0.55, by = lcy - r*0.62;
+    const bw = r*1.1, bh = r*0.95;
+    const br2 = r*0.18;
+    ctx.moveTo(bx+br2, by);
+    ctx.lineTo(bx+bw-br2, by); ctx.quadraticCurveTo(bx+bw, by, bx+bw, by+br2);
+    ctx.lineTo(bx+bw, by+bh*0.65); ctx.quadraticCurveTo(bx+bw, by+bh, bx+bw-br2, by+bh);
+    ctx.lineTo(bx+bw*0.45, by+bh);
+    // Cola de la burbuja
+    ctx.lineTo(bx+bw*0.22, by+bh+r*0.28);
+    ctx.lineTo(bx+bw*0.38, by+bh);
+    ctx.lineTo(bx+br2, by+bh); ctx.quadraticCurveTo(bx, by+bh, bx, by+bh-br2);
+    ctx.lineTo(bx, by+br2); ctx.quadraticCurveTo(bx, by, bx+br2, by);
+    ctx.closePath();
+    ctx.fill();
 
-    /* Teléfono dentro de la burbuja */
-    ctx.fillStyle='#25D366';
-    ctx.font=`bold ${s*0.32}px Arial`;
-    ctx.textAlign='center';ctx.textBaseline='middle';
-    ctx.fillText('✆',cx,cy-s*0.04);
+    // Teléfono verde dentro de la burbuja
+    ctx.fillStyle = '#25D366';
+    ctx.font = `bold ${Math.round(r*0.7)}px Arial`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('📞', lcx, lcy - r*0.1);
     ctx.restore();
   }catch(e){console.warn('[QR]',e);}
 
@@ -512,7 +523,7 @@ async function renderBack(canvas){
   ctx.textAlign='center';ctx.textBaseline='top';ctx.fillStyle='#111111';
 
   const maxW=Math.round(whiteWidth*0.82*SCALE);
-  let ty=Math.round(currentTpl.back.textY*SCALE);
+  let ty=Math.round(760*SCALE);  /* logo termina en y=703, texto empieza en y=760 */
   const gapL=Math.round(18*SCALE);
   const gapS=Math.round(12*SCALE);
 
