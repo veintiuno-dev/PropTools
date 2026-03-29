@@ -712,8 +712,6 @@ async function downloadPNG(){
   finally{btn.disabled=false;btn.textContent='Descargar PNG';}
 }
 
-const CARD_COL='tarjetas';
-
 /* ── Event listeners ── */
 el('btn-login').addEventListener('click',doLogin);
 el('login-password').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
