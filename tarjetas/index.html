@@ -345,42 +345,37 @@ async function renderFront(canvas){
   catch(e){ctx.fillStyle='#1a2744';ctx.fillRect(0,0,W,H);}
 
   /* 2. Foto del agente
-     Path trazado con puntos exactos medidos pixel a pixel:
-     Boundary izquierdo:
-       y=80-140:  x=78  (borde sup)
-       y=140-260: curva de x=78 a x=46
-       y=260-720: x=46  (borde inf estable)
-       y=720-825: curva de x=46 a x=147 (inf-izq)
-     Top: y=71 en zona central, borde derecho desde y=0
-     Bottom: y=827
+     Coordenadas exactas confirmadas:
+     - Ancho: 545px, desde x=46 hasta x=591
+     - Alto: desde y=155 hasta y=825 (h=670)
+     - Esquina sup-izq: redondeada (curva desde y=155 hacia x=46)
+     - Esquina inf-izq: redondeada grande
+     - Esquinas sup-der e inf-der: rectas
   */
   if(photoImg){
     const s=SCALE;
+    const ax=46*s, ay=155*s, aw=545*s, ah=670*s;
+    const rTL=Math.round(80*s);  /* radio esquina sup-izq */
+    const rBL=Math.round(89*s);  /* radio esquina inf-izq */
+
     ctx.save();
     ctx.beginPath();
-    // Empezar desde top-right (x=590, y=0)
-    ctx.moveTo(590*s, 0);
-    // Borde derecho hacia abajo
-    ctx.lineTo(590*s, 827*s);
-    // Borde inferior hacia izquierda hasta inicio de curva inf-izq
-    ctx.lineTo(147*s, 827*s);
-    // Curva esquina inferior izquierda
-    ctx.quadraticCurveTo(46*s, 827*s, 46*s, 720*s);
-    // Borde izquierdo inferior (estable en x=46)
-    ctx.lineTo(46*s, 260*s);
-    // Curva de transición izq (de x=46 a x=78)
-    ctx.quadraticCurveTo(46*s, 140*s, 78*s, 120*s);
-    // Borde izquierdo superior (x=78)
-    ctx.lineTo(78*s, 71*s);
-    // Curva superior izquierda hacia el área del logo REMAX
-    ctx.quadraticCurveTo(78*s, 0, 459*s, 0);
-    // Tope
-    ctx.lineTo(590*s, 0);
+    /* sup-izq: redondeada */
+    ctx.moveTo(ax+rTL, ay);
+    /* sup-der: recta */
+    ctx.lineTo(ax+aw, ay);
+    /* inf-der: recta */
+    ctx.lineTo(ax+aw, ay+ah);
+    /* inf-izq: redondeada */
+    ctx.lineTo(ax+rBL, ay+ah);
+    ctx.quadraticCurveTo(ax, ay+ah, ax, ay+ah-rBL);
+    /* izq hasta curva sup-izq */
+    ctx.lineTo(ax, ay+rTL);
+    ctx.quadraticCurveTo(ax, ay, ax+rTL, ay);
     ctx.closePath();
     ctx.clip();
 
-    // Cover — cubrir el área, alinear arriba para no cortar cabeza
-    const ax=46*s, ay=0, aw=544*s, ah=827*s;
+    /* Cover — alinear arriba para no cortar cabeza */
     const ratio=photoImg.width/photoImg.height;
     const areaRatio=aw/ah;
     let sw,sh,sx,sy;
@@ -447,7 +442,8 @@ async function renderBack(canvas){
   const qrData=waClean?`https://wa.me/${waClean}`:'https://wa.me/50600000000';
   const qrApiUrl=`https://api.qrserver.com/v1/create-qr-code/?size=600x600&data=${encodeURIComponent(qrData)}&bgcolor=ffffff&color=000000&format=png&margin=2`;
 
-  const qSize=Math.round(350*SCALE);
+  /* QR: 400px full res, centrado en área blanca, empieza en y=100 */
+  const qSize=Math.round(400*SCALE);
   const qx=whiteCenterX-qSize/2;
   const qy=Math.round(100*SCALE);
 
@@ -455,26 +451,31 @@ async function renderBack(canvas){
     const qrImg=await loadImg(qrApiUrl);
     ctx.drawImage(qrImg,qx,qy,qSize,qSize);
 
-    /* Logo WhatsApp en el centro del QR — imagen oficial */
-    const lsz = Math.round(qSize * 0.22);
-    const lcx = qx + qSize/2;
-    const lcy = qy + qSize/2;
-    try {
-      const waLogo = await loadImg('https://res.cloudinary.com/dlgrhr6lh/image/upload/v1774813115/whatsapp_epblka.png');
-      // Fondo blanco cuadrado limpio
-      const pad = Math.round(lsz * 0.15);
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(lcx - lsz/2 - pad, lcy - lsz/2 - pad, lsz + pad*2, lsz + pad*2);
-      // Logo
-      ctx.drawImage(waLogo, lcx - lsz/2, lcy - lsz/2, lsz, lsz);
-    } catch(e) { console.warn('[WA logo]', e); }
+    /* Logo WhatsApp verde en el centro del QR */
+    const lsz=Math.round(qSize*0.20);
+    const lcx=qx+qSize/2;
+    const lcy=qy+qSize/2;
+    try{
+      const waLogo=await loadImg('https://res.cloudinary.com/dlgrhr6lh/image/upload/v1774813924/Whatsapp-Logo_tp63ib.png');
+      const pad=Math.round(lsz*0.18);
+      ctx.fillStyle='#ffffff';
+      ctx.fillRect(lcx-lsz/2-pad, lcy-lsz/2-pad, lsz+pad*2, lsz+pad*2);
+      ctx.drawImage(waLogo, lcx-lsz/2, lcy-lsz/2, lsz, lsz);
+    }catch(e){
+      /* Fallback: logo verde dibujado en canvas si no carga la imagen */
+      const lsz2=Math.round(qSize*0.20), pad=Math.round(lsz2*0.18);
+      ctx.fillStyle='#ffffff';
+      ctx.fillRect(lcx-lsz2/2-pad,lcy-lsz2/2-pad,lsz2+pad*2,lsz2+pad*2);
+      ctx.fillStyle='#25D366';
+      ctx.beginPath();ctx.arc(lcx,lcy,lsz2/2,0,Math.PI*2);ctx.fill();
+      ctx.fillStyle='#ffffff';
+      ctx.font=`bold ${Math.round(lsz2*0.55)}px Arial`;
+      ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillText('✆',lcx,lcy);
+    }
   }catch(e){console.warn('[QR]',e);}
 
-  /* 3. Texto editable
-     Zona entre logo REMAX (~y=715) y websites
-     REMAX: textY=730, Sunrise: textY=730 también pero textEndY=855
-     Subido desde 768 a 730 para dar más espacio en Sunrise
-  */
+  /* Texto: teléfono en y=760, email e instagram debajo */
   const phone=v('f-whatsapp')||'';
   const email=v('f-email')||'';
   const insta=v('f-instagram')||'';
@@ -483,7 +484,7 @@ async function renderBack(canvas){
   ctx.textAlign='center';ctx.textBaseline='top';ctx.fillStyle='#111111';
 
   const maxW=Math.round(whiteWidth*0.82*SCALE);
-  let ty=Math.round(790*SCALE);  /* bajado más — logo termina y=703 */
+  let ty=Math.round(760*SCALE);
   const gapL=Math.round(18*SCALE);
   const gapS=Math.round(12*SCALE);
 
