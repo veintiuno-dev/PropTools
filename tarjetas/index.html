@@ -180,6 +180,10 @@ canvas { display: block; }
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
           Descargar PNG
         </button>
+        <button class="btn btn-ghost" id="btn-download-digital">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="9" height="18" rx="1"/><rect x="13" y="3" width="9" height="18" rx="1"/></svg>
+          Tarjeta digital
+        </button>
       </div>
     </div>
     <div class="preview-area">
@@ -354,7 +358,7 @@ async function renderFront(canvas){
   */
   if(photoImg){
     const s=SCALE;
-    const ax=46*s, ay=155*s, aw=545*s, ah=671*s;  /* y=155 a y=826 */
+    const ax=46*s, ay=155*s, aw=545*s, ah=672*s;  /* y=155 a y=827 */
     const rTL=Math.round(80*s);  /* radio esquina sup-izq */
     const rBL=Math.round(89*s);  /* radio esquina inf-izq */
 
@@ -463,7 +467,7 @@ async function renderBack(canvas){
   ctx.textAlign='center';ctx.textBaseline='top';ctx.fillStyle='#111111';
 
   const maxW=Math.round(whiteWidth*0.82*SCALE);
-  let ty=Math.round(760*SCALE);
+  let ty=Math.round(750*SCALE);
   const gapL=Math.round(18*SCALE);
   const gapS=Math.round(12*SCALE);
 
@@ -622,27 +626,54 @@ async function delCard(id,name){
   await loadSaved();
 }
 
+/* ── Helper: renderizar a alta resolución en canvas temporal ── */
+async function renderHiRes() {
+  const hf = document.createElement('canvas');
+  const hb = document.createElement('canvas');
+  hf.width=CARD_W; hf.height=CARD_H;
+  hb.width=CARD_W; hb.height=CARD_H;
+
+  /* Guardar SCALE original y redefinirla temporalmente no es posible
+     porque SCALE es const. En cambio creamos canvas hi-res y renderizamos
+     pasando el canvas directamente a las funciones con dimensiones reales. */
+  const origFW=el('canvas-front').width, origFH=el('canvas-front').height;
+  const origBW=el('canvas-back').width,  origBH=el('canvas-back').height;
+
+  el('canvas-front').width=CARD_W; el('canvas-front').height=CARD_H;
+  el('canvas-back').width=CARD_W;  el('canvas-back').height=CARD_H;
+  await renderCards();
+
+  const fd = el('canvas-front').toDataURL('image/png');
+  const bd = el('canvas-back').toDataURL('image/png');
+
+  /* Restaurar */
+  el('canvas-front').width=origFW; el('canvas-front').height=origFH;
+  el('canvas-back').width=origBW;  el('canvas-back').height=origBH;
+  await renderCards();
+
+  return { fd, bd };
+}
+
 /* ── Descargar PDF ── */
 async function downloadPDF(){
   const btn=el('btn-download-pdf');btn.disabled=true;btn.textContent='Generando PDF...';
   try{
     if(!window.jspdf){
-      await new Promise((res,rej)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';s.onload=res;s.onerror=rej;document.head.appendChild(s);});
+      await new Promise((res,rej)=>{
+        const s=document.createElement('script');
+        s.src='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+        s.onload=res;s.onerror=rej;document.head.appendChild(s);
+      });
     }
     const{jsPDF}=window.jspdf;
-    const origW=el('canvas-front').width,origH=el('canvas-front').height;
-    el('canvas-front').width=CARD_W;el('canvas-front').height=CARD_H;
-    el('canvas-back').width=CARD_W;el('canvas-back').height=CARD_H;
-    await renderCards();
-    const fd=el('canvas-front').toDataURL('image/png');
-    const bd=el('canvas-back').toDataURL('image/png');
-    el('canvas-front').width=origW;el('canvas-front').height=origH;
-    el('canvas-back').width=origW;el('canvas-back').height=origH;
-    await renderCards();
+    const{fd,bd}=await renderHiRes();
+
+    /* Tarjeta 9x5cm = portrait 5cm ancho, 9cm alto */
     const pdf=new jsPDF({orientation:'portrait',unit:'cm',format:[5,9]});
     pdf.addImage(fd,'PNG',0,0,5,9);
     pdf.addPage([5,9],'portrait');
     pdf.addImage(bd,'PNG',0,0,5,9);
+
     const slug=(v('f-name')||'tarjeta').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
     pdf.save(`tarjeta-${slug}.pdf`);
     toast('PDF descargado ✓');
@@ -650,17 +681,51 @@ async function downloadPDF(){
   finally{btn.disabled=false;btn.textContent='Descargar PDF';}
 }
 
-/* ── Descargar PNG ── */
+/* ── Descargar PNG (frente y reverso por separado) ── */
 async function downloadPNG(){
   const btn=el('btn-download-png');btn.disabled=true;btn.textContent='Generando...';
   try{
+    const{fd,bd}=await renderHiRes();
     const slug=(v('f-name')||'tarjeta').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
-    const a1=document.createElement('a');a1.href=el('canvas-front').toDataURL('image/png');a1.download=`tarjeta-${slug}-frente.png`;a1.click();
+    const a1=document.createElement('a');a1.href=fd;a1.download=`tarjeta-${slug}-frente.png`;a1.click();
     await new Promise(r=>setTimeout(r,400));
-    const a2=document.createElement('a');a2.href=el('canvas-back').toDataURL('image/png');a2.download=`tarjeta-${slug}-reverso.png`;a2.click();
+    const a2=document.createElement('a');a2.href=bd;a2.download=`tarjeta-${slug}-reverso.png`;a2.click();
     toast('PNG descargado ✓');
   }catch(e){toast('Error: '+e.message);}
   finally{btn.disabled=false;btn.textContent='Descargar PNG';}
+}
+
+/* ── Tarjeta digital: frente + reverso lado a lado en un solo PNG ── */
+async function downloadDigital(){
+  const btn=el('btn-download-digital');btn.disabled=true;btn.textContent='Generando...';
+  try{
+    const{fd,bd}=await renderHiRes();
+
+    /* Canvas combinado: 2 tarjetas lado a lado con gap */
+    const gap=Math.round(CARD_W*0.05);  /* 5% de gap entre tarjetas */
+    const combined=document.createElement('canvas');
+    combined.width=CARD_W*2+gap;
+    combined.height=CARD_H;
+    const ctx=combined.getContext('2d');
+
+    /* Fondo gris claro */
+    ctx.fillStyle='#f0f2f5';
+    ctx.fillRect(0,0,combined.width,combined.height);
+
+    /* Dibujar frente y reverso */
+    const fi=await loadImg(fd);
+    const bi=await loadImg(bd);
+    ctx.drawImage(fi,0,0,CARD_W,CARD_H);
+    ctx.drawImage(bi,CARD_W+gap,0,CARD_W,CARD_H);
+
+    const slug=(v('f-name')||'tarjeta').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+    const a=document.createElement('a');
+    a.href=combined.toDataURL('image/png');
+    a.download=`tarjeta-${slug}-digital.png`;
+    a.click();
+    toast('Tarjeta digital descargada ✓');
+  }catch(e){console.error(e);toast('Error: '+e.message);}
+  finally{btn.disabled=false;btn.textContent='Tarjeta digital';}
 }
 
 /* ── Event listeners ── */
@@ -670,6 +735,7 @@ el('btn-logout').addEventListener('click',doLogout);
 el('photo-upload').addEventListener('change',e=>uploadPhoto(e.target.files[0]));
 el('btn-download-pdf').addEventListener('click',downloadPDF);
 el('btn-download-png').addEventListener('click',downloadPNG);
+el('btn-download-digital').addEventListener('click',downloadDigital);
 el('btn-save-card').addEventListener('click',saveCard);
 ['f-name','f-whatsapp','f-email','f-instagram'].forEach(id=>{
   const inp=el(id);if(inp)inp.addEventListener('input',renderCards);
