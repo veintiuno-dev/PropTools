@@ -87,6 +87,22 @@ canvas { display: block; }
 .font-dot { width: 7px; height: 7px; border-radius: 50%; background: #f0a500; flex-shrink: 0; }
 .font-dot.ok { background: #22c55e; }
 
+.save-bar { display: flex; gap: 7px; align-items: center; }
+.save-bar input[type="text"] { flex: 1; padding: 7px 10px; font-size: 12px; }
+.btn-save { font-family: inherit; font-size: 12px; font-weight: 600; padding: 7px 14px; border-radius: 7px; border: none; cursor: pointer; background: #000; color: #fff; white-space: nowrap; flex-shrink: 0; transition: background .15s; }
+.btn-save:hover { background: #333; }
+.btn-save:disabled { background: #aaa; cursor: not-allowed; }
+.saved-list { display: flex; flex-direction: column; gap: 6px; }
+.saved-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 9px; padding: 10px 12px; display: flex; align-items: center; gap: 8px; }
+.saved-item-info { flex: 1; min-width: 0; }
+.saved-item-name { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.saved-item-meta { font-size: 11px; color: var(--muted); margin-top: 1px; }
+.saved-item-actions { display: flex; gap: 5px; flex-shrink: 0; }
+.icon-btn { width: 28px; height: 28px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .15s; }
+.icon-btn:hover { border-color: #999; background: #f0f0f0; }
+.icon-btn.del:hover { border-color: #ef4444; background: #fff5f5; }
+.saved-empty { font-size: 12px; color: var(--muted); text-align: center; padding: 16px 0; font-style: italic; }
+
 .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px); background: #000; color: #fff; padding: 10px 22px; border-radius: 100px; font-weight: 700; font-size: 13px; transition: transform .3s cubic-bezier(.34,1.56,.64,1); pointer-events: none; z-index: 1100; }
 .toast.show { transform: translateX(-50%) translateY(0); }
 ::-webkit-scrollbar { width: 5px; }
@@ -171,6 +187,19 @@ canvas { display: block; }
         <div><label>Correo electr&oacute;nico</label><input type="email" id="f-email" placeholder="ana@empresa.com"></div>
         <div><label>Instagram</label><input type="text" id="f-instagram" placeholder="@tu_cuenta"></div>
       </div>
+    </div>
+
+    <div>
+      <p class="section-label">Guardar tarjeta</p>
+      <div class="save-bar">
+        <input type="text" id="f-savename" placeholder="Nombre de la tarjeta">
+        <button class="btn-save" id="btn-save-card">Guardar</button>
+      </div>
+    </div>
+
+    <div>
+      <p class="section-label">Tarjetas guardadas</p>
+      <div class="saved-list" id="saved-list"><p class="saved-empty">Cargando...</p></div>
     </div>
   </aside>
 
@@ -340,6 +369,7 @@ async function loadContext() {
     el('btn-login').disabled=false; el('btn-login').textContent='Ingresar';
     buildGrid();
     setTpl(TEMPLATES[0]);
+    await loadSavedCards();
     loadFonts();
   } catch(e) {
     el('login-error').textContent=e.message;
@@ -387,30 +417,32 @@ async function renderFront(canvas) {
     ctx.drawImage(bg,0,0,W,H);
   } catch(e){ ctx.fillStyle='#1a2744'; ctx.fillRect(0,0,W,H); }
 
-  /* 2. Foto — coordenadas exactas del PSD
-     Área blanca: x=46, y=0, w=545, h=826
-     Esquinas: sup-izq recta, sup-der redondeada, inf-der recta, inf-izq redondeada grande
+  /* 2. Foto — coordenadas medidas pixel a pixel del PSD
+     Área blanca EXACTA: x=46, y=75, w=544, h=750 (hasta y=825)
+     Esquina sup-izq: recta
+     Esquina sup-der: recta (llega hasta x=590 desde y=0)
+     Esquina inf-der: recta
+     Esquina inf-izq: redondeada grande r≈89px
   */
   if(photoImg) {
-    const ax = Math.round(currentTpl.front_photo_x * SCALE);
-    const ay = 0;
-    const aw = Math.round(currentTpl.front_photo_w * SCALE);
-    const ah = Math.round(currentTpl.front_photo_h * SCALE);
-    const rBig = Math.round(68 * SCALE);
-    const rSml = Math.round(38 * SCALE);
+    const ax = Math.round(46  * SCALE);
+    const ay = Math.round(75  * SCALE);
+    const aw = Math.round(544 * SCALE);
+    const ah = Math.round(750 * SCALE);
+    const rBig = Math.round(89 * SCALE);
 
     ctx.save();
     ctx.beginPath();
-    ctx.moveTo(ax, ay);
-    ctx.lineTo(ax+aw-rSml, ay);
-    ctx.quadraticCurveTo(ax+aw, ay, ax+aw, ay+rSml);
-    ctx.lineTo(ax+aw, ay+ah);
-    ctx.lineTo(ax+rBig, ay+ah);
+    ctx.moveTo(ax, ay);              /* sup-izq: recta */
+    ctx.lineTo(ax+aw, ay);           /* sup-der: recta */
+    ctx.lineTo(ax+aw, ay+ah);        /* inf-der: recta */
+    ctx.lineTo(ax+rBig, ay+ah);      /* inf-izq: redondeada */
     ctx.quadraticCurveTo(ax, ay+ah, ax, ay+ah-rBig);
     ctx.lineTo(ax, ay);
     ctx.closePath();
     ctx.clip();
 
+    /* Cover — alinear arriba para no cortar cabeza */
     const ratio = photoImg.width / photoImg.height;
     const areaRatio = aw / ah;
     let sw, sh, sx, sy;
@@ -472,11 +504,10 @@ async function renderBack(canvas) {
     ctx.drawImage(bg,0,0,W,H);
   } catch(e){ ctx.fillStyle='#fff'; ctx.fillRect(0,0,W,H); }
 
-  /* 2. QR code
-     Full res 591x1063:
-     - Franja azul izq: x=0 a x=62, área blanca centro en x=326
-     - Logo REMAX en imagen: ~y=530 a y=720
-     - Gap arriba = gap abajo del QR hasta el logo → QR top=70, size=370, bottom=440, logo@530 → gap=90
+  /* 2. QR code — bajado a y=100 para más espacio arriba
+     Área blanca: x=46, centro x=319
+     Logo REMAX en imagen: y=520-715
+     Gap arriba (100) ≈ Gap abajo hasta logo (520-470=50) → QR size=370, bottom=470
   */
   const whiteStartX = currentTpl.back_white_x;
   const whiteWidth  = CARD_W - whiteStartX;
@@ -489,15 +520,14 @@ async function renderBack(canvas) {
 
   try {
     const qrImg = await loadImg(qrApiUrl);
-    const qSize = Math.round(370 * SCALE);
+    const qSize = Math.round(360 * SCALE);
     const qx    = whiteCenterX - qSize/2;
-    const qy    = Math.round(70 * SCALE);
+    const qy    = Math.round(100 * SCALE);
     ctx.drawImage(qrImg, qx, qy, qSize, qSize);
   } catch(e) { console.warn('[QR]', e); }
 
-  /* 3. Texto editable
-     Zona entre logo REMAX (~y=730) y websites (~y=860):
-     teléfono grande, email e instagram más chico, todos dinámicos
+  /* 3. Texto editable — entre logo (y≈715) y websites (y=885/855)
+     Teléfono más grande, email e instagram MISMO tamaño con ícono
   */
   const phone = v('f-whatsapp') || '';
   const email = v('f-email')    || '';
@@ -508,35 +538,81 @@ async function renderBack(canvas) {
   ctx.textBaseline = 'top';
   ctx.fillStyle    = '#111111';
 
-  const maxTextW = Math.round(whiteWidth * 0.85 * SCALE);
-  /* Texto entre logo (~y=715) y websites (y=885/855)
-     Zona disponible: ~170px full res para REMAX, ~140px para Sunrise
-     Centrar verticalmente: start ~y=760 */
-  const textEndY = Math.round(currentTpl.back_text_end_y * SCALE);
-  let ty = Math.round(760 * SCALE);
-  const lineGapLarge = Math.round(18 * SCALE);
-  const lineGapSmall = Math.round(12 * SCALE);
+  const maxTextW = Math.round(whiteWidth * 0.82 * SCALE);
+  let ty = Math.round(768 * SCALE);
+  const lineGapLarge = Math.round(20 * SCALE);
+  const lineGapSmall = Math.round(14 * SCALE);
 
+  /* Teléfono */
   if(phone) {
-    let fs = Math.max(Math.round(44 * SCALE), 16);
+    let fs = Math.max(Math.round(46 * SCALE), 16);
     ctx.font = `300 ${fs}px ${fontBase}`;
     while(fs > 13 && ctx.measureText(phone).width > maxTextW) { fs--; ctx.font=`300 ${fs}px ${fontBase}`; }
     ctx.fillText(phone, whiteCenterX, ty);
     ty += fs + lineGapLarge;
   }
-  if(email) {
-    let fs = Math.max(Math.round(28 * SCALE), 11);
-    ctx.font = `300 ${fs}px ${fontBase}`;
-    while(fs > 9 && ctx.measureText(email).width > maxTextW) { fs--; ctx.font=`300 ${fs}px ${fontBase}`; }
-    ctx.fillText(email, whiteCenterX, ty);
-    ty += fs + lineGapSmall;
+
+  /* Email e Instagram — mismo tamaño base, dinámico por el más largo */
+  const instaHandle = insta ? (insta.startsWith('@') ? insta : '@'+insta) : '';
+  let smallFs = Math.max(Math.round(26 * SCALE), 10);
+  ctx.font = `300 ${smallFs}px ${fontBase}`;
+  const longestSmall = email.length > instaHandle.length ? email : instaHandle;
+  while(smallFs > 9 && ctx.measureText(longestSmall).width > maxTextW - Math.round(smallFs*1.4)) {
+    smallFs--; ctx.font=`300 ${smallFs}px ${fontBase}`;
   }
-  if(insta) {
-    const handle = insta.startsWith('@') ? insta : '@'+insta;
-    let fs = Math.max(Math.round(28 * SCALE), 11);
-    ctx.font = `300 ${fs}px ${fontBase}`;
-    while(fs > 9 && ctx.measureText(handle).width > maxTextW) { fs--; ctx.font=`300 ${fs}px ${fontBase}`; }
-    ctx.fillText(handle, whiteCenterX, ty);
+
+  if(email) {
+    ctx.font = `300 ${smallFs}px ${fontBase}`;
+    ctx.fillText(email, whiteCenterX, ty);
+    ty += smallFs + lineGapSmall;
+  }
+
+  if(instaHandle) {
+    ctx.font = `300 ${smallFs}px ${fontBase}`;
+    /* Ícono Instagram SVG dibujado en canvas */
+    const iconSize = Math.round(smallFs * 1.1);
+    const textW = ctx.measureText(instaHandle).width;
+    const totalW = iconSize + Math.round(4*SCALE) + textW;
+    const startX = whiteCenterX - totalW/2;
+    const iconY  = ty + (smallFs - iconSize)/2;
+
+    /* Dibujar ícono Instagram como path en canvas */
+    const is = iconSize;
+    const ix = startX;
+    const iy = iconY;
+    const ir = is * 0.2; /* radio esquinas */
+
+    ctx.save();
+    /* Gradiente Instagram */
+    const grad = ctx.createLinearGradient(ix, iy+is, ix+is, iy);
+    grad.addColorStop(0,   '#f09433');
+    grad.addColorStop(0.25,'#e6683c');
+    grad.addColorStop(0.5, '#dc2743');
+    grad.addColorStop(0.75,'#cc2366');
+    grad.addColorStop(1,   '#bc1888');
+    ctx.fillStyle = grad;
+    /* Fondo redondeado */
+    ctx.beginPath();
+    ctx.moveTo(ix+ir, iy);
+    ctx.lineTo(ix+is-ir, iy); ctx.quadraticCurveTo(ix+is, iy, ix+is, iy+ir);
+    ctx.lineTo(ix+is, iy+is-ir); ctx.quadraticCurveTo(ix+is, iy+is, ix+is-ir, iy+is);
+    ctx.lineTo(ix+ir, iy+is); ctx.quadraticCurveTo(ix, iy+is, ix, iy+is-ir);
+    ctx.lineTo(ix, iy+ir); ctx.quadraticCurveTo(ix, iy, ix+ir, iy);
+    ctx.closePath(); ctx.fill();
+    /* Círculo blanco (lente) */
+    ctx.strokeStyle='#fff'; ctx.lineWidth=is*0.1;
+    ctx.beginPath(); ctx.arc(ix+is/2, iy+is/2, is*0.28, 0, Math.PI*2); ctx.stroke();
+    /* Punto blanco (flash) */
+    ctx.fillStyle='#fff';
+    ctx.beginPath(); ctx.arc(ix+is*0.72, iy+is*0.28, is*0.07, 0, Math.PI*2); ctx.fill();
+    ctx.restore();
+
+    /* Texto instagram */
+    ctx.fillStyle = '#111111';
+    ctx.textAlign = 'left';
+    ctx.font = `300 ${smallFs}px ${fontBase}`;
+    ctx.fillText(instaHandle, startX + iconSize + Math.round(4*SCALE), ty);
+    ctx.textAlign = 'center';
   }
 }
 
@@ -624,6 +700,85 @@ async function downloadPNG() {
   finally{ btn.disabled=false; btn.textContent='Descargar PNG'; }
 }
 
+/* ── Guardar / cargar tarjetas ── */
+const CARD_COL = 'tarjetas';
+const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+function renderSavedList(items) {
+  const c = el('saved-list');
+  if(!items||!items.length){ c.innerHTML='<p class="saved-empty">No hay tarjetas guardadas</p>'; return; }
+  c.innerHTML = items.map(s=>`
+    <div class="saved-item">
+      <div class="saved-item-info">
+        <div class="saved-item-name">${esc(s.save_name)}</div>
+        <div class="saved-item-meta">${esc(s.name||'')} &middot; ${new Date(s.updated_at||s.created_at).toLocaleDateString('es-CR')}</div>
+      </div>
+      <div class="saved-item-actions">
+        <button class="icon-btn" data-load="${s.id}" title="Cargar">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+        </button>
+        <button class="icon-btn del" data-del="${s.id}" data-name="${esc(s.save_name)}" title="Eliminar">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>
+        </button>
+      </div>
+    </div>`).join('');
+  c.querySelectorAll('[data-load]').forEach(b=>b.addEventListener('click',()=>loadCard(b.dataset.load)));
+  c.querySelectorAll('[data-del]').forEach(b=>b.addEventListener('click',()=>delCard(b.dataset.del,b.dataset.name)));
+}
+
+async function loadSavedCards() {
+  if(!currentProfile) return;
+  try {
+    const {data} = await sb.from(CARD_COL).select('*').eq('user_id',currentProfile.id).order('updated_at',{ascending:false});
+    renderSavedList(data||[]);
+  } catch(e) { el('saved-list').innerHTML='<p class="saved-empty">Error al cargar</p>'; }
+}
+
+async function saveCard() {
+  if(!currentProfile) return;
+  const saveName = v('f-savename');
+  if(!saveName){ toast('Escrib\u00e9 un nombre para la tarjeta'); return; }
+  const btn = el('btn-save-card'); btn.disabled=true; btn.textContent='Guardando...';
+  const record = {
+    tenant_id: currentTenant.id, user_id: currentProfile.id,
+    save_name: saveName, template: currentTpl?.id||'',
+    photo_url: photoDataUrl||null,
+    name: v('f-name'), whatsapp: v('f-whatsapp'),
+    email: v('f-email'), instagram: v('f-instagram'),
+    updated_at: new Date().toISOString()
+  };
+  try {
+    const {data:ex} = await sb.from(CARD_COL).select('id').eq('user_id',currentProfile.id).eq('save_name',saveName).maybeSingle();
+    if(ex) { await sb.from(CARD_COL).update(record).eq('id',ex.id); toast('Tarjeta actualizada: '+saveName); }
+    else   { await sb.from(CARD_COL).insert(record); toast('Tarjeta guardada: '+saveName); }
+    el('f-savename').value='';
+    await loadSavedCards();
+  } catch(e){ toast('Error: '+e.message); }
+  finally{ btn.disabled=false; btn.textContent='Guardar'; }
+}
+
+async function loadCard(id) {
+  const {data:s} = await sb.from(CARD_COL).select('*').eq('id',id).single();
+  if(!s) return;
+  const tpl = TEMPLATES.find(t=>t.id===s.template);
+  if(tpl) setTpl(tpl);
+  photoDataUrl = s.photo_url||null;
+  if(photoDataUrl) {
+    photoImg = await loadImg(photoDataUrl);
+    el('photo-preview').innerHTML=`<img src="${photoDataUrl}" style="width:100%;height:100%;object-fit:cover" alt="">`;
+    el('upload-title').textContent='Foto cargada'; el('upload-status').textContent='Click para cambiar'; el('upload-area').style.borderColor='#22c55e';
+  }
+  ['name','whatsapp','email','instagram'].forEach(k=>{ const e=el('f-'+k); if(e) e.value=s[k]||''; });
+  el('f-savename').value=s.save_name||'';
+  renderCards(); toast('Tarjeta cargada: '+s.save_name);
+}
+
+async function delCard(id, name) {
+  await sb.from(CARD_COL).delete().eq('id',id);
+  toast('Tarjeta eliminada: '+name);
+  await loadSavedCards();
+}
+
 /* ── Event listeners ── */
 el('btn-login').addEventListener('click', doLogin);
 el('login-password').addEventListener('keydown', e=>{if(e.key==='Enter')doLogin();});
@@ -631,6 +786,7 @@ el('btn-logout').addEventListener('click', doLogout);
 el('photo-upload').addEventListener('change', e=>uploadPhoto(e.target.files[0]));
 el('btn-download-pdf').addEventListener('click', downloadPDF);
 el('btn-download-png').addEventListener('click', downloadPNG);
+el('btn-save-card').addEventListener('click', saveCard);
 ['f-name','f-whatsapp','f-email','f-instagram'].forEach(id=>{
   const inp=el(id); if(inp) inp.addEventListener('input', renderCards);
 });
@@ -639,6 +795,7 @@ el('btn-download-png').addEventListener('click', downloadPNG);
 sb.auth.getSession().then(({data:{session}})=>{
   if(session){currentUser=session.user; loadContext();}
 });
+
 </script>
 </body>
 </html>
