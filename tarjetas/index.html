@@ -60,6 +60,18 @@ input::placeholder { color: var(--muted); opacity: .45; }
 .upload-text { font-size: 12px; color: var(--muted); line-height: 1.5; }
 .upload-text strong { color: var(--text); display: block; font-size: 13px; }
 input[type="file"] { display: none; }
+/* NAV MENU */
+.nav-menu { display: flex; align-items: center; gap: 4px; }
+.nav-item { font-family: inherit; font-size: 12px; font-weight: 600; padding: 6px 12px; border-radius: 7px; border: none; background: transparent; color: var(--muted); cursor: pointer; transition: all .15s; display: flex; align-items: center; gap: 6px; text-decoration: none; }
+.nav-item:hover { background: var(--surface2); color: var(--text); }
+.nav-item.active { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+.nav-item svg { flex-shrink: 0; }
+.header-brand { display: flex; align-items: center; gap: 10px; }
+.header-brand-logo { font-size: 14px; font-weight: 800; letter-spacing: -0.3px; color: var(--text); display: flex; align-items: center; gap: 7px; }
+.header-brand-logo span.pt-dot { color: #C8973B; }
+.header-tenant-badge { display: flex; align-items: center; gap: 7px; padding: 3px 10px 3px 5px; border-radius: 20px; background: var(--surface2); border: 1px solid var(--border); }
+.header-tenant-badge img { height: 20px; }
+.header-tenant-badge span { font-size: 11px; font-weight: 600; color: var(--muted); }
 .save-bar { display: flex; gap: 7px; align-items: center; }
 .save-bar input[type="text"] { flex: 1; padding: 7px 10px; font-size: 12px; }
 .btn-save { font-family: inherit; font-size: 12px; font-weight: 600; padding: 7px 14px; border-radius: 7px; border: none; cursor: pointer; background: #000; color: #fff; white-space: nowrap; flex-shrink: 0; }
@@ -144,11 +156,33 @@ canvas { display: block; }
 <!-- APP -->
 <div class="app-screen" id="app-screen">
   <header>
-    <div><h1>Tarjetas de Presentaci&oacute;n</h1><span class="header-sub" id="header-tenant">Cargando...</span></div>
-    <div class="header-divider"></div>
-    <div class="db-status"><div class="db-dot" id="db-dot"></div><span id="db-status-text">Conectado</span></div>
+    <!-- Brand -->
+    <div class="header-brand">
+      <div class="header-brand-logo">
+        <svg width="22" height="22" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="8" fill="#111318"/><path d="M8 10h16M8 16h10M8 22h13" stroke="#C8973B" stroke-width="2.2" stroke-linecap="round"/></svg>
+        Prop<span class="pt-dot">Tools</span>
+      </div>
+      <div style="width:1px;height:18px;background:var(--border)"></div>
+      <span style="font-size:13px;font-weight:600;color:var(--text)">Tarjetas de Presentaci&oacute;n</span>
+    </div>
+    <!-- Nav -->
+    <nav class="nav-menu" id="nav-menu">
+      <a class="nav-item" href="../firmas/" id="nav-firmas">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M8 12h8M8 16h5"/></svg>
+        Firmas
+      </a>
+      <a class="nav-item active" href="../tarjetas/" id="nav-tarjetas">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+        Tarjetas
+      </a>
+    </nav>
+    <!-- Right -->
     <div class="header-right">
-      <img src="https://res.cloudinary.com/dlgrhr6lh/image/upload/v1774471912/logo_veintiuno_snlwr8.png" alt="Veintiuno">
+      <div class="db-status"><div class="db-dot" id="db-dot"></div><span id="db-status-text">Conectado</span></div>
+      <div class="header-tenant-badge" id="tenant-badge" style="display:none">
+        <img id="tenant-logo" src="" alt="">
+        <span id="header-tenant">Cargando...</span>
+      </div>
       <button class="btn-logout" id="btn-logout">Cerrar sesi&oacute;n</button>
     </div>
   </header>
@@ -473,8 +507,37 @@ async function loadContext(){
   try{
     const{data:p,error:pErr}=await sb.from('users').select('*,tenants(*)').eq('auth_id',currentUser.id).single();
     if(pErr||!p)throw new Error('Usuario no encontrado.');
-    currentProfile=p;currentTenant=p.tenants;
+    currentProfile=p; currentTenant=p.tenants;
+
+    /* Header: tenant badge con logo */
     el('header-tenant').textContent=currentTenant.name;
+    const tenantBadge=el('tenant-badge');
+    const tenantLogoEl=el('tenant-logo');
+    if(currentTenant.logo_url){
+      tenantLogoEl.src=currentTenant.logo_url;
+      tenantBadge.style.display='flex';
+    } else {
+      tenantBadge.style.display='none';
+    }
+
+    /* Pre-llenar campos desde perfil compartido */
+    if(p.name)    setV('f-name',    p.name);
+    if(p.whatsapp)setV('f-whatsapp',p.whatsapp);
+    if(p.email)   setV('f-email',   p.email);
+    if(p.instagram)setV('f-instagram',p.instagram);
+
+    /* Foto compartida */
+    if(p.photo_url && !photoDataUrl){
+      photoDataUrl=p.photo_url;
+      photoImg=await loadImg(p.photo_url).catch(()=>null);
+      if(photoImg){
+        el('photo-preview').innerHTML=`<img src="${p.photo_url}" style="width:100%;height:100%;object-fit:cover" alt="">`;
+        el('upload-title').textContent='Foto de perfil';
+        el('upload-status').textContent='Click para cambiar';
+        el('upload-area').style.borderColor='#22c55e';
+      }
+    }
+
     el('login-screen').style.display='none';
     el('app-screen').classList.add('visible');
     el('btn-login').disabled=false;el('btn-login').textContent='Ingresar';
@@ -485,6 +548,20 @@ async function loadContext(){
     el('btn-login').disabled=false;el('btn-login').textContent='Ingresar';
     await sb.auth.signOut();
   }
+}
+
+/* ── Guardar perfil compartido en users ── */
+async function saveProfile(){
+  if(!currentProfile)return;
+  const updates={
+    name:      v('f-name'),
+    whatsapp:  v('f-whatsapp'),
+    email:     v('f-email'),
+    instagram: v('f-instagram'),
+    photo_url: photoDataUrl||null,
+    updated_at: new Date().toISOString()
+  };
+  await sb.from('users').update(updates).eq('id',currentProfile.id);
 }
 
 /* ── Grid templates ── */
@@ -756,6 +833,7 @@ async function saveCard(){
     if(ex){await sb.from(CARD_COL).update(record).eq('id',ex.id);toast('Tarjeta actualizada: '+saveName);}
     else{await sb.from(CARD_COL).insert(record);toast('Tarjeta guardada: '+saveName);}
     el('f-savename').value='';
+    await saveProfile();  /* sincronizar perfil compartido */
     await loadSaved();
   }catch(e){console.error('[saveCard]',e);toast('Error: '+e.message);}
   finally{btn.disabled=false;btn.textContent='Guardar';}
