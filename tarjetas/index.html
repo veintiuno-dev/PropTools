@@ -391,7 +391,7 @@ async function renderFront(canvas){
   ctx.fillStyle='#ffffff';ctx.textAlign='center';ctx.textBaseline='middle';
 
   if(currentTpl.is_sunrise){
-    let fs=Math.round(30*s);
+    let fs=Math.round(58*s);
     ctx.font=`bold ${fs}px ${fn}`;
     while(fs>11&&ctx.measureText(name.toUpperCase()).width>W*0.92){fs--;ctx.font=`bold ${fs}px ${fn}`;}
     ctx.fillText(name.toUpperCase(),W/2,bandY+bandH/2);
@@ -401,14 +401,17 @@ async function renderFront(canvas){
     if(parts.length===1){l1=parts[0];l2='';}
     else if(parts.length===2){l1=parts[0];l2=parts[1];}
     else{const m=Math.ceil(parts.length/2);l1=parts.slice(0,m).join(' ');l2=parts.slice(m).join(' ');}
-    let fs=Math.round(30*s);
+    let fs=Math.round(58*s);
     ctx.font=`bold ${fs}px ${fn}`;
     const lng=l1.length>=(l2||'').length?l1:l2;
     while(fs>11&&ctx.measureText(lng).width>W*0.88){fs--;ctx.font=`bold ${fs}px ${fn}`;}
+    /* También verificar que las 2 líneas quepan verticalmente en la banda */
     const lh=fs*1.25,totalH=l2?lh*2:lh;
-    const startY=bandY+(bandH-totalH)/2+lh/2;
+    while(fs>11&&totalH>bandH*0.85){fs--;ctx.font=`bold ${fs}px ${fn}`;}
+    const lhF=fs*1.25,totalHF=l2?lhF*2:lhF;
+    const startY=bandY+(bandH-totalHF)/2+lhF/2;
     ctx.fillText(l1,W/2,startY);
-    if(l2)ctx.fillText(l2,W/2,startY+lh);
+    if(l2)ctx.fillText(l2,W/2,startY+lhF);
   }
 }
 
