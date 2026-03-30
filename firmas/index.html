@@ -131,6 +131,17 @@ main { background: var(--bg); overflow-y: auto; display: flex; flex-direction: c
 ::-webkit-scrollbar { width: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+/* NAV MENU */
+.nav-menu { display: flex; align-items: center; gap: 4px; }
+.nav-item { font-family: inherit; font-size: 12px; font-weight: 600; padding: 6px 12px; border-radius: 7px; border: none; background: transparent; color: var(--muted); cursor: pointer; transition: all .15s; display: flex; align-items: center; gap: 6px; text-decoration: none; }
+.nav-item:hover { background: var(--surface2); color: var(--text); }
+.nav-item.active { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+.header-brand { display: flex; align-items: center; gap: 10px; }
+.header-brand-logo { font-size: 14px; font-weight: 800; letter-spacing: -0.3px; color: var(--text); display: flex; align-items: center; gap: 7px; }
+.header-brand-logo span.pt-dot { color: #C8973B; }
+.header-tenant-badge { display: flex; align-items: center; gap: 7px; padding: 3px 10px 3px 5px; border-radius: 20px; background: var(--surface2); border: 1px solid var(--border); }
+.header-tenant-badge img { height: 20px; }
+.header-tenant-badge span { font-size: 11px; font-weight: 600; color: var(--muted); }
 </style>
 </head>
 <body>
@@ -161,17 +172,33 @@ main { background: var(--bg); overflow-y: auto; display: flex; flex-direction: c
 <!-- APP -->
 <div class="app-screen" id="app-screen">
   <header>
-    <div>
-      <h1>Generador de Firmas</h1>
-      <span class="header-sub" id="header-tenant">Cargando...</span>
+    <div class="header-brand">
+      <div class="header-brand-logo">
+        <svg width="22" height="22" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="8" fill="#111318"/><path d="M8 10h16M8 16h10M8 22h13" stroke="#C8973B" stroke-width="2.2" stroke-linecap="round"/></svg>
+        Prop<span class="pt-dot">Tools</span>
+      </div>
+      <div style="width:1px;height:18px;background:var(--border)"></div>
+      <span style="font-size:13px;font-weight:600;color:var(--text)">Generador de Firmas</span>
     </div>
-    <div class="header-divider"></div>
-    <div class="db-status" id="db-status-indicator">
-      <div class="db-dot" id="db-dot"></div>
-      <span id="db-status-text">Conectando...</span>
-    </div>
+    <nav class="nav-menu">
+      <a class="nav-item active" href="../firmas/">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M8 12h8M8 16h5"/></svg>
+        Firmas
+      </a>
+      <a class="nav-item" href="../tarjetas/">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+        Tarjetas
+      </a>
+    </nav>
     <div class="header-right">
-      <img src="https://res.cloudinary.com/dlgrhr6lh/image/upload/v1774471912/logo_veintiuno_snlwr8.png" alt="Veintiuno">
+      <div class="db-status" id="db-status-indicator">
+        <div class="db-dot" id="db-dot"></div>
+        <span id="db-status-text">Conectando...</span>
+      </div>
+      <div class="header-tenant-badge" id="tenant-badge" style="display:none">
+        <img id="tenant-logo" src="" alt="">
+        <span id="header-tenant">Cargando...</span>
+      </div>
       <button class="btn-logout" id="btn-logout">Cerrar sesi&oacute;n</button>
     </div>
   </header>
@@ -259,7 +286,7 @@ main { background: var(--bg); overflow-y: auto; display: flex; flex-direction: c
       </div>
       <div class="email-body-wrap">
         <div class="email-meta">
-          <p><strong>Para:</strong> cliente@empresa.com</p>
+          <p><strong>Para:</strong> <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="e487888d818a9081a481899496819785ca878b89">[email&#160;protected]</a></p>
           <p><strong>Asunto:</strong> Propiedad en venta &mdash; Gran oportunidad</p>
         </div>
         <div class="email-body-text">Estimado/a,<br><br>Le escribo para compartirle informacion sobre una propiedad que podria ser de su interes...</div>
@@ -309,7 +336,7 @@ main { background: var(--bg); overflow-y: auto; display: flex; flex-direction: c
 
 <div class="toast" id="toast"></div>
 
-<script type="module">
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script type="module">
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
 const sb = createClient(
@@ -379,7 +406,40 @@ async function loadContext() {
       .eq('tenant_id', currentTenant.id).eq('active', true).order('sort_order');
     templates = tpls || [];
 
+    /* Header: tenant badge con logo */
     el('header-tenant').textContent = currentTenant.name;
+    const tenantBadge = el('tenant-badge');
+    if (currentTenant.logo_url) {
+      el('tenant-logo').src = currentTenant.logo_url;
+      tenantBadge.style.display = 'flex';
+    } else {
+      tenantBadge.style.display = 'none';
+    }
+
+    /* Pre-llenar campos desde perfil compartido */
+    if (profile.name)      setV('f-name',     profile.name);
+    if (profile.role)      setV('f-role',      profile.role);
+    if (profile.email)     setV('f-email',     profile.email);
+    if (profile.phone)     setV('f-phone',     profile.phone);
+    if (profile.whatsapp)  setV('f-whatsapp',  profile.whatsapp);
+    if (profile.instagram) setV('f-instagram', profile.instagram.startsWith('http') ? profile.instagram : 'https://instagram.com/' + profile.instagram.replace('@',''));
+    if (profile.facebook)  setV('f-facebook',  profile.facebook);
+    if (profile.linkedin)  setV('f-linkedin',  profile.linkedin);
+    if (profile.tiktok)    setV('f-tiktok',    profile.tiktok);
+
+    /* Foto compartida */
+    if (profile.photo_url) {
+      const img = new Image(); img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        el('photo-preview').innerHTML = `<img src="${profile.photo_url}" style="width:100%;height:100%;object-fit:cover" alt="">`;
+        el('upload-title').textContent  = 'Foto de perfil';
+        el('upload-status').textContent = 'Click para cambiar';
+        el('upload-area').style.borderColor = '#22c55e';
+        updatePreview();
+      };
+      img.src = profile.photo_url;
+    }
+
     el('login-screen').style.display = 'none';
     el('app-screen').classList.add('visible');
     el('btn-login').disabled = false; el('btn-login').textContent = 'Ingresar';
@@ -393,6 +453,27 @@ async function loadContext() {
     dbStatus('err', 'Error');
     await sb.auth.signOut();
   }
+}
+
+/* ── Guardar perfil compartido en users ── */
+async function saveProfile() {
+  if (!currentProfile) return;
+  const instaVal = v('f-instagram');
+  const instaHandle = instaVal.includes('instagram.com/')
+    ? '@' + instaVal.split('instagram.com/').pop().replace(/\//g,'')
+    : instaVal;
+  await sb.from('users').update({
+    name:      v('f-name'),
+    role:      v('f-role'),
+    email:     v('f-email'),
+    phone:     v('f-phone'),
+    whatsapp:  v('f-whatsapp'),
+    instagram: instaHandle,
+    facebook:  v('f-facebook'),
+    linkedin:  v('f-linkedin'),
+    tiktok:    v('f-tiktok'),
+    updated_at: new Date().toISOString()
+  }).eq('id', currentProfile.id);
 }
 
 /* ── Templates ── */
@@ -550,6 +631,7 @@ async function saveSig() {
     if (existing) { await sb.from('signatures').update(record).eq('id', existing.id); toast('Firma actualizada: '+saveName); }
     else          { await sb.from('signatures').insert(record); toast('Firma guardada: '+saveName); }
     el('f-savename').value = '';
+    await saveProfile();  /* sincronizar perfil compartido */
     await loadSigs();
   } catch(e) { toast('Error: '+e.message); }
   finally { btn.disabled=false; btn.textContent='Guardar'; }
@@ -591,9 +673,14 @@ function uploadPhoto(file) {
   const fd=new FormData();
   fd.append('file',file); fd.append('upload_preset',PRESET); fd.append('public_id',`agentes/${slug}-${Date.now()}`);
   fetch(`https://api.cloudinary.com/v1_1/${CLOUD}/image/upload`,{method:'POST',body:fd})
-    .then(r=>r.json()).then(d=>{
-      if(d.secure_url){photoDataUrl=d.secure_url;tEl.textContent='Foto subida';sEl.textContent='Click para cambiar';aEl.style.borderColor='#22c55e';updatePreview();}
-      else throw new Error(d.error?.message||'Error');
+    .then(r=>r.json()).then(async d=>{
+      if(d.secure_url){
+        photoDataUrl=d.secure_url;
+        tEl.textContent='Foto subida';sEl.textContent='Click para cambiar';aEl.style.borderColor='#22c55e';
+        updatePreview();
+        /* Guardar foto en perfil compartido */
+        if(currentProfile) await sb.from('users').update({photo_url:d.secure_url}).eq('id',currentProfile.id);
+      } else throw new Error(d.error?.message||'Error');
     }).catch(e=>{tEl.textContent='Error';sEl.textContent=e.message;aEl.style.borderColor='#ef4444';})
     .finally(()=>{aEl.style.pointerEvents='auto';});
 }
@@ -685,14 +772,4 @@ el('guide-overlay').addEventListener('click', e => {
   if(e.target === el('guide-overlay')) { el('guide-overlay').style.display='none'; document.body.style.overflow=''; }
 });
 el('guide-tabs').addEventListener('click', e => {
-  const btn = e.target.closest('.gtab'); if(btn) showTab(btn.dataset.tab);
-});
-
-/* ── Verificar sesión existente al cargar ── */
-sb.auth.getSession().then(({ data: { session } }) => {
-  if (session) { currentUser = session.user; loadContext(); }
-});
-
-</script>
-</body>
-</html>
+  const btn = e.target.closest('.gtab'); if(btn) showTab
