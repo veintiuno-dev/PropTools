@@ -332,67 +332,69 @@ const H_W = 9000, H_H = 5400;   /* Horizontal 30"×18" */
 const MARGIN = 480;
 
 /* ── VERTICAL ─────────────────────────────────────────
-   Banda roja:  y=0     → y=1710  (altura=1710)
-   Zona blanca: y=1710  → y=6750
-   Banda azul:  y=6750  → y=9000  (altura=2250)
+   Espacio banda roja: 7200×1980 px
+   Margen 480 px en los 4 lados dentro de la banda.
+   Zona texto útil: x 480-6720 (w=6240), y 480-1500 (h=1020)
+   Zona blanca: y=1980 → y=7020
+   Banda azul:  y=7020 → y=9000
 ─────────────────────────────────────────────────────── */
 const V = {
-  redStart: 0,    redEnd: 1710,
-  whiteEnd: 6750,
-  blueStart: 6750, blueEnd: 9000,
+  redStart: 0,    redEnd: 1980,
+  whiteEnd: 7020,
+  blueStart: 7020, blueEnd: 9000,
 
-  /* Texto rojo: ocupa todo el ancho con margen */
-  redTextLeft:  MARGIN,
-  redTextRight: V_W - MARGIN,   /* ancho útil = 6240 px */
+  /* Zona útil texto rojo (márgenes 480 en los 4 lados) */
+  redTxtX1: MARGIN,          redTxtX2: V_W - MARGIN,    /* ancho útil = 6240 */
+  redTxtY1: MARGIN,          redTxtY2: 1980 - MARGIN,   /* alto útil  = 1020 */
 
-  /* Agente: empieza en y=4715, 1 columna centrada */
-  agentStartY:  4715,
+  /* Agente: empieza en y=4735, centrado en ancho completo */
+  agentStartY:  4735,
   agentLeft:    MARGIN,
   agentRight:   V_W - MARGIN,   /* ancho = 6240 px */
 
-  /* Fuentes: 145pt = 604px, 50pt = 208px */
+  /* Fuentes: 145pt=604px, 50pt=208px */
   nameFSmax:   604,
-  phoneFSmax:  604,   /* mismo tamaño que nombre */
   emailFSmax:  208,
 
-  /* QR: 1395×1395 centrado horizontal, centrado vertical en banda azul */
+  /* QR: 1395×1395, posición exacta */
   qrSize: 1395,
-  qrX: Math.round((V_W - 1395) / 2),     /* = 2902 */
-  qrY: Math.round(6750 + (2250 - 1395) / 2), /* = 7177 */
+  qrX:    640,
+  qrY:    7112,
 };
 
 /* ── HORIZONTAL ───────────────────────────────────────
-   Banda roja:  y=0     → y=1512  (altura=1512)
-   Zona blanca: y=1512  → y=4050
-   Banda azul:  y=4050  → y=5400  (altura=1350)
-
-   Globo (logo): ocupa la columna izquierda.
-   El espacio de texto (rojo + blanco) arranca en x=3304:
-     ancho = 5696 px (de x=3304 a x=9000-margen=8520, usa 5696 como ancho de zona)
-   Centro de esa zona = 3304 + 5696/2 = 6152
+   Espacio banda roja: 5730×1485 px (desde x=3270, y=0)
+   Margen 480 px en los 4 lados dentro de esa zona.
+   Zona texto útil: x 3750-8520 (w=4770), y 480-1005 (h=525)
+   Centro X zona = 3270 + 5730/2 = 6135
+   Zona blanca: y=1485 → y=4050
+   Banda azul:  y=4050 → y=5400
 ─────────────────────────────────────────────────────── */
 const H = {
-  redStart: 0,   redEnd: 1512,
+  redStart: 0,   redEnd: 1485,
   whiteEnd: 4050,
   blueStart: 4050, blueEnd: 5400,
 
-  /* Zona de texto (derecha del globo) */
-  textZoneX:   3304,
-  textZoneW:   5696,
-  textZoneCX:  3304 + 5696 / 2,   /* = 6152 */
+  /* Zona de texto rojo (derecha del globo, 5730px de ancho) */
+  textZoneX:   3270,
+  textZoneW:   5730,
+  textZoneCX:  3270 + 5730 / 2,   /* = 6135 */
 
-  /* Agente: empieza en y=1713 */
-  agentStartY: 1713,
+  /* Zona útil texto rojo (con márgenes 480 en los 4 lados) */
+  redTxtX1: 3270 + MARGIN,          redTxtX2: 9000 - MARGIN,   /* ancho útil = 4770 */
+  redTxtY1: MARGIN,                  redTxtY2: 1485 - MARGIN,   /* alto útil  = 525  */
+
+  /* Agente: empieza en y=1710 */
+  agentStartY: 1710,
 
   /* Fuentes */
   nameFSmax:   604,
-  phoneFSmax:  604,
   emailFSmax:  208,
 
   /* QR: posición exacta */
   qrSize: 1260,
   qrX:    1144,
-  qrY:    3890,
+  qrY:    3885,
 };
 
 /* Templates */
@@ -668,39 +670,37 @@ async function drawVertical(ctx, s, fn, W, Ht){
   const lay=V;
 
   /* ── Texto banda roja ──────────────────────────────
-     Centro de la banda roja: (redStart + redEnd) / 2
-     Ancho útil: redTextRight - redTextLeft = 6240 px
+     Zona útil: x 480-6720 (w=6240), y 480-1500 (h=1020)
+     Centro de esa zona útil.
   ── */
   {
-    const cx = (lay.redTextLeft + lay.redTextRight) / 2 * s;
-    const cy = (lay.redStart + lay.redEnd) / 2 * s;
-    const maxW = (lay.redTextRight - lay.redTextLeft) * s;
-    const maxH = (lay.redEnd - lay.redStart) * s;
+    const cx  = (lay.redTxtX1 + lay.redTxtX2) / 2 * s;
+    const cy  = (lay.redTxtY1 + lay.redTxtY2) / 2 * s;
+    const maxW = (lay.redTxtX2 - lay.redTxtX1) * s;
+    const maxH = (lay.redTxtY2 - lay.redTxtY1) * s;
     drawAutoText(ctx, mainText, cx, cy, maxW, maxH, fn);
   }
 
   /* ── Datos del agente ────────────────────────────
-     Nombre en 1 sola línea, phone mismo tamaño que nombre, email 50pt.
-     Empieza en y=4715, centrado en zona blanca (4715→6750), ancho 6240px.
-     Dinámica: parte de los tamaños máximos y los reduce si no caben.
+     Nombre 1 línea, phone mismo size, email 50pt.
+     Empieza y=4735, centrado verticalmente hacia y=whiteEnd.
   ── */
   {
     const agCX   = (lay.agentLeft + lay.agentRight) / 2 * s;
     const maxW   = (lay.agentRight - lay.agentLeft) * s;
     const startY = lay.agentStartY * s;
-    const endY   = lay.whiteEnd * s;      /* hasta donde llega la zona blanca */
+    const endY   = lay.whiteEnd * s;
 
     const name  = (v('f-name')    ||'').toUpperCase();
     const phone = (v('f-whatsapp')||'');
     const email = (v('f-email')   ||'').toUpperCase();
 
-    /* Buscar el tamaño de fuente óptimo para que todo quepa verticalmente */
     const layout=calcAgentLayout(ctx, name, phone, email, maxW, startY, endY, fn, lay, s, false);
     drawAgentText(ctx, layout, agCX, fn);
   }
 
   /* ── QR ──────────────────────────────────────────
-     Tamaño fijo 1395×1395, centrado horizontal, centrado vertical en banda azul.
+     1395×1395 px, posición exacta x=640, y=7112
   ── */
   const waPhone=v('f-whatsapp').replace(/\D/g,'');
   if(waPhone){
@@ -722,19 +722,19 @@ async function drawHorizontal(ctx, s, fn, W, Ht){
   const lay=H;
 
   /* ── Texto banda roja ──────────────────────────────
-     Zona: x=3304, ancho=5696, altura=1512
-     Centro vertical de la banda: 1512/2 = 756
+     Zona útil: x 3750-8520 (w=4770), y 480-1005 (h=525)
+     Centro de esa zona útil.
   ── */
   {
-    const cx  = lay.textZoneCX * s;
-    const cy  = (lay.redStart + lay.redEnd) / 2 * s;
-    const maxW= lay.textZoneW * s;
-    const maxH= (lay.redEnd - lay.redStart) * s;
+    const cx  = (lay.redTxtX1 + lay.redTxtX2) / 2 * s;
+    const cy  = (lay.redTxtY1 + lay.redTxtY2) / 2 * s;
+    const maxW= (lay.redTxtX2 - lay.redTxtX1) * s;
+    const maxH= (lay.redTxtY2 - lay.redTxtY1) * s;
     drawAutoText(ctx, mainText, cx, cy, maxW, maxH, fn);
   }
 
   /* ── Datos del agente ────────────────────────────
-     Zona: x=3304, ancho=5696, empieza y=1713, hasta y=4050.
+     Zona: textZoneCX, ancho=5730, empieza y=1710, hasta y=4050.
      nombre: 1 línea si Sunrise, 2 líneas si REMAX.
   ── */
   {
@@ -779,8 +779,9 @@ function calcAgentLayout(ctx, name, phone, email, maxW, startY, endY, fn, lay, s
   const emailFSmax = lay.emailFSmax * s;
   const availH     = endY - startY;  /* altura disponible */
 
-  /* Espaciado entre bloques (compacto) */
-  const GAP_BETWEEN = 30 * s;  /* gap entre nombre/phone, phone/email */
+  /* Espaciado entre bloques */
+  const GAP_NAME_PHONE = 20 * s;   /* gap nombre→phone */
+  const GAP_PHONE_EMAIL = 8 * s;   /* gap phone→email (muy compacto) */
 
   /* Intentar ajustar tamaños */
   let nameFS  = nameFSmax;
@@ -824,8 +825,8 @@ function calcAgentLayout(ctx, name, phone, email, maxW, startY, endY, fn, lay, s
     const hasPhone = phone.length>0;
     const hasEmail = email.length>0;
     const blockH   = nLines*lineH
-                   + (hasPhone ? GAP_BETWEEN + lineH : 0)
-                   + (hasEmail ? GAP_BETWEEN + emailLineH : 0);
+                   + (hasPhone ? GAP_NAME_PHONE + lineH : 0)
+                   + (hasEmail ? GAP_PHONE_EMAIL + emailLineH : 0);
 
     if(allFit && blockH<=availH) break;
 
@@ -843,8 +844,8 @@ function calcAgentLayout(ctx, name, phone, email, maxW, startY, endY, fn, lay, s
   const hasEmail   = email.length>0;
 
   const blockH = nameParts.length*lineH
-               + (hasPhone ? GAP_BETWEEN + lineH : 0)
-               + (hasEmail ? GAP_BETWEEN + emailLineH : 0);
+               + (hasPhone ? GAP_NAME_PHONE + lineH : 0)
+               + (hasEmail ? GAP_PHONE_EMAIL + emailLineH : 0);
 
   /* Centrar verticalmente entre startY y endY */
   const blockTop = startY + (endY - startY - blockH) / 2;
@@ -856,12 +857,12 @@ function calcAgentLayout(ctx, name, phone, email, maxW, startY, endY, fn, lay, s
     y += lineH;
   }
   if(hasPhone){
-    y += GAP_BETWEEN;
+    y += GAP_NAME_PHONE;
     lines.push({ text:phone, fs:nameFS, y });
     y += lineH;
   }
   if(hasEmail){
-    y += GAP_BETWEEN;
+    y += GAP_PHONE_EMAIL;
     lines.push({ text:email, fs:emailFS, y });
   }
 
@@ -886,26 +887,32 @@ function drawAutoText(ctx, text, cx, cy, maxW, maxH, fn){
   ctx.textAlign='center';
   ctx.textBaseline='middle';
 
-  /* Intentar 1 línea */
-  let fs=fitFS(ctx, text, maxW, `bold 1px ${fn}`, 10, maxH*0.88);
-  ctx.font=`bold ${fs}px ${fn}`;
-  if(ctx.measureText(text).width<=maxW){
+  /* Comprobar si el texto cabe en 1 línea al tamaño máximo permitido (maxH*0.88).
+     Si a ese tamaño cabe en maxW → 1 línea.
+     Si no cabe → 2 líneas, cada una hasta maxH*0.44. */
+  const fsMax1 = maxH * 0.88;
+  ctx.font = `bold ${fsMax1}px ${fn}`;
+  const needsTwoLines = (text.indexOf(' ') !== -1) && (ctx.measureText(text).width > maxW);
+
+  if(!needsTwoLines){
+    /* 1 línea: buscar el tamaño más grande que quepa en maxW */
+    const fs = fitFS(ctx, text, maxW, `bold 1px ${fn}`, 10, fsMax1);
+    ctx.font = `bold ${fs}px ${fn}`;
     ctx.fillText(text, cx, cy);
     return;
   }
 
-  /* 2 líneas */
-  const words=text.split(' ');
-  if(words.length<2){ ctx.fillText(text,cx,cy); return; }
-  const mid=Math.ceil(words.length/2);
-  const l1=words.slice(0,mid).join(' ');
-  const l2=words.slice(mid).join(' ');
-  const wider=l1.length>=l2.length?l1:l2;
-  const fs2=fitFS(ctx, wider, maxW, `bold 1px ${fn}`, 10, maxH*0.44);
-  const lh=fs2*1.08;
-  ctx.font=`bold ${fs2}px ${fn}`;
-  ctx.fillText(l1, cx, cy-lh/2);
-  ctx.fillText(l2, cx, cy+lh/2);
+  /* 2 líneas: dividir en la mitad de palabras */
+  const words = text.split(' ');
+  const mid   = Math.ceil(words.length / 2);
+  const l1    = words.slice(0, mid).join(' ');
+  const l2    = words.slice(mid).join(' ');
+  const wider = l1.length >= l2.length ? l1 : l2;
+  const fs2   = fitFS(ctx, wider, maxW, `bold 1px ${fn}`, 10, maxH * 0.44);
+  const lh    = fs2 * 1.10;
+  ctx.font = `bold ${fs2}px ${fn}`;
+  ctx.fillText(l1, cx, cy - lh / 2);
+  ctx.fillText(l2, cx, cy + lh / 2);
 }
 
 function fitFS(ctx, text, maxW, fontTpl, minPx, maxPx){
@@ -979,7 +986,7 @@ async function saveRotulo(){
   if(!saveName){ toast('Escribe un nombre para el rótulo'); return; }
   const btn=el('btn-save-rotulo'); btn.disabled=true; btn.textContent='Guardando…';
   const record={
-    user_id:    currentProfile.id,
+    user_id:    currentUser.id,
     tenant_id:  currentTenant?.id||null,
     save_name:  saveName,
     orientacion: currentOri,
@@ -991,7 +998,7 @@ async function saveRotulo(){
     updated_at: new Date().toISOString(),
   };
   try{
-    const {data:ex}=await sb.from(COLECCION).select('id').eq('user_id',currentProfile.id).eq('save_name',saveName).maybeSingle();
+    const {data:ex}=await sb.from(COLECCION).select('id').eq('user_id',currentUser.id).eq('save_name',saveName).maybeSingle();
     if(ex){ await sb.from(COLECCION).update(record).eq('id',ex.id); toast('Rótulo actualizado: '+saveName); }
     else  { await sb.from(COLECCION).insert(record);                toast('Rótulo guardado: '+saveName); }
     el('f-savename').value='';
@@ -1003,7 +1010,7 @@ async function saveRotulo(){
 async function loadSaved(){
   if(!currentProfile) return;
   try{
-    const {data}=await sb.from(COLECCION).select('*').eq('user_id',currentProfile.id).order('updated_at',{ascending:false});
+    const {data}=await sb.from(COLECCION).select('*').eq('user_id',currentUser.id).order('updated_at',{ascending:false});
     renderSaved(data||[]);
   }catch(e){ console.error('[loadSaved]',e); el('saved-list').innerHTML='<p class="saved-empty">Error al cargar</p>'; }
 }
