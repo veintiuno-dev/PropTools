@@ -1,1 +1,757 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rótulos — PropTools</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 36'%3E%3Crect x='0' y='4' width='4' height='28' rx='2' fill='%231B6EF3'/%3E%3Crect x='0' y='4' width='26' height='4' rx='2' fill='%231B6EF3'/%3E%3Crect x='0' y='20' width='20' height='4' rx='2' fill='%231B6EF3'/%3E%3Crect x='22' y='4' width='4' height='20' rx='2' fill='%231B6EF3'/%3E%3C/svg%3E">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --blue:   #0c2749;
+  --red:    #b01c24;
+  --white:  #ffffff;
+  --gray:   #f0f2f5;
+  --border: #dde1e7;
+  --text:   #1a1a2e;
+  --muted:  #6b7280;
+  --accent: #1B6EF3;
+}
+body { font-family:'Segoe UI',system-ui,sans-serif; background:var(--gray); color:var(--text); min-height:100vh; }
 
+/* AUTH */
+#authScreen { display:flex; align-items:center; justify-content:center; min-height:100vh; padding:24px; }
+.auth-card {
+  background:white; border-radius:20px; padding:48px 40px;
+  width:100%; max-width:420px;
+  box-shadow:0 8px 40px rgba(0,0,0,.12);
+}
+.auth-brand { display:flex; align-items:center; gap:10px; margin-bottom:36px; }
+.auth-brand span { font-size:21px; font-weight:800; color:var(--blue); letter-spacing:-.5px; }
+.auth-card h1 { font-size:24px; font-weight:800; margin-bottom:6px; }
+.auth-card p  { color:var(--muted); font-size:14px; margin-bottom:30px; }
+.field { margin-bottom:18px; }
+.field label { display:block; font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; margin-bottom:7px; color:var(--muted); }
+.field input { width:100%; padding:12px 15px; border:2px solid var(--border); border-radius:10px; font-size:15px; outline:none; transition:border-color .2s; }
+.field input:focus { border-color:var(--accent); }
+.btn-primary { width:100%; padding:14px; background:var(--blue); color:white; border:none; border-radius:10px; font-size:15px; font-weight:700; cursor:pointer; transition:opacity .2s; }
+.btn-primary:hover { opacity:.88; }
+.btn-primary:disabled { opacity:.5; cursor:not-allowed; }
+#authError { color:#c0392b; font-size:13px; margin-top:12px; display:none; }
+
+/* APP */
+#appScreen { display:none; }
+.topbar {
+  background:var(--blue); color:white; padding:0 24px; height:58px;
+  display:flex; align-items:center; justify-content:space-between;
+  position:sticky; top:0; z-index:100; box-shadow:0 2px 12px rgba(0,0,0,.2);
+}
+.topbar-brand { display:flex; align-items:center; gap:10px; font-size:17px; font-weight:800; }
+.topbar-user { display:flex; align-items:center; gap:16px; font-size:13px; }
+.topbar-user span { opacity:.7; }
+.btn-logout { background:rgba(255,255,255,.15); border:none; color:white; padding:7px 15px; border-radius:7px; font-size:13px; cursor:pointer; transition:background .2s; }
+.btn-logout:hover { background:rgba(255,255,255,.28); }
+
+.workspace { display:grid; grid-template-columns:300px 1fr; min-height:calc(100vh - 58px); }
+
+/* SIDEBAR */
+.sidebar { background:white; border-right:1px solid var(--border); padding:20px 18px; overflow-y:auto; }
+.sb-section { margin-bottom:24px; }
+.sb-section h3 { font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.1em; color:var(--muted); margin-bottom:10px; }
+
+.seg-group { display:flex; border:2px solid var(--border); border-radius:10px; overflow:hidden; }
+.seg-btn { flex:1; padding:9px 4px; border:none; background:white; font-size:12px; font-weight:600; cursor:pointer; color:var(--muted); transition:all .15s; line-height:1.4; }
+.seg-btn.active { background:var(--blue); color:white; }
+.seg-btn:not(:last-child) { border-right:2px solid var(--border); }
+
+.tpl-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.tpl-card { border:2px solid var(--border); border-radius:10px; padding:12px 8px; cursor:pointer; text-align:center; transition:all .15s; font-size:11px; font-weight:700; color:var(--muted); }
+.tpl-card:hover { border-color:var(--blue); color:var(--blue); }
+.tpl-card.active { border-color:var(--blue); background:#eef3ff; color:var(--blue); }
+.tpl-icon { font-size:20px; margin-bottom:4px; }
+
+.preset-row { display:flex; gap:6px; margin-bottom:8px; }
+.preset-btn { flex:1; padding:8px 4px; border:2px solid var(--border); border-radius:8px; background:white; font-size:11px; font-weight:700; cursor:pointer; color:var(--muted); transition:all .15s; }
+.preset-btn:hover { border-color:var(--red); color:var(--red); }
+.preset-btn.active { background:var(--red); border-color:var(--red); color:white; }
+
+.field-sm { margin-bottom:12px; }
+.field-sm label { display:block; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); margin-bottom:5px; }
+.field-sm textarea { width:100%; padding:9px 11px; border:2px solid var(--border); border-radius:8px; font-size:13px; outline:none; transition:border-color .2s; font-family:inherit; resize:vertical; min-height:55px; }
+.field-sm textarea:focus { border-color:var(--accent); }
+
+.profile-box { background:var(--gray); border-radius:10px; padding:12px; font-size:12px; color:var(--muted); line-height:1.8; }
+.profile-name { font-size:14px; font-weight:700; color:var(--text); }
+
+.exp-btns { display:flex; flex-direction:column; gap:8px; }
+.btn-exp { padding:12px 14px; border:none; border-radius:9px; font-size:13px; font-weight:700; cursor:pointer; transition:all .15s; display:flex; align-items:center; gap:8px; }
+.btn-exp.pdf { background:var(--blue); color:white; }
+.btn-exp.pdf:hover { opacity:.88; }
+.btn-exp.png { background:white; color:var(--blue); border:2px solid var(--blue); }
+.btn-exp.png:hover { background:#eef3ff; }
+.btn-exp:disabled { opacity:.45; cursor:not-allowed; }
+
+/* CANVAS AREA */
+.canvas-area { padding:28px; display:flex; flex-direction:column; align-items:center; gap:14px; overflow:auto; background:#d8dce3; }
+.canvas-label { font-size:11px; font-weight:700; color:#555; text-transform:uppercase; letter-spacing:.07em; align-self:flex-start; }
+#previewCanvas { border-radius:4px; box-shadow:0 10px 48px rgba(0,0,0,.28); max-width:100%; }
+#statusBar { font-size:12px; color:#666; align-self:flex-start; }
+
+/* LOADING */
+#loadingOverlay { display:none; position:fixed; inset:0; background:rgba(12,39,73,.75); z-index:999; flex-direction:column; align-items:center; justify-content:center; color:white; font-size:16px; font-weight:700; gap:18px; }
+#loadingOverlay.show { display:flex; }
+.spinner { width:36px; height:36px; border:3px solid rgba(255,255,255,.3); border-top-color:white; border-radius:50%; animation:spin .7s linear infinite; }
+@keyframes spin { to { transform:rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<!-- AUTH -->
+<div id="authScreen">
+  <div class="auth-card">
+    <div class="auth-brand">
+      <svg width="28" height="32" viewBox="0 0 32 36"><rect x="0" y="4" width="4" height="28" rx="2" fill="#0c2749"/><rect x="0" y="4" width="26" height="4" rx="2" fill="#0c2749"/><rect x="0" y="20" width="20" height="4" rx="2" fill="#0c2749"/><rect x="22" y="4" width="4" height="20" rx="2" fill="#0c2749"/></svg>
+      <span>PropTools</span>
+    </div>
+    <h1>Rótulos</h1>
+    <p>Inicia sesión con tu cuenta para generar rótulos de propiedad.</p>
+    <div class="field">
+      <label>Correo</label>
+      <input type="email" id="loginEmail" placeholder="tu@correo.com" autocomplete="email">
+    </div>
+    <div class="field">
+      <label>Contraseña</label>
+      <input type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <button class="btn-primary" id="loginBtn" onclick="doLogin()">Ingresar</button>
+    <div id="authError"></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="appScreen">
+  <div class="topbar">
+    <div class="topbar-brand">
+      <svg width="20" height="24" viewBox="0 0 32 36"><rect x="0" y="4" width="4" height="28" rx="2" fill="white"/><rect x="0" y="4" width="26" height="4" rx="2" fill="white"/><rect x="0" y="20" width="20" height="4" rx="2" fill="white"/><rect x="22" y="4" width="4" height="20" rx="2" fill="white"/></svg>
+      PropTools — Rótulos
+    </div>
+    <div class="topbar-user">
+      <span id="userEmailDisplay"></span>
+      <button class="btn-logout" onclick="doLogout()">Salir</button>
+    </div>
+  </div>
+
+  <div class="workspace">
+    <div class="sidebar">
+
+      <div class="sb-section">
+        <h3>Formato</h3>
+        <div class="seg-group">
+          <button class="seg-btn active" id="btnV" onclick="setOrientation('vertical')">Vertical<br><small style="font-weight:500">24 × 30"</small></button>
+          <button class="seg-btn" id="btnH" onclick="setOrientation('horizontal')">Horizontal<br><small style="font-weight:500">30 × 18"</small></button>
+        </div>
+      </div>
+
+      <div class="sb-section">
+        <h3>Template</h3>
+        <div class="tpl-grid">
+          <div class="tpl-card active" id="tplRemax" onclick="setTemplate('remax')">
+            <div class="tpl-icon">🏠</div>
+            REMAX Central
+          </div>
+          <div class="tpl-card" id="tplSunrise" onclick="setTemplate('sunrise')">
+            <div class="tpl-icon">🌅</div>
+            Team Sunrise
+          </div>
+        </div>
+      </div>
+
+      <div class="sb-section">
+        <h3>Texto principal (banda roja)</h3>
+        <div class="preset-row">
+          <button class="preset-btn active" id="pVende"   onclick="setPreset('SE VENDE')">SE VENDE</button>
+          <button class="preset-btn"        id="pAlquila" onclick="setPreset('SE ALQUILA')">SE ALQUILA</button>
+        </div>
+        <div class="field-sm">
+          <label>Personalizado</label>
+          <textarea id="customText" placeholder="Ej: SE TRASPASA" oninput="onCustomText()"></textarea>
+        </div>
+      </div>
+
+      <div class="sb-section">
+        <h3>Agente</h3>
+        <div class="profile-box" id="profileBox">
+          <span>Cargando perfil…</span>
+        </div>
+      </div>
+
+      <div class="sb-section">
+        <h3>Exportar (300 dpi)</h3>
+        <div class="exp-btns">
+          <button class="btn-exp pdf" onclick="exportPDF()">
+            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            Exportar PDF
+          </button>
+          <button class="btn-exp png" onclick="exportPNG()">
+            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            Exportar PNG
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="canvas-area">
+      <div class="canvas-label" id="canvasLabel">Vista previa — Vertical 24 × 30"</div>
+      <canvas id="previewCanvas"></canvas>
+      <div id="statusBar">Iniciando…</div>
+    </div>
+  </div>
+</div>
+
+<div id="loadingOverlay">
+  <div class="spinner"></div>
+  <span id="loadingMsg">Generando…</span>
+</div>
+
+<div id="qrTemp" style="position:fixed;left:-9999px;top:-9999px;pointer-events:none;"></div>
+
+<script type="module">
+// ═══════════════════════════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════════════════════════
+const SUPABASE_URL = 'https://zsldwaiwcvziqfajcmph.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpzbGR3YWl3Y3Z6aXFmYWpjbXBoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1NjQ4NzcsImV4cCI6MjA5MDE0MDg3N30.eFlAAk-fPHI8r8YQPjP8kYnohziRpGu9whGpgfaW-KU';
+
+const FONT_URL_NARROW_BOLD = 'https://res.cloudinary.com/dlgrhr6lh/raw/upload/v1774650941/Gotham_Narrow_Bold_arzjpl.otf';
+const FONT_URL_LIGHT       = 'https://res.cloudinary.com/dlgrhr6lh/raw/upload/v1774650942/Gotham-Light_fqu7wc.otf';
+
+// Template image URLs
+const TPLS = {
+  vertical:   { remax: 'https://res.cloudinary.com/dlgrhr6lh/image/upload/v1774988162/vertical-remax_no6qeh.png',
+                sunrise: 'https://res.cloudinary.com/dlgrhr6lh/image/upload/v1774988163/vertical-sunrise_i6ssjf.png' },
+  horizontal: { remax: 'https://res.cloudinary.com/dlgrhr6lh/image/upload/v1774988162/horizontal-remax_e5rnn6.png',
+                sunrise: 'https://res.cloudinary.com/dlgrhr6lh/image/upload/v1774988163/horizontal-sunrise_s62rqt.png' },
+};
+
+const DPI = 300;
+
+// Physical sizes in pixels at 300 dpi
+// Vertical:   24" × 30"  →  7200 × 9000
+// Horizontal: 30" × 18"  →  9000 × 5400
+const SIZES = {
+  vertical:   { w: 24 * DPI, h: 30 * DPI, wIn: 24, hIn: 30 },
+  horizontal: { w: 30 * DPI, h: 18 * DPI, wIn: 30, hIn: 18 },
+};
+
+// Margin: 1.6" at 300 dpi = 480 px
+const MARGIN_PX = 1.6 * DPI;
+
+// Colors
+const C_RED   = '#b01c24';
+const C_BLUE  = '#0c2749';
+const C_WHITE = '#ffffff';
+const C_BLACK = '#111111';
+
+// Font stacks
+const F_BLACK  = 'GothamNarrowBold,"Arial Black",Arial,sans-serif';
+const F_NARROW = 'GothamNarrowBold,"Arial Narrow",Arial,sans-serif';
+
+// REMAX office phone (fixed)
+const OFFICE_PHONE = '8887-3629';
+
+// Layout proportions (derived from muestras)
+// Vertical: red=19%, white=56%, blue=25%  →  redEndY=0.19, blueStartY=0.75
+// Horizontal: red=28%, white=47%, blue=25% →  redEndY=0.28, blueStartY=0.75
+const LAYOUT = {
+  vertical: {
+    redEnd:    0.19,   // red band ends at 19% of height
+    blueStart: 0.75,   // blue band starts at 75% of height
+    // Logo column: left 0% → 42% of width (template handles logo image)
+    agentColStart: 0.42,  // agent text starts at 42% of width
+  },
+  horizontal: {
+    redEnd:    0.28,
+    blueStart: 0.75,
+    // In horizontal: logo occupies left ~38%, agent text right ~62%
+    agentColStart: 0.38,
+  },
+};
+
+// ═══════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════
+let orientation = 'vertical';
+let template    = 'remax';
+let mainText    = 'SE VENDE';
+let profile     = null;
+let fontsLoaded = false;
+let imgCache    = {};
+
+// ═══════════════════════════════════════════════════════════════
+// SUPABASE
+// ═══════════════════════════════════════════════════════════════
+const { createClient } = window.supabase;
+const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ═══════════════════════════════════════════════════════════════
+// FONTS
+// ═══════════════════════════════════════════════════════════════
+async function loadFonts() {
+  setStatus('Cargando fuentes…');
+  try {
+    const [fNB, fL] = await Promise.all([
+      new FontFace('GothamNarrowBold', `url(${FONT_URL_NARROW_BOLD})`).load(),
+      new FontFace('GothamLight',      `url(${FONT_URL_LIGHT})`).load(),
+    ]);
+    document.fonts.add(fNB);
+    document.fonts.add(fL);
+    fontsLoaded = true;
+    setStatus('Listo');
+  } catch(e) {
+    console.warn('Font load error (using fallback):', e);
+    fontsLoaded = true;
+    setStatus('Fuentes de sistema activas');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// AUTH
+// ═══════════════════════════════════════════════════════════════
+window.doLogin = async function() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const pass  = document.getElementById('loginPassword').value;
+  const btn   = document.getElementById('loginBtn');
+  const err   = document.getElementById('authError');
+  err.style.display = 'none';
+  btn.disabled = true; btn.textContent = 'Ingresando…';
+  const { error } = await sb.auth.signInWithPassword({ email, password: pass });
+  if (error) {
+    err.textContent = error.message; err.style.display = 'block';
+    btn.disabled = false; btn.textContent = 'Ingresar';
+  }
+};
+window.doLogout = async function() {
+  await sb.auth.signOut();
+  show('authScreen'); hide('appScreen');
+};
+document.getElementById('loginPassword').addEventListener('keydown', e => {
+  if (e.key === 'Enter') window.doLogin();
+});
+
+sb.auth.onAuthStateChange(async (event, session) => {
+  if (session?.user) {
+    hide('authScreen'); show('appScreen');
+    document.getElementById('userEmailDisplay').textContent = session.user.email;
+    await loadFonts();
+    await loadProfile(session.user);
+    renderPreview();
+  } else {
+    show('authScreen'); hide('appScreen');
+  }
+});
+
+async function loadProfile(user) {
+  const { data } = await sb.from('profiles').select('*').eq('id', user.id).single();
+  if (data) {
+    profile = data;
+  } else {
+    profile = {
+      nombre:   user.user_metadata?.nombre   || user.email?.split('@')[0] || '',
+      whatsapp: user.user_metadata?.whatsapp || user.user_metadata?.celular || '',
+      email:    user.email || '',
+    };
+  }
+  updateProfileBox();
+}
+
+function updateProfileBox() {
+  if (!profile) return;
+  const tel = profile.whatsapp || profile.celular || '';
+  document.getElementById('profileBox').innerHTML = `
+    <div class="profile-name">${profile.nombre || ''}</div>
+    📱 ${tel || '—'}<br>
+    ✉️ ${profile.email || '—'}
+  `;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CONTROLS
+// ═══════════════════════════════════════════════════════════════
+window.setOrientation = function(o) {
+  orientation = o;
+  el('btnV').classList.toggle('active', o === 'vertical');
+  el('btnH').classList.toggle('active', o === 'horizontal');
+  el('canvasLabel').textContent = o === 'vertical'
+    ? 'Vista previa — Vertical 24 × 30"'
+    : 'Vista previa — Horizontal 30 × 18"';
+  renderPreview();
+};
+
+window.setTemplate = function(t) {
+  template = t;
+  el('tplRemax').classList.toggle('active', t === 'remax');
+  el('tplSunrise').classList.toggle('active', t === 'sunrise');
+  renderPreview();
+};
+
+window.setPreset = function(text) {
+  mainText = text;
+  el('customText').value = '';
+  el('pVende').classList.toggle('active', text === 'SE VENDE');
+  el('pAlquila').classList.toggle('active', text === 'SE ALQUILA');
+  renderPreview();
+};
+
+window.onCustomText = function() {
+  const v = el('customText').value.trim();
+  if (v) {
+    mainText = v.toUpperCase();
+    el('pVende').classList.remove('active');
+    el('pAlquila').classList.remove('active');
+    renderPreview();
+  }
+};
+
+// ═══════════════════════════════════════════════════════════════
+// QR GENERATION
+// ═══════════════════════════════════════════════════════════════
+function makeQR(text, sizePx) {
+  return new Promise(resolve => {
+    const div = el('qrTemp');
+    div.innerHTML = '';
+    div.style.width  = sizePx + 'px';
+    div.style.height = sizePx + 'px';
+    new QRCode(div, {
+      text,
+      width:  sizePx,
+      height: sizePx,
+      colorDark:  C_BLUE,
+      colorLight: C_WHITE,
+      correctLevel: QRCode.CorrectLevel.M,
+    });
+    setTimeout(() => {
+      const node = div.querySelector('canvas') || div.querySelector('img');
+      resolve(node);
+    }, 150);
+  });
+}
+
+async function getQRCanvas(text, sizePx) {
+  const node = await makeQR(text, sizePx);
+  if (!node) return null;
+  if (node.tagName === 'CANVAS') return node;
+  // img → canvas
+  const c = document.createElement('canvas');
+  c.width = c.height = sizePx;
+  c.getContext('2d').drawImage(node, 0, 0, sizePx, sizePx);
+  return c;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// IMAGE CACHE
+// ═══════════════════════════════════════════════════════════════
+function loadImg(url) {
+  if (imgCache[url]) return Promise.resolve(imgCache[url]);
+  return new Promise((res, rej) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload  = () => { imgCache[url] = img; res(img); };
+    img.onerror = rej;
+    img.src = url;
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CANVAS RENDER ENTRY
+// ═══════════════════════════════════════════════════════════════
+const PREVIEW_MAX = 760;
+
+async function renderPreview() {
+  const { w, h } = SIZES[orientation];
+  const scale = PREVIEW_MAX / Math.max(w, h);
+  const canvas = el('previewCanvas');
+  canvas.width  = Math.round(w * scale);
+  canvas.height = Math.round(h * scale);
+  await drawRotulo(canvas, scale);
+}
+
+async function renderHiRes() {
+  const { w, h } = SIZES[orientation];
+  const c = document.createElement('canvas');
+  c.width  = w;
+  c.height = h;
+  await drawRotulo(c, 1);
+  return c;
+}
+
+window.renderPreview = renderPreview;
+
+// ═══════════════════════════════════════════════════════════════
+// CORE DRAW
+// ═══════════════════════════════════════════════════════════════
+async function drawRotulo(canvas, scale) {
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const M = MARGIN_PX * scale;   // scaled margin
+  const lay = LAYOUT[orientation];
+
+  // 1. White background
+  ctx.fillStyle = C_WHITE;
+  ctx.fillRect(0, 0, W, H);
+
+  // 2. Template image (full bleed — contains red band, white zone, blue band + logos)
+  try {
+    const tplImg = await loadImg(TPLS[orientation][template]);
+    ctx.drawImage(tplImg, 0, 0, W, H);
+  } catch(e) {
+    console.error('Template load failed:', e);
+    // Draw basic layout as fallback
+    ctx.fillStyle = C_RED;
+    ctx.fillRect(0, 0, W, H * lay.redEnd);
+    ctx.fillStyle = C_BLUE;
+    ctx.fillRect(0, H * lay.blueStart, W, H * (1 - lay.blueStart));
+  }
+
+  // 3. Text overlays
+  const redH    = H * lay.redEnd;       // bottom of red band
+  const blueY   = H * lay.blueStart;    // top of blue band
+  const blueH   = H - blueY;
+
+  // ── Main text in red band ──────────────────────────────────
+  // Vertical:   text spans full width (logo is template bg only in circle)
+  // Horizontal: text spans right 62% of width (logo overlaps left in red)
+  {
+    const textLeft   = orientation === 'horizontal' ? W * lay.agentColStart : M;
+    const textRight  = W - M;
+    const textCenterX = (textLeft + textRight) / 2;
+    const textMaxW   = textRight - textLeft;
+    const textCenterY = redH / 2;
+
+    drawFitText(ctx, mainText, textCenterX, textCenterY, textMaxW, redH * 0.68, F_BLACK, C_WHITE);
+  }
+
+  // ── Agent data (white zone, right column) ─────────────────
+  if (profile) {
+    const agX   = W * lay.agentColStart;
+    const agW   = W - agX - M;
+    const agCX  = agX + agW / 2;
+    const agTop = redH;
+    const agBot = blueY;
+    const agMid = agTop + (agBot - agTop) / 2;
+
+    const name  = (profile.nombre  || '').toUpperCase();
+    const tel   = profile.whatsapp || profile.celular || '';
+    const email = (profile.email   || '').toUpperCase();
+
+    // Fit name font size (may be 1 or 2 lines)
+    const nameParts = splitIntoLines(name);
+    // Find size where widest part fits
+    const widestPart = nameParts.reduce((a, b) => a.length > b.length ? a : b, '');
+    const nameSize = fitSize(ctx, widestPart, agW, `bold 1px ${F_NARROW}`,
+      12 * scale, 200 * scale);
+
+    const lineH      = nameSize * 1.18;
+    const telSize    = nameSize * 0.68;
+    const emailSize  = nameSize * 0.36;
+    const gapPh      = lineH * 0.15;
+    const gapEm      = lineH * 0.05;
+
+    // Total block height
+    const hasSunriseLogo = template === 'sunrise';
+    const sunriseLogoH   = hasSunriseLogo ? nameSize * 0.55 : 0;
+    const blockH = nameParts.length * lineH + gapPh + telSize + gapEm + emailSize + sunriseLogoH;
+    let y = agMid - blockH / 2 + lineH / 2;
+
+    ctx.textAlign    = 'center';
+    ctx.textBaseline = 'middle';
+
+    // Name lines
+    ctx.font      = `bold ${nameSize}px ${F_NARROW}`;
+    ctx.fillStyle = C_BLACK;
+    for (const part of nameParts) {
+      ctx.fillText(part, agCX, y);
+      y += lineH;
+    }
+    y += gapPh;
+
+    // Phone
+    ctx.font      = `bold ${telSize}px ${F_NARROW}`;
+    ctx.fillStyle = C_BLACK;
+    ctx.fillText(tel, agCX, y);
+    y += telSize + gapEm + emailSize * 0.3;
+
+    // Email
+    ctx.font      = `bold ${emailSize}px ${F_NARROW}`;
+    ctx.fillStyle = C_BLACK;
+    ctx.fillText(email, agCX, y);
+    // (Sunrise logo is part of template image, no need to draw separately)
+  }
+
+  // ── Blue band: QR + REMAX CENTRAL + phone ─────────────────
+  const bandMidY = blueY + blueH / 2;
+  const qrSize   = Math.round(blueH * 0.74);
+  const qrX      = M;
+  const qrY      = bandMidY - qrSize / 2;
+
+  // QR
+  const tel = profile?.whatsapp || profile?.celular || '';
+  if (tel) {
+    const waNum = tel.replace(/\D/g, '');
+    const waUrl = `https://wa.me/506${waNum.replace(/^506/, '')}`;
+    try {
+      const qrC = await getQRCanvas(waUrl, qrSize);
+      if (qrC) ctx.drawImage(qrC, qrX, qrY, qrSize, qrSize);
+    } catch(e) { console.warn('QR draw error', e); }
+  }
+
+  // REMAX CENTRAL + OFFICE PHONE — right of QR, centered in blue band
+  const txtX     = qrX + qrSize + M * 0.55;
+  const txtRight = W - M;
+  const txtMaxW  = txtRight - txtX;
+  const txtCX    = txtX + txtMaxW / 2;
+
+  const rcSize = blueH * 0.225;
+  const phSize = blueH * 0.205;
+
+  ctx.textAlign    = 'center';
+  ctx.textBaseline = 'middle';
+
+  ctx.font      = `bold ${rcSize}px ${F_NARROW}`;
+  ctx.fillStyle = C_WHITE;
+  ctx.fillText('REMAX CENTRAL', txtCX, bandMidY - rcSize * 0.6);
+
+  ctx.font      = `bold ${phSize}px ${F_NARROW}`;
+  ctx.fillStyle = C_WHITE;
+  ctx.fillText(OFFICE_PHONE, txtCX, bandMidY + phSize * 0.6);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// TEXT HELPERS
+// ═══════════════════════════════════════════════════════════════
+
+/**
+ * Draw text centered at (cx, cy), fitting within (maxW × maxH).
+ * Tries 1 line; if too wide, wraps to 2 lines.
+ * Font weight is always 900 (Black).
+ */
+function drawFitText(ctx, text, cx, cy, maxW, maxH, fontStack, color) {
+  ctx.fillStyle    = color;
+  ctx.textAlign    = 'center';
+  ctx.textBaseline = 'middle';
+
+  // Try 1 line
+  let size1 = fitSize(ctx, text, maxW, `900 1px ${fontStack}`, 10, maxH * 0.88);
+  ctx.font = `900 ${size1}px ${fontStack}`;
+  if (ctx.measureText(text).width <= maxW) {
+    ctx.fillText(text, cx, cy);
+    return;
+  }
+
+  // 2 lines
+  const parts = text.split(' ');
+  if (parts.length < 2) {
+    // Can't split, just draw at max size
+    ctx.fillText(text, cx, cy);
+    return;
+  }
+  const mid   = Math.ceil(parts.length / 2);
+  const line1 = parts.slice(0, mid).join(' ');
+  const line2 = parts.slice(mid).join(' ');
+  const wider = line1.length >= line2.length ? line1 : line2;
+  const size2 = fitSize(ctx, wider, maxW, `900 1px ${fontStack}`, 10, maxH * 0.44);
+  const lineH = size2 * 1.08;
+  ctx.font = `900 ${size2}px ${fontStack}`;
+  ctx.fillText(line1, cx, cy - lineH / 2);
+  ctx.fillText(line2, cx, cy + lineH / 2);
+}
+
+/**
+ * Binary-search font size so that text fits within maxW.
+ * fontTemplate: e.g. "bold 1px Arial" — the "1px" will be replaced.
+ */
+function fitSize(ctx, text, maxW, fontTemplate, minPx, maxPx) {
+  let lo = minPx, hi = maxPx;
+  while (hi - lo > 1) {
+    const mid = (lo + hi) / 2;
+    ctx.font = fontTemplate.replace('1px', `${mid}px`);
+    if (ctx.measureText(text).width <= maxW) lo = mid;
+    else hi = mid;
+  }
+  return lo;
+}
+
+/**
+ * Split a name string into 1 or 2 lines.
+ * Tries to keep roughly equal visual weight on each line.
+ */
+function splitIntoLines(text) {
+  const words = text.trim().split(/\s+/);
+  if (words.length <= 1) return [text];
+  if (words.length === 2) return [words[0], words[1]];
+  // 3+ words: try splitting at midpoint
+  const mid = Math.ceil(words.length / 2);
+  return [words.slice(0, mid).join(' '), words.slice(mid).join(' ')];
+}
+
+// ═══════════════════════════════════════════════════════════════
+// EXPORT
+// ═══════════════════════════════════════════════════════════════
+window.exportPDF = async function() {
+  showLoading('Generando PDF a 300 dpi…');
+  try {
+    await sleep(60);
+    const c = await renderHiRes();
+    const { jsPDF } = window.jspdf;
+    const { wIn, hIn } = SIZES[orientation];
+    const pdf = new jsPDF({
+      orientation: orientation === 'vertical' ? 'portrait' : 'landscape',
+      unit: 'in',
+      format: [wIn, hIn],
+    });
+    pdf.addImage(c.toDataURL('image/jpeg', 0.97), 'JPEG', 0, 0, wIn, hIn);
+    pdf.save(fileName('pdf'));
+  } catch(e) {
+    alert('Error al generar PDF: ' + e.message);
+    console.error(e);
+  } finally { hideLoading(); }
+};
+
+window.exportPNG = async function() {
+  showLoading('Generando PNG a 300 dpi…');
+  try {
+    await sleep(60);
+    const c = await renderHiRes();
+    const a = document.createElement('a');
+    a.download = fileName('png');
+    a.href = c.toDataURL('image/png');
+    a.click();
+  } catch(e) {
+    alert('Error al generar PNG: ' + e.message);
+    console.error(e);
+  } finally { hideLoading(); }
+};
+
+function fileName(ext) {
+  const tpl = template === 'remax' ? 'REMAX-Central' : 'Team-Sunrise';
+  const ori = orientation === 'vertical' ? 'Vertical' : 'Horizontal';
+  const txt = mainText.replace(/\s+/g, '-');
+  return `Rotulo-${tpl}-${ori}-${txt}.${ext}`;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════════════════════
+function el(id)  { return document.getElementById(id); }
+function show(id){ el(id).style.display = 'flex'; }
+function hide(id){ el(id).style.display = 'none'; }
+function setStatus(msg) { el('statusBar').textContent = msg; }
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+function showLoading(msg) { el('loadingMsg').textContent = msg; el('loadingOverlay').classList.add('show'); }
+function hideLoading()    { el('loadingOverlay').classList.remove('show'); }
+</script>
+</body>
+</html>
