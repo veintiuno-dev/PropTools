@@ -31,9 +31,8 @@ body { font-family:'DM Sans',-apple-system,sans-serif; background:var(--bg); col
 /* LOGIN */
 .login-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--bg); padding: 24px; }
 .login-box { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 40px; width: 100%; max-width: 400px; box-shadow: 0 4px 24px rgba(0,0,0,.06); }
-.login-logo { display: flex; align-items: center; gap: 10px; margin-bottom: 28px; }
-.login-logo img { height: 22px; }
-.login-logo span { font-size: 15px; font-weight: 700; }
+.login-logo { display: flex; align-items: center; gap: 8px; margin-bottom: 28px; font-size: 16px; font-weight: 400; color: var(--ink); letter-spacing: -0.2px; }
+.login-logo strong { font-weight: 700; }
 .login-box h2 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
 .login-box p { font-size: 13px; color: var(--muted); margin-bottom: 28px; line-height: 1.5; }
 .form-field { margin-bottom: 14px; }
@@ -93,7 +92,7 @@ header {
   display: none;
   align-items: center;
 }
-.header-tenant-badge img { height: 15px; max-width: 90px; object-fit: contain; }
+.header-tenant-badge img { height: 22px; max-width: 120px; object-fit: contain; }
 /* Right: nav + status + logout */
 .header-right {
   margin-left: auto;
@@ -296,6 +295,10 @@ main { background: var(--bg); overflow-y: auto; display: flex; flex-direction: c
       <a class="nav-item" href="../tarjetas/">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
         Tarjetas
+      </a>
+      <a class="nav-item" href="../perfil/">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+        Mi informaci&oacute;n
       </a>
       <div class="nav-divider"></div>
       <button class="btn-logout" id="btn-logout">Cerrar sesi&oacute;n</button>
