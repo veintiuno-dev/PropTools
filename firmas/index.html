@@ -58,24 +58,23 @@ header {
   gap: 16px;
   background: var(--surface);
 }
-/* Left: brand block */
-.header-brand { display: flex; align-items: center; gap: 12px; }
-.header-brand-right { display: flex; flex-direction: column; justify-content: center; gap: 5px; }
-.pt-logotype {
+/* Left: brand — una sola línea: ícono | PropTools | App | logo tenant */
+.header-brand { display: flex; align-items: center; gap: 10px; }
+.pt-wordmark {
   font-family: 'DM Sans', sans-serif;
   font-size: 17px;
   font-weight: 400;
   color: var(--ink);
   letter-spacing: -0.3px;
   white-space: nowrap;
-  line-height: 1;
   display: flex;
   align-items: center;
+  gap: 0;
 }
-.pt-logotype .pt-bold { font-weight: 700; }
-.header-tool-row { display: flex; align-items: center; gap: 10px; }
-.header-tool-name { font-size: 13px; font-weight: 500; color: var(--ink-mid); }
-.header-tenant-badge { display: none; align-items: center; }
+.pt-wordmark .pt-bold { font-weight: 700; }
+.pt-sep { color: var(--border); font-weight: 300; margin: 0 8px; font-size: 20px; line-height: 1; }
+.pt-app { font-size: 17px; font-weight: 500; color: var(--ink-mid); }
+.header-tenant-badge { display: none; align-items: center; margin-left: 10px; }
 .header-tenant-badge img { height: 26px; max-width: 130px; object-fit: contain; }
 /* Right: nav + status + logout */
 .header-right {
@@ -259,14 +258,9 @@ main { background: var(--bg); overflow-y: auto; display: flex; flex-direction: c
         <rect x="0" y="20" width="20" height="4" rx="2" fill="#1B6EF3"/>
         <rect x="22" y="4" width="4" height="20" rx="2" fill="#1B6EF3"/>
       </svg>
-      <div class="header-brand-right">
-        <div class="pt-logotype">Prop<span class="pt-bold">Tools</span></div>
-        <div class="header-tool-row">
-          <span class="header-tool-name">Firmas</span>
-          <div class="header-tenant-badge" id="tenant-badge">
-            <img id="tenant-logo" src="" alt="">
-          </div>
-        </div>
+      <div class="pt-wordmark">Prop<span class="pt-bold">Tools</span><span class="pt-sep">|</span><span class="pt-app">Firmas</span></div>
+      <div class="header-tenant-badge" id="tenant-badge">
+        <img id="tenant-logo" src="" alt="">
       </div>
     </div>
     <div class="header-right">
