@@ -45,7 +45,7 @@ body { font-family:'DM Sans',-apple-system,sans-serif; background:var(--bg); col
 .app-screen { display: none; min-height: 100vh; grid-template-columns: 360px 1fr; grid-template-rows: auto 1fr; }
 .app-screen.visible { display: grid; }
 header {
-  grid-column: 1/-1; height: 68px; padding: 0 28px;
+  grid-column: 1/-1; height: 88px; padding: 0 28px;
   border-bottom: 1px solid var(--border);
   display: flex; align-items: center; gap: 16px;
   background: var(--surface);
@@ -55,8 +55,8 @@ header {
 .pt-wordmark .pt-bold { font-weight: 700; }
 .pt-sep { color: var(--border); font-weight: 300; margin: 0 8px; font-size: 20px; line-height: 1; }
 .pt-app { font-size: 17px; font-weight: 500; color: var(--ink-mid); }
-.header-tenant-badge { display: none; align-items: center; margin-left: 10px; }
-.header-tenant-badge img { height: 26px; max-width: 130px; object-fit: contain; }
+.header-tenant-badge { display: none; align-items: center; }
+.header-tenant-badge img { height: 60px; max-width: 200px; object-fit: contain; }
 .header-right { margin-left: auto; display: flex; align-items: center; gap: 6px; }
 .db-status { font-size: 11px; padding: 4px 10px; border-radius: 20px; display: inline-flex; align-items: center; gap: 5px; border: 1px solid var(--border); background: var(--surface2); font-family: 'DM Mono', monospace; }
 .db-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--warn); }
@@ -154,17 +154,13 @@ canvas { display: block; }
 <body>
 
 <!-- LOGIN -->
-<div class="login-screen" id="login-screen">
+<div id="splash">
+  <div class="splash-spinner"></div>
+</div>
+
+<div class="login-screen" id="login-screen" style="display:none">
   <div class="login-box">
-    <div class="login-logo">
-      <svg width="28" height="32" viewBox="0 0 32 36" fill="none">
-        <rect x="0" y="4" width="4" height="28" rx="2" fill="#1B6EF3"/>
-        <rect x="0" y="4" width="26" height="4" rx="2" fill="#1B6EF3"/>
-        <rect x="0" y="20" width="20" height="4" rx="2" fill="#1B6EF3"/>
-        <rect x="22" y="4" width="4" height="20" rx="2" fill="#1B6EF3"/>
-      </svg>
-      Prop<strong>Tools</strong>
-    </div>
+    <div class="login-logo"><svg width="28" height="32" viewBox="0 0 32 36" fill="none"><rect x="0" y="4" width="4" height="28" rx="2" fill="#1B6EF3"/><rect x="0" y="4" width="26" height="4" rx="2" fill="#1B6EF3"/><rect x="0" y="20" width="20" height="4" rx="2" fill="#1B6EF3"/><rect x="22" y="4" width="4" height="20" rx="2" fill="#1B6EF3"/></svg>Prop<strong>Tools</strong></div>
     <h2>Iniciar sesi&oacute;n</h2>
     <p>Ingres&aacute; con tu cuenta para acceder al generador de tarjetas.</p>
     <div class="form-field"><label>Correo</label><input type="email" id="login-email" placeholder="tu@correo.com"></div>
@@ -186,10 +182,7 @@ canvas { display: block; }
         <rect x="22" y="4" width="4" height="20" rx="2" fill="#1B6EF3"/>
       </svg>
       <div class="pt-wordmark">Prop<span class="pt-bold">Tools</span><span class="pt-sep">|</span><span class="pt-app">Tarjetas</span></div>
-      <div class="header-tenant-badge" id="tenant-badge">
-        <img id="tenant-logo" src="" alt="">
       </div>
-    </div>
     <div class="header-right">
       <div class="db-status"><div class="db-dot" id="db-dot"></div><span id="db-status-text">Conectado</span></div>
       <div class="nav-divider"></div>
@@ -207,6 +200,9 @@ canvas { display: block; }
       </a>
       <div class="nav-divider"></div>
       <button class="btn-logout" id="btn-logout">Cerrar sesi&oacute;n</button>
+      <div class="header-tenant-badge" id="tenant-badge" style="margin-left:12px">
+        <img id="tenant-logo" src="" alt="">
+      </div>
     </div>
   </header>
 
@@ -1000,6 +996,7 @@ el('guidelines-toggle').addEventListener('click',()=>{
 sb.auth.getSession().then(({data:{session}})=>{
   if(session){currentUser=session.user;loadContext();}
   else{window.location.href='../perfil/';}
+  document.getElementById('splash').classList.add('hidden');
 });
 </script>
 </body>
