@@ -28,8 +28,8 @@
 body { font-family:'DM Sans',-apple-system,sans-serif; background:var(--bg); color:var(--ink); min-height:100vh; font-size:14px; }
 .login-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--bg); padding: 24px; }
 .login-box { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 40px; width: 100%; max-width: 400px; box-shadow: 0 4px 24px rgba(0,0,0,.06); }
-.login-logo { display: flex; align-items: center; gap: 8px; margin-bottom: 28px; font-size: 15px; font-weight: 700; color: var(--ink); }
-.login-logo .pt-accent { color: var(--blue); }
+.login-logo { display: flex; align-items: center; gap: 8px; margin-bottom: 28px; font-size: 15px; font-weight: 400; color: var(--ink); }
+.login-logo strong { font-weight: 700; }
 .login-box h2 { font-size: 22px; font-weight: 700; margin-bottom: 6px; }
 .login-box p { font-size: 13px; color: var(--muted); margin-bottom: 28px; line-height: 1.5; }
 .form-field { margin-bottom: 14px; }
@@ -51,12 +51,11 @@ header {
 }
 .header-brand { display: flex; flex-direction: column; justify-content: center; gap: 2px; }
 .header-brand-top { display: flex; align-items: center; gap: 8px; }
-.pt-logotype { font-size: 14px; font-weight: 700; color: var(--ink); letter-spacing: -0.2px; display: flex; align-items: center; gap: 7px; }
-.pt-logotype .pt-accent { color: var(--blue); }
-.header-tool-name { font-size: 13px; font-weight: 500; color: var(--ink-mid); padding-left: 8px; border-left: 1px solid var(--border); }
-.header-tenant-badge { display: none; align-items: center; gap: 6px; margin-top: 1px; }
-.header-tenant-badge img { height: 16px; max-width: 80px; object-fit: contain; }
-.header-tenant-badge span { font-size: 10px; font-weight: 500; color: var(--ink-mid); font-family: 'DM Mono', monospace; }
+.pt-logotype { font-size: 15px; font-weight: 400; color: var(--ink); letter-spacing: -0.3px; display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+.pt-logotype .pt-bold { font-weight: 700; }
+.header-tool-name { font-size: 12px; font-weight: 500; color: var(--ink-mid); padding-left: 8px; border-left: 1px solid var(--border); }
+.header-tenant-badge { display: none; align-items: center; margin-top: 2px; }
+.header-tenant-badge img { height: 18px; max-width: 100px; object-fit: contain; }
 .header-right { margin-left: auto; display: flex; align-items: center; gap: 6px; }
 .db-status { font-size: 11px; padding: 4px 10px; border-radius: 20px; display: inline-flex; align-items: center; gap: 5px; border: 1px solid var(--border); background: var(--surface2); font-family: 'DM Mono', monospace; }
 .db-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--warn); }
@@ -157,8 +156,13 @@ canvas { display: block; }
 <div class="login-screen" id="login-screen">
   <div class="login-box">
     <div class="login-logo">
-      <svg width="24" height="24" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="7" fill="#0D0F12"/><path d="M8 10h16M8 16h10M8 22h13" stroke="#1B6EF3" stroke-width="2.2" stroke-linecap="round"/></svg>
-      Prop<span class="pt-accent">Tools</span>
+      <svg width="24" height="24" viewBox="0 0 32 36" fill="none">
+        <rect x="0" y="4" width="4" height="28" rx="2" fill="#1B6EF3"/>
+        <rect x="0" y="4" width="26" height="4" rx="2" fill="#1B6EF3"/>
+        <rect x="0" y="20" width="20" height="4" rx="2" fill="#1B6EF3"/>
+        <rect x="22" y="4" width="4" height="20" rx="2" fill="#1B6EF3"/>
+      </svg>
+      Prop<strong>Tools</strong>
     </div>
     <h2>Iniciar sesi&oacute;n</h2>
     <p>Ingres&aacute; con tu cuenta para acceder al generador de tarjetas.</p>
@@ -176,14 +180,18 @@ canvas { display: block; }
     <div class="header-brand">
       <div class="header-brand-top">
         <div class="pt-logotype">
-          <svg width="20" height="20" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="7" fill="#0D0F12"/><path d="M8 10h16M8 16h10M8 22h13" stroke="#1B6EF3" stroke-width="2.2" stroke-linecap="round"/></svg>
-          Prop<span class="pt-accent">Tools</span>
+          <svg width="20" height="20" viewBox="0 0 32 36" fill="none">
+            <rect x="0" y="4" width="4" height="28" rx="2" fill="#1B6EF3"/>
+            <rect x="0" y="4" width="26" height="4" rx="2" fill="#1B6EF3"/>
+            <rect x="0" y="20" width="20" height="4" rx="2" fill="#1B6EF3"/>
+            <rect x="22" y="4" width="4" height="20" rx="2" fill="#1B6EF3"/>
+          </svg>
+          Prop<span class="pt-bold">Tools</span>
         </div>
         <span class="header-tool-name">Tarjetas</span>
       </div>
       <div class="header-tenant-badge" id="tenant-badge">
         <img id="tenant-logo" src="" alt="">
-        <span id="header-tenant"></span>
       </div>
     </div>
     <div class="header-right">
@@ -524,15 +532,11 @@ async function loadContext(){
     if(pErr||!p)throw new Error('Usuario no encontrado.');
     currentProfile=p; currentTenant=p.tenants;
 
-    /* Header: tenant badge con logo */
-    el('header-tenant').textContent=currentTenant.name;
+    /* Header: solo logo del tenant */
     const tenantBadge=el('tenant-badge');
-    const tenantLogoEl=el('tenant-logo');
     if(currentTenant.logo_url){
-      tenantLogoEl.src=currentTenant.logo_url;
+      el('tenant-logo').src=currentTenant.logo_url;
       tenantBadge.style.display='flex';
-    } else {
-      tenantBadge.style.display='none';
     }
 
     /* Pre-llenar campos desde perfil compartido */
