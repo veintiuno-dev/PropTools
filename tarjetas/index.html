@@ -45,7 +45,7 @@ body { font-family:'DM Sans',-apple-system,sans-serif; background:var(--bg); col
 .app-screen { display: none; min-height: 100vh; grid-template-columns: 360px 1fr; grid-template-rows: auto 1fr; }
 .app-screen.visible { display: grid; }
 header {
-  grid-column: 1/-1; height: 56px; padding: 0 28px;
+  grid-column: 1/-1; height: 64px; padding: 0 28px;
   border-bottom: 1px solid var(--border);
   display: flex; align-items: center; gap: 16px;
   background: var(--surface);
@@ -56,7 +56,7 @@ header {
 .pt-logotype .pt-bold { font-weight: 700; }
 .header-tool-name { font-size: 13px; font-weight: 400; color: var(--ink-mid); }
 .header-tenant-badge { display: none; align-items: center; }
-.header-tenant-badge img { height: 22px; max-width: 120px; object-fit: contain; }
+.header-tenant-badge img { height: 28px; max-width: 140px; object-fit: contain; }
 .header-right { margin-left: auto; display: flex; align-items: center; gap: 6px; }
 .db-status { font-size: 11px; padding: 4px 10px; border-radius: 20px; display: inline-flex; align-items: center; gap: 5px; border: 1px solid var(--border); background: var(--surface2); font-family: 'DM Mono', monospace; }
 .db-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--warn); }
@@ -157,7 +157,7 @@ canvas { display: block; }
 <div class="login-screen" id="login-screen">
   <div class="login-box">
     <div class="login-logo">
-      <svg width="24" height="24" viewBox="0 0 32 36" fill="none">
+      <svg width="28" height="32" viewBox="0 0 32 36" fill="none">
         <rect x="0" y="4" width="4" height="28" rx="2" fill="#1B6EF3"/>
         <rect x="0" y="4" width="26" height="4" rx="2" fill="#1B6EF3"/>
         <rect x="0" y="20" width="20" height="4" rx="2" fill="#1B6EF3"/>
@@ -179,7 +179,7 @@ canvas { display: block; }
 <div class="app-screen" id="app-screen">
   <header>
     <div class="header-brand">
-      <svg width="28" height="32" viewBox="0 0 32 36" fill="none" style="flex-shrink:0">
+      <svg width="36" height="40" viewBox="0 0 32 36" fill="none" style="flex-shrink:0">
         <rect x="0" y="4" width="4" height="28" rx="2" fill="#1B6EF3"/>
         <rect x="0" y="4" width="26" height="4" rx="2" fill="#1B6EF3"/>
         <rect x="0" y="20" width="20" height="4" rx="2" fill="#1B6EF3"/>
@@ -195,6 +195,10 @@ canvas { display: block; }
     <div class="header-right">
       <div class="db-status"><div class="db-dot" id="db-dot"></div><span id="db-status-text">Conectado</span></div>
       <div class="nav-divider"></div>
+      <a class="nav-item" href="../perfil/">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+        Mi informaci&oacute;n
+      </a>
       <a class="nav-item" href="../firmas/">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 12h10M7 16h6"/></svg>
         Firmas
@@ -202,10 +206,6 @@ canvas { display: block; }
       <a class="nav-item active" href="../tarjetas/">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
         Tarjetas
-      </a>
-      <a class="nav-item" href="../perfil/">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-        Mi informaci&oacute;n
       </a>
       <div class="nav-divider"></div>
       <button class="btn-logout" id="btn-logout">Cerrar sesi&oacute;n</button>
@@ -525,8 +525,7 @@ async function doLogin(){
 }
 async function doLogout(){
   await sb.auth.signOut();
-  el('login-screen').style.display='flex';
-  el('app-screen').classList.remove('visible');
+  window.location.href='../perfil/';
 }
 async function loadContext(){
   try{
@@ -580,7 +579,6 @@ async function saveProfile(){
     email:     v('f-email'),
     instagram: v('f-instagram'),
     photo_url: photoDataUrl||null,
-    updated_at: new Date().toISOString()
   };
   await sb.from('users').update(updates).eq('id',currentProfile.id);
 }
@@ -1001,6 +999,7 @@ el('guidelines-toggle').addEventListener('click',()=>{
 /* ── Init ── */
 sb.auth.getSession().then(({data:{session}})=>{
   if(session){currentUser=session.user;loadContext();}
+  else{window.location.href='../perfil/';}
 });
 </script>
 </body>
