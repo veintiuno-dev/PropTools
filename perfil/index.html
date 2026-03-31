@@ -57,7 +57,7 @@ header { height:88px; padding:0 28px; border-bottom:1px solid var(--border); dis
 .pt-sep { color:var(--border); font-weight:300; margin:0 8px; font-size:20px; line-height:1; }
 .pt-app { font-size:17px; font-weight:500; color:var(--ink-mid); }
 .header-tenant-badge { display:none; align-items:center; }
-.header-tenant-badge img { height:60px; max-width:200px; object-fit:contain; }
+.header-tenant-badge img { height:50px; max-width:160px; object-fit:contain; }
 .header-right { margin-left:auto; display:flex; align-items:center; gap:6px; }
 .db-status { font-size:11px; padding:4px 10px; border-radius:20px; display:inline-flex; align-items:center; gap:5px; border:1px solid var(--border); background:var(--surface2); font-family:'DM Mono',monospace; }
 .db-dot { width:7px; height:7px; border-radius:50%; background:var(--warn); }
@@ -359,10 +359,12 @@ async function loadContext() {
 
     el('login-screen').style.display = 'none';
     el('app-screen').classList.add('visible');
+    el('splash').classList.add('hidden');
     el('btn-login').disabled = false; el('btn-login').textContent = 'Ingresar';
   } catch(e) {
     el('login-error').textContent = e.message; el('login-error').style.display = 'block';
     el('btn-login').disabled = false; el('btn-login').textContent = 'Ingresar';
+    el('splash').classList.add('hidden');
     await sb.auth.signOut();
   }
 }
@@ -443,7 +445,7 @@ el('photo-upload').addEventListener('change', e => uploadPhoto(e.target.files[0]
 /* ── Init ── */
 sb.auth.getSession().then(({ data: { session } }) => {
   if(session) { currentUser = session.user; loadContext(); }
-  else { el('login-screen').style.display = 'flex'; }
+  else { el('splash').classList.add('hidden'); el('login-screen').style.display = 'flex'; }
 });
 </script>
 </body>
