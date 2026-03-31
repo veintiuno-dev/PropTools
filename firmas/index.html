@@ -3,14 +3,29 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Generador de Firmas — PropTools</title>
+<title>Firmas — PropTools</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
-  --bg: #f0f2f5; --surface: #fff; --surface2: #f5f6f8;
-  --border: #e2e4e9; --text: #111318; --muted: #6b7280; --radius: 12px;
+  --blue:    #1B6EF3;
+  --blue-dk: #0A4FC4;
+  --ink:     #0D0F12;
+  --ink-mid: #5A6070;
+  --surface: #ffffff;
+  --surface2:#F4F5F7;
+  --border:  #E2E5EA;
+  --success: #0FA870;
+  --warn:    #F59E0B;
+  --error:   #EF4444;
+  --radius:  10px;
+  --text: var(--ink);
+  --muted: var(--ink-mid);
+  --bg: var(--surface2);
 }
-body { font-family: -apple-system,'Segoe UI',Arial,sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+body { font-family:'DM Sans',-apple-system,sans-serif; background:var(--bg); color:var(--ink); min-height:100vh; font-size:14px; }
 
 /* LOGIN */
 .login-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--bg); padding: 24px; }
@@ -33,18 +48,117 @@ body { font-family: -apple-system,'Segoe UI',Arial,sans-serif; background: var(-
 /* APP */
 .app-screen { display: none; min-height: 100vh; grid-template-columns: 400px 1fr; grid-template-rows: auto 1fr; }
 .app-screen.visible { display: grid; }
-header { grid-column: 1/-1; padding: 12px 28px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 14px; background: var(--surface); }
-header h1 { font-size: 16px; font-weight: 700; }
-.header-divider { width: 1px; height: 22px; background: var(--border); flex-shrink: 0; }
-.header-sub { font-size: 12px; color: var(--muted); }
-.header-right { margin-left: auto; display: flex; align-items: center; gap: 12px; }
-.header-right img { height: 22px; display: block; }
-.db-status { font-size: 11px; padding: 4px 10px; border-radius: 20px; display: inline-flex; align-items: center; gap: 5px; border: 1px solid var(--border); background: var(--surface2); }
-.db-dot { width: 7px; height: 7px; border-radius: 50%; background: #f0a500; }
-.db-dot.ok { background: #22c55e; }
-.db-dot.err { background: #ef4444; }
-.btn-logout { font-family: inherit; font-size: 11px; font-weight: 600; padding: 5px 12px; border-radius: 7px; border: 1px solid var(--border); background: var(--surface2); color: var(--muted); cursor: pointer; transition: all .15s; }
-.btn-logout:hover { border-color: #ef4444; color: #ef4444; background: #fff5f5; }
+header {
+  grid-column: 1/-1;
+  padding: 0 28px;
+  height: 56px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--surface);
+}
+/* Left: brand block */
+.header-brand {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  min-width: 0;
+}
+.header-brand-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.pt-logotype {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -0.2px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.pt-logotype .pt-accent { color: var(--blue); }
+.pt-logotype svg rect { fill: var(--ink); }
+.header-tool-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-mid);
+  padding-left: 8px;
+  border-left: 1px solid var(--border);
+  margin-left: 0;
+}
+.header-tenant-badge {
+  display: none;
+  align-items: center;
+  gap: 6px;
+  margin-top: 1px;
+}
+.header-tenant-badge img { height: 16px; max-width: 80px; object-fit: contain; }
+.header-tenant-badge span {
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--ink-mid);
+  font-family: 'DM Mono', monospace;
+  letter-spacing: 0.3px;
+}
+/* Right: nav + status + logout */
+.header-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.db-status {
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  font-family: 'DM Mono', monospace;
+}
+.db-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--warn); }
+.db-dot.ok  { background: var(--success); }
+.db-dot.err { background: var(--error); }
+/* Nav menu */
+.nav-divider { width: 1px; height: 22px; background: var(--border); margin: 0 4px; }
+.nav-item {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 6px 11px;
+  border-radius: 7px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--ink-mid);
+  cursor: pointer;
+  transition: all .15s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+}
+.nav-item:hover { background: var(--surface2); color: var(--ink); border-color: var(--border); }
+.nav-item.active { background: var(--surface2); color: var(--ink); border-color: var(--border); font-weight: 600; }
+.btn-logout {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 6px 12px;
+  border-radius: 7px;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--ink-mid);
+  cursor: pointer;
+  transition: all .15s;
+}
+.btn-logout:hover { border-color: var(--error); color: var(--error); background: #fff5f5; }
 aside { background: var(--surface); border-right: 1px solid var(--border); overflow-y: auto; padding: 20px 18px; display: flex; flex-direction: column; gap: 20px; }
 .section-label { font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
 .template-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 6px; }
@@ -172,33 +286,36 @@ main { background: var(--bg); overflow-y: auto; display: flex; flex-direction: c
 <!-- APP -->
 <div class="app-screen" id="app-screen">
   <header>
+    <!-- Brand: PropTools logo + tool name + tenant badge below -->
     <div class="header-brand">
-      <div class="header-brand-logo">
-        <svg width="22" height="22" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="8" fill="#111318"/><path d="M8 10h16M8 16h10M8 22h13" stroke="#C8973B" stroke-width="2.2" stroke-linecap="round"/></svg>
-        Prop<span class="pt-dot">Tools</span>
+      <div class="header-brand-top">
+        <div class="pt-logotype">
+          <svg width="20" height="20" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="7"/><path d="M8 10h16M8 16h10M8 22h13" stroke="#1B6EF3" stroke-width="2.2" stroke-linecap="round"/></svg>
+          Prop<span class="pt-accent">Tools</span>
+        </div>
+        <span class="header-tool-name">Firmas</span>
       </div>
-      <div style="width:1px;height:18px;background:var(--border)"></div>
-      <span style="font-size:13px;font-weight:600;color:var(--text)">Generador de Firmas</span>
+      <div class="header-tenant-badge" id="tenant-badge">
+        <img id="tenant-logo" src="" alt="">
+        <span id="header-tenant"></span>
+      </div>
     </div>
-    <nav class="nav-menu">
-      <a class="nav-item active" href="../firmas/">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M8 12h8M8 16h5"/></svg>
-        Firmas
-      </a>
-      <a class="nav-item" href="../tarjetas/">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
-        Tarjetas
-      </a>
-    </nav>
+    <!-- Right: nav + db status + logout -->
     <div class="header-right">
       <div class="db-status" id="db-status-indicator">
         <div class="db-dot" id="db-dot"></div>
         <span id="db-status-text">Conectando...</span>
       </div>
-      <div class="header-tenant-badge" id="tenant-badge" style="display:none">
-        <img id="tenant-logo" src="" alt="">
-        <span id="header-tenant">Cargando...</span>
-      </div>
+      <div class="nav-divider"></div>
+      <a class="nav-item active" href="../firmas/">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 12h10M7 16h6"/></svg>
+        Firmas
+      </a>
+      <a class="nav-item" href="../tarjetas/">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+        Tarjetas
+      </a>
+      <div class="nav-divider"></div>
       <button class="btn-logout" id="btn-logout">Cerrar sesi&oacute;n</button>
     </div>
   </header>
@@ -336,7 +453,7 @@ main { background: var(--bg); overflow-y: auto; display: flex; flex-direction: c
 
 <div class="toast" id="toast"></div>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script type="module">
+<script type="module">
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
 const sb = createClient(
@@ -411,10 +528,8 @@ async function loadContext() {
     const tenantBadge = el('tenant-badge');
     if (currentTenant.logo_url) {
       el('tenant-logo').src = currentTenant.logo_url;
-      tenantBadge.style.display = 'flex';
-    } else {
-      tenantBadge.style.display = 'none';
     }
+    tenantBadge.style.display = 'flex';
 
     /* Pre-llenar campos desde perfil compartido */
     if (profile.name)      setV('f-name',     profile.name);
