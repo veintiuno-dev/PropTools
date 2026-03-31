@@ -73,38 +73,29 @@ header {
 }
 .pt-logotype {
   font-family: 'DM Sans', sans-serif;
-  font-size: 14px;
-  font-weight: 700;
+  font-size: 15px;
+  font-weight: 400;
   color: var(--ink);
-  letter-spacing: -0.2px;
+  letter-spacing: -0.3px;
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: 8px;
+  white-space: nowrap;
 }
-.pt-logotype .pt-accent { color: var(--blue); }
-.pt-logotype svg rect { fill: var(--ink); }
+.pt-logotype .pt-bold { font-weight: 700; }
 .header-tool-name {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
   color: var(--ink-mid);
   padding-left: 8px;
   border-left: 1px solid var(--border);
-  margin-left: 0;
 }
 .header-tenant-badge {
   display: none;
   align-items: center;
-  gap: 6px;
-  margin-top: 1px;
+  margin-top: 2px;
 }
-.header-tenant-badge img { height: 16px; max-width: 80px; object-fit: contain; }
-.header-tenant-badge span {
-  font-size: 10px;
-  font-weight: 500;
-  color: var(--ink-mid);
-  font-family: 'DM Mono', monospace;
-  letter-spacing: 0.3px;
-}
+.header-tenant-badge img { height: 18px; max-width: 100px; object-fit: contain; }
 /* Right: nav + status + logout */
 .header-right {
   margin-left: auto;
@@ -245,17 +236,6 @@ main { background: var(--bg); overflow-y: auto; display: flex; flex-direction: c
 ::-webkit-scrollbar { width: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-/* NAV MENU */
-.nav-menu { display: flex; align-items: center; gap: 4px; }
-.nav-item { font-family: inherit; font-size: 12px; font-weight: 600; padding: 6px 12px; border-radius: 7px; border: none; background: transparent; color: var(--muted); cursor: pointer; transition: all .15s; display: flex; align-items: center; gap: 6px; text-decoration: none; }
-.nav-item:hover { background: var(--surface2); color: var(--text); }
-.nav-item.active { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
-.header-brand { display: flex; align-items: center; gap: 10px; }
-.header-brand-logo { font-size: 14px; font-weight: 800; letter-spacing: -0.3px; color: var(--text); display: flex; align-items: center; gap: 7px; }
-.header-brand-logo span.pt-dot { color: #C8973B; }
-.header-tenant-badge { display: flex; align-items: center; gap: 7px; padding: 3px 10px 3px 5px; border-radius: 20px; background: var(--surface2); border: 1px solid var(--border); }
-.header-tenant-badge img { height: 20px; }
-.header-tenant-badge span { font-size: 11px; font-weight: 600; color: var(--muted); }
 </style>
 </head>
 <body>
@@ -264,8 +244,13 @@ main { background: var(--bg); overflow-y: auto; display: flex; flex-direction: c
 <div class="login-screen" id="login-screen">
   <div class="login-box">
     <div class="login-logo">
-      <img src="https://res.cloudinary.com/dlgrhr6lh/image/upload/v1774471912/logo_veintiuno_snlwr8.png" alt="Veintiuno">
-      <span>PropTools</span>
+      <svg width="24" height="24" viewBox="0 0 32 36" fill="none">
+        <rect x="0" y="4" width="4" height="28" rx="2" fill="#1B6EF3"/>
+        <rect x="0" y="4" width="26" height="4" rx="2" fill="#1B6EF3"/>
+        <rect x="0" y="20" width="20" height="4" rx="2" fill="#1B6EF3"/>
+        <rect x="22" y="4" width="4" height="20" rx="2" fill="#1B6EF3"/>
+      </svg>
+      Prop<strong>Tools</strong>
     </div>
     <h2>Iniciar sesi&oacute;n</h2>
     <p>Ingres&aacute; con tu cuenta para acceder al generador de firmas.</p>
@@ -286,21 +271,23 @@ main { background: var(--bg); overflow-y: auto; display: flex; flex-direction: c
 <!-- APP -->
 <div class="app-screen" id="app-screen">
   <header>
-    <!-- Brand: PropTools logo + tool name + tenant badge below -->
     <div class="header-brand">
       <div class="header-brand-top">
         <div class="pt-logotype">
-          <svg width="20" height="20" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="7"/><path d="M8 10h16M8 16h10M8 22h13" stroke="#1B6EF3" stroke-width="2.2" stroke-linecap="round"/></svg>
-          Prop<span class="pt-accent">Tools</span>
+          <svg width="20" height="20" viewBox="0 0 32 36" fill="none">
+            <rect x="0" y="4" width="4" height="28" rx="2" fill="#1B6EF3"/>
+            <rect x="0" y="4" width="26" height="4" rx="2" fill="#1B6EF3"/>
+            <rect x="0" y="20" width="20" height="4" rx="2" fill="#1B6EF3"/>
+            <rect x="22" y="4" width="4" height="20" rx="2" fill="#1B6EF3"/>
+          </svg>
+          Prop<span class="pt-bold">Tools</span>
         </div>
         <span class="header-tool-name">Firmas</span>
       </div>
       <div class="header-tenant-badge" id="tenant-badge">
         <img id="tenant-logo" src="" alt="">
-        <span id="header-tenant"></span>
       </div>
     </div>
-    <!-- Right: nav + db status + logout -->
     <div class="header-right">
       <div class="db-status" id="db-status-indicator">
         <div class="db-dot" id="db-dot"></div>
@@ -523,13 +510,12 @@ async function loadContext() {
       .eq('tenant_id', currentTenant.id).eq('active', true).order('sort_order');
     templates = tpls || [];
 
-    /* Header: tenant badge con logo */
-    el('header-tenant').textContent = currentTenant.name;
+    /* Header: solo logo del tenant, sin nombre */
     const tenantBadge = el('tenant-badge');
     if (currentTenant.logo_url) {
       el('tenant-logo').src = currentTenant.logo_url;
+      tenantBadge.style.display = 'flex';
     }
-    tenantBadge.style.display = 'flex';
 
     /* Pre-llenar campos desde perfil compartido */
     if (profile.name)      setV('f-name',     profile.name);
