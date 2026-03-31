@@ -322,7 +322,7 @@ async function loadContext() {
 
     /* Llenar campos */
     setV('f-name',      p.name);
-    setV('f-role',      p.role);
+    setV('f-role',      p.job_title);
     setV('f-email',     p.email);
     setV('f-phone',     p.phone);
     setV('f-whatsapp',  p.whatsapp);
@@ -333,7 +333,7 @@ async function loadContext() {
 
     /* Display name/role en card header */
     if(p.name)  el('display-name').textContent = p.name;
-    if(p.role)  el('display-role').textContent = p.role;
+    if(p.job_title) el('display-role').textContent = p.job_title;
 
     /* Foto */
     if(p.photo_url) {
@@ -388,7 +388,7 @@ async function saveProfile() {
   try {
     const updates = {
       name:      v('f-name'),
-      role:      v('f-role'),
+      job_title: v('f-role'),
       email:     v('f-email'),
       phone:     v('f-phone'),
       whatsapp:  v('f-whatsapp'),
