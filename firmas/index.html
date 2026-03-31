@@ -515,7 +515,7 @@ async function loadContext() {
 
     /* Pre-llenar campos desde perfil compartido */
     if (profile.name)      setV('f-name',     profile.name);
-    if (profile.role)      setV('f-role',      profile.role);
+    if (profile.job_title) setV('f-role',      profile.job_title);
     if (profile.email)     setV('f-email',     profile.email);
     if (profile.phone)     setV('f-phone',     profile.phone);
     if (profile.whatsapp)  setV('f-whatsapp',  profile.whatsapp);
@@ -561,7 +561,7 @@ async function saveProfile() {
     : instaVal;
   await sb.from('users').update({
     name:      v('f-name'),
-    role:      v('f-role'),
+    job_title: v('f-role'),
     email:     v('f-email'),
     phone:     v('f-phone'),
     whatsapp:  v('f-whatsapp'),
