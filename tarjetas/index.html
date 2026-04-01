@@ -599,19 +599,35 @@ el('btn-save-rotulo').addEventListener('click', saveRotulo);
    QR
 ═══════════════════════════════════════════════════ */
 function makeQRCanvas(text, sizePx){
+  /* Borde blanco: padding ~5% del tamaño total */
+  const pad    = Math.round(sizePx * 0.05);
+  const qrSize = sizePx - pad * 2;   /* QR interior sin el borde */
   return new Promise(resolve=>{
     const div=el('qr-tmp');
     div.innerHTML='';
-    div.style.width=div.style.height=sizePx+'px';
-    new QRCode(div,{ text, width:sizePx, height:sizePx,
+    div.style.width=div.style.height=qrSize+'px';
+    new QRCode(div,{ text, width:qrSize, height:qrSize,
       colorDark:'#0c2749', colorLight:'#ffffff',
       correctLevel:QRCode.CorrectLevel.M });
     setTimeout(()=>{
       const node=div.querySelector('canvas')||div.querySelector('img');
       if(!node){ resolve(null); return; }
-      if(node.tagName==='CANVAS'){ resolve(node); return; }
-      const c=document.createElement('canvas'); c.width=c.height=sizePx;
-      c.getContext('2d').drawImage(node,0,0,sizePx,sizePx);
+      /* Canvas final con borde blanco */
+      const c=document.createElement('canvas');
+      c.width=c.height=sizePx;
+      const ctx=c.getContext('2d');
+      /* Fondo blanco (el borde) */
+      ctx.fillStyle='#ffffff';
+      ctx.fillRect(0,0,sizePx,sizePx);
+      /* QR centrado con padding */
+      if(node.tagName==='CANVAS'){
+        ctx.drawImage(node, pad, pad, qrSize, qrSize);
+      } else {
+        const tmp=document.createElement('canvas');
+        tmp.width=tmp.height=qrSize;
+        tmp.getContext('2d').drawImage(node,0,0,qrSize,qrSize);
+        ctx.drawImage(tmp, pad, pad, qrSize, qrSize);
+      }
       resolve(c);
     },180);
   });
@@ -783,7 +799,7 @@ function calcAgentLayout(ctx, name, phone, email, maxW, startY, endY, fn, lay, s
 
   /* Espaciado entre bloques */
   const GAP_NAME_PHONE = 20 * s;   /* gap nombre→phone */
-  const GAP_PHONE_EMAIL = 8 * s;   /* gap phone→email (muy compacto) */
+  const GAP_PHONE_EMAIL = 2 * s;   /* gap phone→email (mínimo) */
 
   /* Intentar ajustar tamaños */
   let nameFS  = nameFSmax;
