@@ -823,7 +823,7 @@ function calcAgentLayout(ctx, name, phone, email, maxW, startY, endY, fn, lay, s
   for(let iter=0; iter<600; iter++){
     const nameParts = getNameParts(nameFS);
     const lineH     = nameFS * 1.10;   /* interlineado compacto */
-    const emailLineH= emailFS * 1.0;
+    const emailLineH= emailFS * 0.70;
 
     /* Comprobar ancho de cada parte */
     let allFit=true;
@@ -860,7 +860,7 @@ function calcAgentLayout(ctx, name, phone, email, maxW, startY, endY, fn, lay, s
   /* Construir líneas con posiciones Y */
   const nameParts  = getNameParts(nameFS);
   const lineH      = nameFS  * 1.10;
-  const emailLineH = emailFS * 1.0;
+  const emailLineH = emailFS * 0.70;
   const hasPhone   = phone.length>0;
   const hasEmail   = email.length>0;
 
@@ -921,14 +921,14 @@ function drawAutoText(ctx, text, cx, cy, maxW, maxH, fn){
   }
 
   /* ── Paso 2: 2 líneas ──
-     Dividir por mitad de palabras.
-     Buscar el font size más grande donde:
-       a) La línea más ancha quepa en maxW
-       b) El bloque total (2 líneas + gap) quepa en maxH
+     El tamaño máximo posible donde:
+       a) Cada línea quepa en maxW
+       b) El bloque total (2 líneas) quepa en maxH
+     Techo por altura: fs = maxH / (2 * 1.10)
+     Dentro de ese techo, buscar el fs máximo donde la línea más ancha quepa en maxW.
   ── */
   const words = text.split(' ');
   if(words.length < 2){
-    /* Una sola palabra — no se puede dividir, reducir hasta que quepa */
     const fs = fitFS(ctx, text, maxW, `bold 1px ${fn}`, 10, fsMax);
     ctx.font = `bold ${fs}px ${fn}`;
     ctx.fillText(text, cx, cy);
@@ -939,16 +939,12 @@ function drawAutoText(ctx, text, cx, cy, maxW, maxH, fn){
   const l2    = words.slice(mid).join(' ');
   const wider = l1.length >= l2.length ? l1 : l2;
 
-  /* Límite por ancho de la línea más larga */
-  const fsByWidth = fitFS(ctx, wider, maxW, `bold 1px ${fn}`, 10, fsMax);
+  /* Techo máximo por altura: 2 líneas × interlineado deben caber en maxH */
+  const fsMaxByH = maxH / (2 * 1.10);
 
-  /* Límite por altura: 2 líneas + gap deben caber en maxH
-     blockH = 2 * fs * lineH_ratio  (con gap incluido en ratio)
-     maxH = 2 * fs * 1.15  →  fs = maxH / 2.3  */
-  const fsByHeight = maxH / 2.3;
-
-  const fs2 = Math.min(fsByWidth, fsByHeight);
-  const lh  = fs2 * 1.15;
+  /* Dentro de ese techo, buscar el más grande que quepa en maxW */
+  const fs2 = fitFS(ctx, wider, maxW, `bold 1px ${fn}`, 10, fsMaxByH);
+  const lh  = fs2 * 1.10;
 
   ctx.font = `bold ${fs2}px ${fn}`;
   ctx.fillText(l1, cx, cy - lh / 2);
