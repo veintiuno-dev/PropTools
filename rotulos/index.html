@@ -849,10 +849,9 @@ function calcAgentLayout(ctx, name, phone, email, maxW, startY, endY, fn, lay, s
                + (hasPhone ? GAP_NAME_PHONE + lineH : 0)
                + (hasEmail ? GAP_PHONE_EMAIL + emailLineH : 0);
 
-  /* Centrar verticalmente entre startY y endY */
-  const blockTop = startY + (endY - startY - blockH) / 2;
+  /* agentStartY es el top fijo del bloque — sin centrado vertical */
   const lines=[];
-  let y=blockTop + lineH/2;
+  let y=startY + lineH/2;
 
   for(const part of nameParts){
     lines.push({ text:part, fs:nameFS, y });
