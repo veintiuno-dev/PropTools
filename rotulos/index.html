@@ -388,9 +388,10 @@ const H = {
   agentStartY_remax:   1715,
   agentStartY_sunrise: 1700,
 
-  /* Fuentes */
-  nameFSmax:   604,
-  emailFSmax:  208,
+  /* Fuentes — remax tiene nombre en 2 líneas, necesita fs menor */
+  nameFSmax:        604,   /* base (usado por sunrise 1 línea) */
+  nameFSmax_remax:  460,   /* REMAX horizontal: 2 líneas, más compacto */
+  emailFSmax:       208,
 
   /* QR: posición exacta */
   qrSize: 1260,
@@ -793,13 +794,15 @@ async function drawHorizontal(ctx, s, fn, W, Ht){
    vertical y horizontalmente.
 ═══════════════════════════════════════════════════ */
 function calcAgentLayout(ctx, name, phone, email, maxW, startY, endY, fn, lay, s, forceTwoLines){
-  const nameFSmax  = lay.nameFSmax  * s;
+  /* REMAX horizontal fuerza 2 líneas → usar nameFSmax_remax si existe */
+  const rawNameFS  = (forceTwoLines && lay.nameFSmax_remax) ? lay.nameFSmax_remax : lay.nameFSmax;
+  const nameFSmax  = rawNameFS * s;
   const emailFSmax = lay.emailFSmax * s;
   const availH     = endY - startY;  /* altura disponible */
 
   /* Espaciado entre bloques */
   const GAP_NAME_PHONE = 20 * s;   /* gap nombre→phone */
-  const GAP_PHONE_EMAIL = 2 * s;   /* gap phone→email (mínimo) */
+  const GAP_PHONE_EMAIL = 0;       /* sin espacio extra entre phone y email */
 
   /* Intentar ajustar tamaños */
   let nameFS  = nameFSmax;
