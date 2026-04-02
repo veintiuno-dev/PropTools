@@ -826,7 +826,7 @@ function calcAgentLayout(ctx, name, phone, email, maxW, startY, endY, fn, lay, s
   for(let iter=0; iter<600; iter++){
     const nameParts = getNameParts(nameFS);
     const lineH     = nameFS * 1.10;   /* interlineado compacto */
-    const emailLineH= emailFS * 0.10;
+    const emailLineH= emailFS * 0.05;
 
     /* Comprobar ancho de cada parte */
     let allFit=true;
@@ -863,7 +863,7 @@ function calcAgentLayout(ctx, name, phone, email, maxW, startY, endY, fn, lay, s
   /* Construir líneas con posiciones Y */
   const nameParts  = getNameParts(nameFS);
   const lineH      = nameFS  * 1.10;
-  const emailLineH = emailFS * 0.10;
+  const emailLineH = emailFS * 0.05;
   const hasPhone   = phone.length>0;
   const hasEmail   = email.length>0;
 
