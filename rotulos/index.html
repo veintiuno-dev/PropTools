@@ -380,9 +380,12 @@ const H = {
   textZoneW:   5730,
   textZoneCX:  3270 + 5730 / 2,   /* = 6135 */
 
-  /* Zona útil texto rojo (con márgenes 480 en los 4 lados) */
-  redTxtX1: 3270 + MARGIN,          redTxtX2: 9000 - MARGIN,   /* ancho útil = 4770 */
-  redTxtY1: MARGIN,                  redTxtY2: 1485 - MARGIN,   /* alto útil  = 525  */
+  /* Zona útil texto rojo (márgenes 480 en los 4 lados dentro de la zona de texto)
+     X: desde textZoneX+MARGIN hasta H_W-MARGIN = 3270+480=3750 → 9000-480=8520, ancho=4770
+     Y: desde MARGIN hasta redEnd-MARGIN = 480 → 1005, alto=525
+     Centro X de esa zona = (3750+8520)/2 = 6135 */
+  redTxtX1: 3270 + MARGIN,          redTxtX2: H_W - MARGIN,    /* 3750→8520, ancho=4770 */
+  redTxtY1: MARGIN,                  redTxtY2: 1485 - MARGIN,   /* 480→1005,  alto=525  */
 
   /* Agente: y diferente por template */
   agentStartY_remax:   1715,
@@ -823,7 +826,7 @@ function calcAgentLayout(ctx, name, phone, email, maxW, startY, endY, fn, lay, s
   for(let iter=0; iter<600; iter++){
     const nameParts = getNameParts(nameFS);
     const lineH     = nameFS * 1.10;   /* interlineado compacto */
-    const emailLineH= emailFS * 0.70;
+    const emailLineH= emailFS * 0.30;
 
     /* Comprobar ancho de cada parte */
     let allFit=true;
@@ -860,7 +863,7 @@ function calcAgentLayout(ctx, name, phone, email, maxW, startY, endY, fn, lay, s
   /* Construir líneas con posiciones Y */
   const nameParts  = getNameParts(nameFS);
   const lineH      = nameFS  * 1.10;
-  const emailLineH = emailFS * 0.70;
+  const emailLineH = emailFS * 0.30;
   const hasPhone   = phone.length>0;
   const hasEmail   = email.length>0;
 
@@ -907,44 +910,62 @@ function drawAutoText(ctx, text, cx, cy, maxW, maxH, fn){
   ctx.textAlign='center';
   ctx.textBaseline='middle';
 
-  /* ── Paso 1: ver si cabe en 1 línea al tamaño máximo ── */
-  const fsMax = maxH * 0.88;
-  ctx.font = `bold ${fsMax}px ${fn}`;
-  const fitsOneLine = ctx.measureText(text).width <= maxW;
+  const fontTpl = `bold 1px ${fn}`;
 
-  if(fitsOneLine){
-    /* 1 línea: el tamaño más grande que quepa en maxW */
-    const fs = fitFS(ctx, text, maxW, `bold 1px ${fn}`, 10, fsMax);
-    ctx.font = `bold ${fs}px ${fn}`;
+  /* ── Paso 1: ver si el texto completo cabe en 1 línea ──
+     Probamos al tamaño máximo permitido por la altura.
+     Si a ese tamaño cabe en ancho → 1 línea al tamaño máximo.
+  ── */
+  const fsMax1 = maxH * 0.88;   /* techo por altura para 1 línea */
+  const fs1    = fitFS(ctx, text, maxW, fontTpl, 10, fsMax1);
+  ctx.font     = `bold ${fs1}px ${fn}`;
+
+  if(ctx.measureText(text).width <= maxW){
     ctx.fillText(text, cx, cy);
     return;
   }
 
   /* ── Paso 2: 2 líneas ──
-     El tamaño máximo posible donde:
-       a) Cada línea quepa en maxW
-       b) El bloque total (2 líneas) quepa en maxH
-     Techo por altura: fs = maxH / (2 * 1.10)
-     Dentro de ese techo, buscar el fs máximo donde la línea más ancha quepa en maxW.
+     Dividimos en mitad de palabras.
+     Techo por altura: las 2 líneas + gap deben caber en maxH.
+       lh = fs * 1.05  →  totalH = 2*lh = 2*fs*1.05
+       maxH = 2*fs*1.05  →  fsMaxByH = maxH / (2*1.05)
+     Techo por ancho: la línea más larga cabe en maxW.
+     Usamos el menor de los dos techos, luego fitFS dentro de él.
   ── */
   const words = text.split(' ');
   if(words.length < 2){
-    const fs = fitFS(ctx, text, maxW, `bold 1px ${fn}`, 10, fsMax);
-    ctx.font = `bold ${fs}px ${fn}`;
+    /* No se puede dividir — forzar al tamaño que quepa */
     ctx.fillText(text, cx, cy);
     return;
   }
-  const mid   = Math.ceil(words.length / 2);
-  const l1    = words.slice(0, mid).join(' ');
-  const l2    = words.slice(mid).join(' ');
-  const wider = l1.length >= l2.length ? l1 : l2;
 
-  /* Techo máximo por altura: 2 líneas × interlineado deben caber en maxH */
-  const fsMaxByH = maxH / (2 * 1.10);
+  /* Buscar la mejor división: la partición que minimiza
+     la diferencia de ancho entre líneas (más equilibrado) */
+  let bestMid = Math.ceil(words.length / 2);
+  let bestDiff = Infinity;
+  ctx.font = fontTpl.replace('1px', '100px');
+  for(let i=1; i<words.length; i++){
+    const a = ctx.measureText(words.slice(0,i).join(' ')).width;
+    const b = ctx.measureText(words.slice(i).join(' ')).width;
+    const diff = Math.abs(a-b);
+    if(diff < bestDiff){ bestDiff=diff; bestMid=i; }
+  }
 
-  /* Dentro de ese techo, buscar el más grande que quepa en maxW */
-  const fs2 = fitFS(ctx, wider, maxW, `bold 1px ${fn}`, 10, fsMaxByH);
-  const lh  = fs2 * 1.10;
+  const l1    = words.slice(0, bestMid).join(' ');
+  const l2    = words.slice(bestMid).join(' ');
+  const wider = ctx.measureText(l1).width >= ctx.measureText(l2).width ? l1 : l2;
+
+  /* Tamaño máximo para 2 líneas:
+     - Por ANCHO: la línea más larga debe caber en maxW
+     - Por ALTO:  el bloque (2 líneas con interlineado 1.05) debe caber en maxH
+       totalH = 2 * fs * 1.05  ≤  maxH  →  fs ≤ maxH / 2.10
+     Tomamos el menor de ambos techos. */
+  /* Interlineado mínimo (0.95) para maximizar el font size en 2 líneas:
+     totalH = 2 * fs * 0.975  ≤  maxH  →  fs ≤ maxH / 1.95 */
+  const fsCeilH = maxH / 1.95;
+  const fs2     = fitFS(ctx, wider, maxW, fontTpl, 10, fsCeilH);
+  const lh      = fs2 * 0.975;  /* interlineado muy compacto */
 
   ctx.font = `bold ${fs2}px ${fn}`;
   ctx.fillText(l1, cx, cy - lh / 2);
