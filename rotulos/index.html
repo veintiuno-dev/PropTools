@@ -805,7 +805,7 @@ function calcAgentLayout(ctx, name, phone, email, maxW, startY, endY, fn, lay, s
 
   /* Espaciado entre bloques */
   const GAP_NAME_PHONE = 20 * s;   /* gap nombre→phone */
-  const GAP_PHONE_EMAIL = 10 * s;  /* gap fijo entre phone y email */
+  const GAP_PHONE_EMAIL = nameFS * 0.20;  /* gap entre phone y email */
 
   /* Intentar ajustar tamaños */
   let nameFS  = nameFSmax;
