@@ -849,7 +849,7 @@ function calcAgentLayout(ctx, name, phone, email, maxW, startY, endY, fn, lay, s
     const hasPhone = phone.length>0;
     const hasEmail = email.length>0;
     const blockH   = nLines*lineH
-                   + (hasPhone ? GAP_NAME_PHONE + lineH : 0)
+                   + (hasPhone ? GAP_NAME_PHONE + nameFS : 0)
                    + (hasEmail ? GAP_PHONE_EMAIL + emailLineH : 0);
 
     if(allFit && blockH<=availH) break;
@@ -868,7 +868,7 @@ function calcAgentLayout(ctx, name, phone, email, maxW, startY, endY, fn, lay, s
   const hasEmail   = email.length>0;
 
   const blockH = nameParts.length*lineH
-               + (hasPhone ? GAP_NAME_PHONE + lineH : 0)
+               + (hasPhone ? GAP_NAME_PHONE + nameFS : 0)
                + (hasEmail ? GAP_PHONE_EMAIL + emailLineH : 0);
 
   /* agentStartY es el top fijo del bloque — sin centrado vertical */
@@ -882,7 +882,8 @@ function calcAgentLayout(ctx, name, phone, email, maxW, startY, endY, fn, lay, s
   if(hasPhone){
     y += GAP_NAME_PHONE;
     lines.push({ text:phone, fs:nameFS, y });
-    y += lineH;
+    /* Avanzar solo el tamaño real del teléfono + gap mínimo hacia el email */
+    y += nameFS;
   }
   if(hasEmail){
     y += GAP_PHONE_EMAIL;
