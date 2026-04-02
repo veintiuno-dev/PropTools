@@ -805,7 +805,7 @@ function calcAgentLayout(ctx, name, phone, email, maxW, startY, endY, fn, lay, s
 
   /* Espaciado entre bloques */
   const GAP_NAME_PHONE = 20 * s;   /* gap nombre→phone */
-  const GAP_PHONE_EMAIL = -(nameFS * 0.12); /* acercar phone y email */
+  const GAP_PHONE_EMAIL = 10 * s;  /* gap fijo entre phone y email */
 
   /* Intentar ajustar tamaños */
   let nameFS  = nameFSmax;
@@ -849,8 +849,8 @@ function calcAgentLayout(ctx, name, phone, email, maxW, startY, endY, fn, lay, s
     const hasPhone = phone.length>0;
     const hasEmail = email.length>0;
     const blockH   = nLines*lineH
-                   + (hasPhone ? GAP_NAME_PHONE + nameFS / 2 : 0)
-                   + (hasEmail ? GAP_PHONE_EMAIL + emailFS / 2 + emailLineH : 0);
+                   + (hasPhone ? GAP_NAME_PHONE + nameFS * 0.38 : 0)
+                   + (hasEmail ? GAP_PHONE_EMAIL + emailLineH : 0);
 
     if(allFit && blockH<=availH) break;
 
@@ -868,8 +868,8 @@ function calcAgentLayout(ctx, name, phone, email, maxW, startY, endY, fn, lay, s
   const hasEmail   = email.length>0;
 
   const blockH = nameParts.length*lineH
-               + (hasPhone ? GAP_NAME_PHONE + nameFS / 2 : 0)
-               + (hasEmail ? GAP_PHONE_EMAIL + emailFS / 2 + emailLineH : 0);
+               + (hasPhone ? GAP_NAME_PHONE + nameFS * 0.38 : 0)
+               + (hasEmail ? GAP_PHONE_EMAIL + emailLineH : 0);
 
   /* agentStartY es el top fijo del bloque — sin centrado vertical */
   const lines=[];
@@ -881,24 +881,24 @@ function calcAgentLayout(ctx, name, phone, email, maxW, startY, endY, fn, lay, s
   }
   if(hasPhone){
     y += GAP_NAME_PHONE;
-    lines.push({ text:phone, fs:nameFS, y });
-    /* Bajar al bottom del teléfono (textBaseline=middle → mitad del fs) */
-    y += nameFS / 2;
+    lines.push({ text:phone, fs:nameFS, y, baseline:'middle' });
+    /* bottom del phone ≈ y + nameFS*0.35 (cap-height con baseline=middle) */
+    y += nameFS * 0.38;
   }
   if(hasEmail){
     y += GAP_PHONE_EMAIL;
-    /* Subir al centro del email desde el bottom del teléfono */
-    y += emailFS / 2;
-    lines.push({ text:email, fs:emailFS, y });
+    /* email con baseline=top — y es el top del email */
+    lines.push({ text:email, fs:emailFS, y, baseline:'top' });
   }
 
   return { lines };
 }
 
 function drawAgentText(ctx, layout, cx, fn){
-  ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillStyle='#111111';
+  ctx.textAlign='center'; ctx.fillStyle='#111111';
   for(const line of layout.lines){
     ctx.font=`bold ${line.fs}px ${fn}`;
+    ctx.textBaseline = line.baseline || 'middle';
     ctx.fillText(line.text, cx, line.y);
   }
 }
