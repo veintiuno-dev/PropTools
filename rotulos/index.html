@@ -850,7 +850,7 @@ function calcAgentLayout(ctx, name, phone, email, maxW, startY, endY, fn, lay, s
     const hasEmail = email.length>0;
     const blockH   = nLines*lineH
                    + (hasPhone ? GAP_NAME_PHONE + nameFS * 0.38 : 0)
-                   + (hasEmail ? nameFS*0.20 + emailLineH : 0);
+                   + (hasEmail ? nameFS*0.28 + emailLineH : 0);
 
     if(allFit && blockH<=availH) break;
 
@@ -861,7 +861,7 @@ function calcAgentLayout(ctx, name, phone, email, maxW, startY, endY, fn, lay, s
   }
 
   /* Construir líneas con posiciones Y */
-  const GAP_PHONE_EMAIL = nameFS * 0.20;  /* calculado aquí donde nameFS tiene valor */
+  const GAP_PHONE_EMAIL = nameFS * 0.28;  /* calculado aquí donde nameFS tiene valor */
   const nameParts  = getNameParts(nameFS);
   const lineH      = nameFS  * 1.10;
   const emailLineH = emailFS * 0.05;
