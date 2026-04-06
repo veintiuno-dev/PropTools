@@ -112,6 +112,33 @@ function injectComponentStyles() {
     #pt-footer .pt-footer-brand strong { color: var(--ink); font-weight: 600; }
     #pt-footer .pt-footer-version { font-family: var(--font-mono); font-size: 11px; color: var(--ink-soft); opacity: 0.6; }
 
+    /* Nav horizontal en header (cuando no hay sidebar) */
+    #pt-header-nav {
+      display: flex; align-items: center; gap: 2px; margin-left: 8px;
+    }
+    #pt-header-nav a.pt-hnav-item {
+      display: flex; align-items: center; gap: 6px;
+      padding: 6px 10px; border-radius: 6px;
+      text-decoration: none; font-size: 13px; font-weight: 500;
+      color: var(--ink-soft); transition: background 0.12s, color 0.12s;
+      white-space: nowrap;
+    }
+    #pt-header-nav a.pt-hnav-item:hover { background: var(--surface2); color: var(--ink); }
+    #pt-header-nav a.pt-hnav-item.active { background: #EBF2FF; color: var(--blue); }
+    #pt-header-nav a.pt-hnav-item-admin:hover { background: #F5F3FF; color: #6D28D9; }
+    #pt-header-nav a.pt-hnav-item-admin.active { background: #EDE9FE; color: #6D28D9; }
+    #pt-header-nav .pt-hnav-divider {
+      width: 1px; height: 20px; background: var(--border); margin: 0 4px;
+    }
+    #pt-header .pt-logout-btn {
+      display: flex; align-items: center; gap: 6px;
+      padding: 6px 10px; border-radius: 6px;
+      background: none; border: none; cursor: pointer;
+      font-family: var(--font); font-size: 13px; font-weight: 500;
+      color: var(--ink-soft); transition: background 0.12s, color 0.12s;
+    }
+    #pt-header .pt-logout-btn:hover { background: #FEF2F2; color: #DC2626; }
+
     /* Mobile */
     #pt-sidebar-toggle { display: none; background: none; border: none; cursor: pointer; padding: 6px; color: var(--ink); }
     @media (max-width: 768px) {
@@ -137,9 +164,44 @@ function injectComponentStyles() {
 
 // ─── Header ───────────────────────────────────────────────────────────────────
 
-function renderHeader({ tenantLogo = '', tenantName = 'Tenant' } = {}) {
+function renderHeader({ tenantLogo = '', tenantName = 'Tenant', apps = [], active = '', role = 'agent' } = {}) {
   const el = document.getElementById('pt-header');
   if (!el) return;
+
+  const hasSidebar = !!document.getElementById('pt-sidebar');
+
+  // Nav horizontal: solo si no hay sidebar
+  let navHTML = '';
+  if (!hasSidebar && apps.length > 0) {
+    const toolApps  = apps.filter(a => a.requires_role !== 'admin');
+    const adminApps = apps.filter(a => a.requires_role === 'admin' && role === 'admin');
+
+    const buildLink = (app) => `
+      <a href="${app.href}"
+         class="pt-hnav-item${app.requires_role === 'admin' ? ' pt-hnav-item-admin' : ''}${active === app.slug ? ' active' : ''}">
+        ${app.icon_svg}${app.label}
+      </a>`;
+
+    const adminSection = adminApps.length
+      ? `<div class="pt-hnav-divider"></div>${adminApps.map(buildLink).join('')}`
+      : '';
+
+    navHTML = `
+      <nav id="pt-header-nav">
+        ${toolApps.map(buildLink).join('')}
+        ${adminSection}
+        <div class="pt-hnav-divider"></div>
+        <button class="pt-logout-btn" onclick="window.__ptLogout()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+            <polyline points="16 17 21 12 16 7"/>
+            <line x1="21" y1="12" x2="9" y2="12"/>
+          </svg>
+          Salir
+        </button>
+      </nav>`;
+  }
+
   el.innerHTML = `
     <button id="pt-sidebar-toggle" aria-label="Menú" onclick="window.__ptToggleSidebar()">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
@@ -152,6 +214,7 @@ function renderHeader({ tenantLogo = '', tenantName = 'Tenant' } = {}) {
       ${PROPTOOLS_SVG}
       <span>PropTools <span class="pt-app-badge">| App</span></span>
     </a>
+    ${navHTML}
     <div class="pt-header-spacer"></div>
     ${tenantLogo ? `<img src="${tenantLogo}" alt="${tenantName}" class="pt-tenant-logo" />` : ''}
   `;
@@ -284,6 +347,9 @@ async function initComponents({ active = '', version = '' } = {}) {
   renderHeader({
     tenantLogo: profile.tenants?.logo_url || '',
     tenantName: profile.tenants?.name     || 'Tenant',
+    apps: resolvedApps,
+    active,
+    role: profile.role,
   });
 
   renderSidebar({ apps: resolvedApps, active, role: profile.role });
