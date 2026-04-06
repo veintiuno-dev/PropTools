@@ -45,13 +45,12 @@ function injectComponentStyles() {
       display: grid;
       grid-template-columns: var(--sidebar-w) 1fr;
       grid-template-rows: var(--header-h) 1fr auto;
-      grid-template-areas: "header header" "sidebar main" "sidebar footer";
       min-height: 100vh;
     }
 
     /* Header */
     #pt-header {
-      grid-area: header; position: sticky; top: 0; z-index: 100;
+      grid-column: 1 / -1; position: sticky; top: 0; z-index: 100;
       height: var(--header-h); background: var(--surface); border-bottom: 1px solid var(--border);
       display: flex; align-items: center; padding: 0 28px; gap: 10px;
     }
@@ -66,7 +65,7 @@ function injectComponentStyles() {
 
     /* Sidebar */
     #pt-sidebar {
-      grid-area: sidebar; background: var(--surface); border-right: 1px solid var(--border);
+      background: var(--surface); border-right: 1px solid var(--border);
       display: flex; flex-direction: column; padding: 24px 16px; gap: 2px;
       position: sticky; top: var(--header-h); height: calc(100vh - var(--header-h)); overflow-y: auto;
     }
@@ -100,11 +99,11 @@ function injectComponentStyles() {
     #pt-sidebar .pt-logout-btn:hover { background: #FEF2F2; color: #DC2626; }
 
     /* Main */
-    #pt-main { grid-area: main; padding: 32px 36px; min-width: 0; }
+    #pt-main { padding: 32px 36px; min-width: 0; }
 
     /* Footer */
     #pt-footer {
-      grid-area: footer; border-top: 1px solid var(--border); background: var(--surface);
+      border-top: 1px solid var(--border); background: var(--surface);
       padding: 16px 28px; display: flex; align-items: center; justify-content: space-between; gap: 16px;
     }
     #pt-footer .pt-footer-brand {
@@ -116,7 +115,7 @@ function injectComponentStyles() {
     /* Mobile */
     #pt-sidebar-toggle { display: none; background: none; border: none; cursor: pointer; padding: 6px; color: var(--ink); }
     @media (max-width: 768px) {
-      #pt-layout { grid-template-columns: 1fr; grid-template-areas: "header" "main" "footer"; }
+      #pt-layout { grid-template-columns: 1fr; }
       #pt-sidebar-toggle { display: flex; }
       #pt-sidebar {
         position: fixed; top: var(--header-h); left: 0; width: var(--sidebar-w);
