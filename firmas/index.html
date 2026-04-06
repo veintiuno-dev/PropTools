@@ -46,7 +46,7 @@ body { font-family:'DM Sans',-apple-system,sans-serif; background:var(--bg); col
 .login-footer { margin-top: 20px; text-align: center; font-size: 12px; color: var(--muted); }
 
 /* APP */
-.app-screen { display: none; min-height: 100vh; grid-template-columns: 400px 1fr; grid-template-rows: auto 1fr; }
+.app-screen { display: none; min-height: 100vh; grid-template-columns: 400px 1fr; grid-template-rows: 88px 1fr; grid-template-areas: "header header" "aside main"; }
 .app-screen.visible { display: grid; }
 header {
   grid-column: 1/-1;
@@ -254,7 +254,7 @@ main { background: var(--bg); overflow-y: auto; display: flex; flex-direction: c
 <div class="app-screen" id="app-screen">
   <header id="pt-header"></header>
 
-  <aside>
+  <aside style="grid-area: aside;">
     <div>
       <p class="section-label">Template</p>
       <div class="template-grid" id="template-grid"></div>
