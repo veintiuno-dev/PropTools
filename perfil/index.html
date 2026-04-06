@@ -396,7 +396,7 @@ async function saveProfile() {
 /* ── Event listeners ── */
 el('btn-login').addEventListener('click', doLogin);
 el('login-password').addEventListener('keydown', e => { if(e.key === 'Enter') doLogin(); });
-el('btn-logout').addEventListener('click', doLogout);
+// logout manejado por components.js → window.__ptLogout
 el('btn-save').addEventListener('click', saveProfile);
 el('photo-upload').addEventListener('change', e => uploadPhoto(e.target.files[0]));
 ['f-name', 'f-role'].forEach(id => {
