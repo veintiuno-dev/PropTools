@@ -1089,13 +1089,14 @@ async function delRotulo(id, name){
 /* ═══════════════════════════════════════════════════
    INIT
 ═══════════════════════════════════════════════════ */
-(async () => {
+{
   const result = await initComponents({ active: 'rotulos' });
-  if (!result) return;
-  currentUser = (await sb.auth.getSession()).data.session.user;
-  await loadContext();
-  el('splash').classList.add('hidden');
-})();
+  if (result) {
+    currentUser = (await sb.auth.getSession()).data.session.user;
+    await loadContext();
+    el('splash').classList.add('hidden');
+  }
+}
 </script>
 </body>
 </html>
