@@ -304,7 +304,17 @@ async function initComponents({ active = '', version = '' } = {}) {
   }
 
   // 1. Sesión
-  const { data: { session } } = await sb.auth.getSession();
+  // getSession() puede retornar null en el primer render aunque haya sesión en localStorage.
+  // Esperar hasta 3s a que Supabase la restaure antes de redirigir.
+  let session = (await sb.auth.getSession()).data.session;
+  if (!session) {
+    session = await new Promise(resolve => {
+      const timeout = setTimeout(() => resolve(null), 3000);
+      const { data: { subscription } } = sb.auth.onAuthStateChange((_event, s) => {
+        if (s) { clearTimeout(timeout); subscription.unsubscribe(); resolve(s); }
+      });
+    });
+  }
   if (!session) {
     window.location.href = '/PropTools/perfil/';
     return null;
