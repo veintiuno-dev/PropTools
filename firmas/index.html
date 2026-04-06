@@ -844,13 +844,14 @@ el('guide-tabs').addEventListener('click', e => {
 });
 
 /* ── Init ── */
-(async () => {
+{
   const result = await initComponents({ active: 'firmas' });
-  if (!result) return;
-  currentUser = (await sb.auth.getSession()).data.session.user;
-  await loadContext();
-  document.getElementById('splash').classList.add('hidden');
-})();
+  if (result) {
+    currentUser = (await sb.auth.getSession()).data.session.user;
+    await loadContext();
+    document.getElementById('splash').classList.add('hidden');
+  }
+}
 </script>
 </body>
 </html>
