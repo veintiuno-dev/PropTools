@@ -554,7 +554,7 @@ function syncPresets(){
 
 el('btn-pdf').addEventListener('click', downloadPDF);
 el('btn-png').addEventListener('click', downloadPNG);
-el('btn-logout').addEventListener('click', doLogout);
+// logout manejado por components.js → window.__ptLogout
 el('btn-login').addEventListener('click', doLogin);
 el('login-password').addEventListener('keydown',e=>{ if(e.key==='Enter') doLogin(); });
 el('btn-save-rotulo').addEventListener('click', saveRotulo);
