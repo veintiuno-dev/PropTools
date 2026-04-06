@@ -492,20 +492,24 @@ async function loadContext(){
     if(p.whatsapp) setV('f-whatsapp',p.whatsapp);
     if(p.email)    setV('f-email',   p.email);
 
-    el('login-screen').style.display='none';
+    if(el('login-screen')) el('login-screen').style.display='none';
     el('app-screen').classList.add('visible');
-    el('btn-login').disabled=false; el('btn-login').textContent='Ingresar';
-    el('db-dot').className='db-dot ok';
-    el('db-status-text').textContent='Conectado';
+    if(el('btn-login')){ el('btn-login').disabled=false; el('btn-login').textContent='Ingresar'; }
+    if(el('db-dot')) el('db-dot').className='db-dot ok';
+    if(el('db-status-text')) el('db-status-text').textContent='Conectado';
 
     buildTemplateGrid();
     await loadSaved();
     await loadFonts();
     renderPreview();
   }catch(e){
-    el('login-error').textContent=e.message; el('login-error').style.display='block';
-    el('btn-login').disabled=false; el('btn-login').textContent='Ingresar';
-    await sb.auth.signOut();
+    console.error('[loadContext]', e);
+    if(el('login-error')){ el('login-error').textContent=e.message; el('login-error').style.display='block'; }
+    if(el('btn-login')){ el('btn-login').disabled=false; el('btn-login').textContent='Ingresar'; }
+    // Solo cerrar sesión si el error es de auth, no de DOM
+    if(e.message && (e.message.includes('no encontrado') || e.message.includes('auth'))) {
+      await sb.auth.signOut();
+    }
   }
 }
 
