@@ -132,72 +132,9 @@
     }
 
     /* ── LAYOUT ───────────────────────────────────────── */
-    .app { display: flex; flex: 1; min-height: 0; }
+    .app { display: block; flex: 1; min-height: 0; }
 
-    /* ── ASIDE ────────────────────────────────────────── */
-    aside {
-      width: 360px;
-      flex-shrink: 0;
-      background: var(--surface);
-      border-right: 1px solid var(--border);
-      display: flex;
-      flex-direction: column;
-      padding: 28px 0;
-      overflow-y: auto;
-    }
 
-    .aside-section-label {
-      font-size: 10px;
-      font-weight: 600;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      color: var(--ink-light);
-      padding: 0 24px;
-      margin-bottom: 8px;
-      font-family: 'DM Mono', monospace;
-    }
-
-    nav { padding: 0 12px; margin-bottom: 28px; }
-
-    .nav-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 10px 12px;
-      border-radius: 8px;
-      text-decoration: none;
-      color: var(--ink-mid);
-      font-size: 14px;
-      font-weight: 500;
-      transition: background .12s, color .12s;
-      cursor: pointer;
-    }
-
-    .nav-item:hover { background: var(--surface2); color: var(--ink); }
-    .nav-item.active { background: var(--blue-light); color: var(--blue); }
-
-    .nav-item svg {
-      width: 18px;
-      height: 18px;
-      flex-shrink: 0;
-      opacity: .7;
-    }
-
-    .nav-item.active svg { opacity: 1; }
-
-    .nav-divider { height: 1px; background: var(--border); margin: 8px 12px; }
-
-    .admin-badge {
-      margin-left: auto;
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: .4px;
-      font-family: 'DM Mono', monospace;
-      background: var(--blue);
-      color: #fff;
-      border-radius: 4px;
-      padding: 2px 6px;
-    }
 
     /* ── MAIN ─────────────────────────────────────────── */
     main {
@@ -713,7 +650,6 @@
     }
 
     @media (max-width: 820px) {
-      aside { display: none; }
       main  { padding: 24px 20px; }
     }
   </style>
@@ -734,9 +670,6 @@
 
 <!-- APP -->
 <div class="app">
-
-  <!-- ASIDE -->
-  <aside id="pt-sidebar"></aside>
 
   <!-- MAIN -->
   <main>
