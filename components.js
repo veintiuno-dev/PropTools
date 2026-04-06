@@ -268,7 +268,17 @@ async function initComponents({ active = '', version = '' } = {}) {
 
   if (appsError) console.warn('[PropTools] Error cargando apps:', appsError);
 
-  const resolvedApps = apps || [];
+  let resolvedApps = apps || [];
+
+  // Fallback: si el tenant no tiene plan asignado, cargar todos los apps del catálogo
+  if (resolvedApps.length === 0) {
+    console.warn('[PropTools] No apps via RPC (¿tenant sin plan?). Usando catálogo completo.');
+    const { data: allApps } = await sb
+      .from('apps')
+      .select('slug, label, icon_svg, href, nav_order, requires_role')
+      .order('nav_order');
+    resolvedApps = allApps || [];
+  }
 
   // 4 + 5. Render
   renderHeader({
