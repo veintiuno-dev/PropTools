@@ -421,8 +421,10 @@ function toast(msg) {
   setTimeout(() => t.classList.remove('show'), 2800);
 }
 function dbStatus(state, msg) {
-  el('db-dot').className = 'db-dot ' + (state === 'ok' ? 'ok' : state === 'err' ? 'err' : '');
-  el('db-status-text').textContent = msg;
+  const dot  = el('db-dot');
+  const text = el('db-status-text');
+  if (dot)  dot.className = 'db-dot ' + (state === 'ok' ? 'ok' : state === 'err' ? 'err' : '');
+  if (text) text.textContent = msg;
 }
 
 /* ── Auth ── */
