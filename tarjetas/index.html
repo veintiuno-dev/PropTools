@@ -965,13 +965,14 @@ el('guidelines-toggle').addEventListener('click',()=>{
 });
 
 /* ── Init ── */
-(async () => {
+{
   const result = await initComponents({ active: 'tarjetas' });
-  if (!result) return;
-  currentUser = (await sb.auth.getSession()).data.session.user;
-  await loadContext();
-  document.getElementById('splash').classList.add('hidden');
-})();
+  if (result) {
+    currentUser = (await sb.auth.getSession()).data.session.user;
+    await loadContext();
+    document.getElementById('splash').classList.add('hidden');
+  }
+}
 </script>
 </body>
 </html>
