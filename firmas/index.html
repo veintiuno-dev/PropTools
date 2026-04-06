@@ -790,7 +790,7 @@ el('btn-login').addEventListener('click', doLogin);
 el('login-password').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
 
 // Logout
-el('btn-logout').addEventListener('click', doLogout);
+// logout manejado por components.js → window.__ptLogout
 
 // Campos — actualizar preview en tiempo real
 ['f-name','f-role','f-email','f-phone','f-whatsapp','f-facebook','f-instagram','f-linkedin','f-tiktok']
