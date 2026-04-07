@@ -37,7 +37,7 @@ nav {
 }
 .nav-brand { display:flex; align-items:center; gap:10px; text-decoration:none; }
 .nav-bar { width:5px; height:26px; border-radius:3px; flex-shrink:0; background:linear-gradient(to bottom,var(--grad-start),var(--grad-mid),var(--grad-end)); }
-.nav-wordmark { font-size:18px; line-height:1; letter-spacing:-0.5px; white-space:nowrap; }
+.nav-wordmark { font-size:18px; line-height:1; letter-spacing:-0.5px; white-space:nowrap; display:flex; align-items:baseline; gap:0; }
 .nav-wordmark .prop  { font-weight:300; color:var(--ink); }
 .nav-wordmark .tools { font-weight:900; letter-spacing:-1px; color:var(--ink); }
 .nav-cta {
@@ -50,10 +50,10 @@ nav {
 
 /* ── HERO — fondo oscuro como gener8tor ── */
 .hero {
-  min-height:100vh;
+  min-height:80vh;
   display:flex; flex-direction:column;
   justify-content:center;
-  padding:120px 48px 80px;
+  padding:100px 48px 72px;
   background:var(--ink);
   position:relative; overflow:hidden;
 }
@@ -269,7 +269,7 @@ footer {
 }
 .footer-brand { display:flex; align-items:center; gap:10px; text-decoration:none; }
 .footer-bar { width:4px; height:24px; border-radius:2px; flex-shrink:0; background:linear-gradient(to bottom,var(--grad-start),var(--grad-mid),var(--grad-end)); }
-.footer-wordmark { font-size:18px; line-height:1; }
+.footer-wordmark { font-size:18px; line-height:1; display:flex; align-items:baseline; gap:0; }
 .footer-wordmark .prop  { font-weight:300; color:rgba(255,255,255,.9); }
 .footer-wordmark .tools { font-weight:900; letter-spacing:-1px; color:rgba(255,255,255,.9); }
 .footer-links { display:flex; gap:28px; }
@@ -279,7 +279,7 @@ footer {
 
 @media (max-width:768px) {
   nav { padding:0 20px; }
-  .hero { padding:100px 20px 60px; }
+  .hero { padding:80px 20px 48px; min-height:70vh; }
   h1 { font-size:40px; letter-spacing:-1.5px; }
   .stats { padding:48px 20px; }
   .stats-inner { grid-template-columns:1fr; gap:32px; }
