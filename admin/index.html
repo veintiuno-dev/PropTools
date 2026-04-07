@@ -644,6 +644,149 @@
       cursor: text;
     }
 
+    
+    /* ── ADMIN TABS ──────────────────────────────────── */
+    .admin-tabs {
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 32px;
+      margin-top: -8px;
+    }
+
+    .admin-tab {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 20px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--ink-mid);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all .15s;
+      user-select: none;
+      margin-bottom: -1px;
+    }
+
+    .admin-tab:hover { color: var(--ink); }
+
+    .admin-tab.active {
+      color: var(--blue);
+      border-bottom-color: var(--blue);
+      font-weight: 600;
+    }
+
+    .admin-tab svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+    .admin-panel { display: none; }
+    .admin-panel.active { display: block; }
+
+    /* ── EQUIPOS PANEL ───────────────────────────────── */
+    .eq-form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 14px;
+      align-items: end;
+    }
+
+    .eq-form-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr auto;
+      gap: 14px;
+      align-items: end;
+      margin-top: 14px;
+    }
+
+    .eq-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .eq-table { width: 100%; border-collapse: collapse; }
+
+    .eq-table th {
+      text-align: left;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .7px;
+      color: var(--ink-light);
+      font-family: 'DM Mono', monospace;
+      padding: 0 16px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .eq-table th:first-child { padding-left: 24px; }
+    .eq-table th:last-child  { padding-right: 24px; text-align: right; }
+
+    .eq-table td {
+      padding: 13px 16px;
+      border-bottom: 1px solid var(--surface2);
+      font-size: 13px;
+      vertical-align: middle;
+    }
+
+    .eq-table td:first-child { padding-left: 24px; }
+    .eq-table td:last-child  { padding-right: 24px; text-align: right; }
+    .eq-table tr:last-child td { border-bottom: none; }
+
+    .tipo-pill {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      font-family: 'DM Mono', monospace;
+      letter-spacing: .3px;
+    }
+
+    .tipo-laptop    { background: #EDE9FE; color: #5B21B6; }
+    .tipo-proyector { background: #DBEAFE; color: #1D4ED8; }
+    .tipo-camara    { background: #FCE7F3; color: #9D174D; }
+    .tipo-audio     { background: #D1FAE5; color: #065F46; }
+    .tipo-otro      { background: var(--surface2); color: var(--ink-mid); }
+
+    .estado-select {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--surface2);
+      cursor: pointer;
+      color: var(--ink);
+      padding: 4px 28px 4px 10px;
+      height: 30px;
+      outline: none;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%235A6070' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 8px center;
+      transition: border-color .15s;
+    }
+
+    .estado-select:focus { border-color: var(--blue); }
+    .estado-disponible  { border-color: #BBF7D0; background-color: var(--green-light); color: var(--green); }
+    .estado-reservado   { border-color: #BFDBFE; background-color: var(--blue-light);  color: var(--blue); }
+    .estado-mantenimiento { border-color: #FDE68A; background-color: var(--amber-light); color: var(--amber); }
+
+    .eq-search {
+      height: 36px;
+      padding: 0 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      color: var(--ink);
+      outline: none;
+      width: 220px;
+      transition: border-color .15s;
+    }
+    .eq-search:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(27,110,243,.1); }
+
     /* ── RESPONSIVE ───────────────────────────────────── */
     @media (max-width: 1100px) {
       .content-grid { grid-template-columns: 1fr; }
@@ -713,9 +856,26 @@
   <main>
 
     <div class="page-header">
-      <div class="page-title">Gestión de agentes</div>
-      <div class="page-subtitle">Invita nuevos agentes a tu equipo y administra accesos.</div>
+      <div class="page-title">Administración</div>
+      <div class="page-subtitle">Gestión de agentes, invitaciones y equipos de oficina.</div>
     </div>
+
+    <!-- Admin Tabs -->
+    <div class="admin-tabs">
+      <div class="admin-tab active" id="tab-agentes" onclick="switchAdminTab('agentes')">
+        <svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5.5" r="2.5" stroke="currentColor" stroke-width="1.3"/><path d="M2.5 14c0-3.038 2.462-5.5 5.5-5.5s5.5 2.462 5.5 5.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+        Agentes
+      </div>
+      <div class="admin-tab" id="tab-equipos" onclick="switchAdminTab('equipos')">
+        <svg viewBox="0 0 16 16" fill="none"><rect x="1" y="3" width="14" height="9" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M5 14h6M8 12v2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+        Equipos de oficina
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         PANEL: AGENTES
+    ════════════════════════════════════════════════════ -->
+    <div class="admin-panel active" id="panel-agentes">
 
     <!-- Stats -->
     <div class="stats-row">
@@ -866,6 +1026,109 @@
 
       </div><!-- end right col -->
     </div><!-- end grid -->
+
+  </div><!-- end panel-agentes -->
+
+    <!-- ═══════════════════════════════════════════════════
+         PANEL: EQUIPOS
+    ════════════════════════════════════════════════════ -->
+    <div class="admin-panel" id="panel-equipos">
+
+      <!-- Equipos Stats -->
+      <div class="eq-stats">
+        <div class="stat-card">
+          <div class="stat-label">Total equipos</div>
+          <div class="stat-value blue" id="eq-stat-total">–</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Disponibles</div>
+          <div class="stat-value green" id="eq-stat-disponibles">–</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Reservados</div>
+          <div class="stat-value amber" id="eq-stat-reservados">–</div>
+        </div>
+      </div>
+
+      <!-- Agregar equipo -->
+      <div class="card" style="margin-bottom:24px;">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Agregar equipo</div>
+            <div class="card-subtitle">Registra un nuevo equipo disponible para reserva</div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="eq-form-grid">
+            <div class="form-group" style="margin:0">
+              <label>Tipo</label>
+              <select id="eq-tipo">
+                <option value="">Seleccionar…</option>
+                <option value="laptop">Laptop</option>
+                <option value="proyector">Proyector</option>
+                <option value="camara">Cámara</option>
+                <option value="audio">Equipo de audio</option>
+                <option value="otro">Otro</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin:0">
+              <label>Marca</label>
+              <input type="text" id="eq-marca" placeholder="ej. Dell, Sony, Canon" />
+            </div>
+            <div class="form-group" style="margin:0">
+              <label>Modelo</label>
+              <input type="text" id="eq-modelo" placeholder="ej. XPS 15, Alpha 7" />
+            </div>
+          </div>
+          <div class="eq-form-grid-2">
+            <div class="form-group" style="margin:0">
+              <label>Nombre / Identificador</label>
+              <input type="text" id="eq-nombre" placeholder="ej. Laptop Sala A" />
+            </div>
+            <div class="form-group" style="margin:0">
+              <label>Descripción <span class="optional">(opcional)</span></label>
+              <input type="text" id="eq-descripcion" placeholder="Notas adicionales" />
+            </div>
+            <button class="btn btn-primary" onclick="eqAgregar()" style="white-space:nowrap;">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1v12M1 7h12" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
+              Agregar
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Inventario -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Inventario</div>
+            <div class="card-subtitle">Equipos registrados en el sistema</div>
+          </div>
+          <input type="text" class="eq-search" placeholder="Buscar equipo…" oninput="eqRenderTable()" id="eq-search">
+        </div>
+
+        <div id="eq-loading" style="padding:40px;text-align:center;color:var(--ink-light);font-size:13px;">Cargando…</div>
+
+        <table class="eq-table" id="eq-table" style="display:none;">
+          <thead>
+            <tr>
+              <th>Equipo</th>
+              <th>Tipo</th>
+              <th>Marca / Modelo</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="eq-tbody"></tbody>
+        </table>
+
+        <div class="empty-state" id="eq-empty" style="display:none;">
+          <svg viewBox="0 0 40 40" fill="none"><rect x="4" y="8" width="32" height="22" rx="3" stroke="currentColor" stroke-width="1.5"/><path d="M14 32h12M20 30v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          <p>No hay equipos registrados aún.</p>
+        </div>
+      </div>
+
+    </div><!-- end panel-equipos -->
 
   </main>
 </div>
@@ -1114,6 +1377,132 @@ async function resendInvite(id, email) {
 $('btn-refresh').addEventListener('click', loadInvites);
 
 // ── BOOT ───────────────────────────────────────────────────
+
+// ── ADMIN TABS ──────────────────────────────────────────────
+function switchAdminTab(tab) {
+  ['agentes','equipos'].forEach(t => {
+    document.getElementById('tab-' + t).classList.toggle('active', t === tab);
+    document.getElementById('panel-' + t).classList.toggle('active', t === tab);
+  });
+  if (tab === 'equipos' && window._eqLoaded !== true) {
+    eqLoad();
+    window._eqLoaded = true;
+  }
+}
+
+// ── EQUIPOS ─────────────────────────────────────────────────
+let _equipos = [];
+
+async function eqLoad() {
+  $('eq-loading').style.display = 'block';
+  $('eq-table').style.display   = 'none';
+  $('eq-empty').style.display   = 'none';
+
+  const { data, error } = await sb.from('equipos').select('*').order('tipo').order('nombre');
+  $('eq-loading').style.display = 'none';
+
+  if (error) { toast('Error cargando equipos: ' + error.message, 'error'); return; }
+  _equipos = data || [];
+  eqUpdateStats();
+  eqRenderTable();
+}
+
+function eqUpdateStats() {
+  $('eq-stat-total').textContent       = _equipos.length;
+  $('eq-stat-disponibles').textContent = _equipos.filter(e => e.estado === 'disponible').length;
+  $('eq-stat-reservados').textContent  = _equipos.filter(e => e.estado === 'reservado').length;
+}
+
+function eqTipoLabel(t) {
+  return { laptop:'Laptop', proyector:'Proyector', camara:'Cámara', audio:'Audio', otro:'Otro' }[t] || t || 'Otro';
+}
+
+function eqRenderTable() {
+  const q = ($('eq-search').value || '').toLowerCase();
+  const rows = _equipos.filter(e =>
+    [e.nombre, e.marca, e.modelo, e.tipo].some(v => (v||'').toLowerCase().includes(q))
+  );
+
+  if (!rows.length) {
+    $('eq-table').style.display = 'none';
+    $('eq-empty').style.display = 'block';
+    return;
+  }
+
+  $('eq-empty').style.display = 'none';
+  $('eq-table').style.display = 'table';
+
+  $('eq-tbody').innerHTML = rows.map(e => `
+    <tr>
+      <td>
+        <div style="font-weight:500">${e.nombre || '—'}</div>
+        ${e.descripcion ? `<div style="font-size:12px;color:var(--ink-mid);margin-top:2px;">${e.descripcion}</div>` : ''}
+      </td>
+      <td><span class="tipo-pill tipo-${e.tipo || 'otro'}">${eqTipoLabel(e.tipo)}</span></td>
+      <td>
+        <div style="font-weight:500">${e.marca || '—'}</div>
+        <div style="font-size:11px;color:var(--ink-mid);font-family:'DM Mono',monospace;margin-top:2px;">${e.modelo || '—'}</div>
+      </td>
+      <td>
+        <select class="estado-select estado-${e.estado||'disponible'}"
+                onchange="eqCambiarEstado('${e.id}', this.value, this)">
+          <option value="disponible"     ${e.estado==='disponible'?'selected':''}>● Disponible</option>
+          <option value="reservado"      ${e.estado==='reservado'?'selected':''}>● Reservado</option>
+          <option value="mantenimiento"  ${e.estado==='mantenimiento'?'selected':''}>● Mantenimiento</option>
+        </select>
+      </td>
+      <td>
+        <button class="btn btn-danger btn-sm" onclick="eqEliminar('${e.id}')">Eliminar</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+async function eqAgregar() {
+  const tipo        = $('eq-tipo').value;
+  const marca       = $('eq-marca').value.trim();
+  const modelo      = $('eq-modelo').value.trim();
+  const nombre      = $('eq-nombre').value.trim();
+  const descripcion = $('eq-descripcion').value.trim();
+
+  if (!tipo || !marca || !modelo || !nombre) {
+    toast('Completá tipo, marca, modelo y nombre.', 'error'); return;
+  }
+
+  const { error } = await sb.from('equipos').insert({
+    tipo, marca, modelo, nombre,
+    descripcion: descripcion || null,
+    estado: 'disponible'
+  });
+
+  if (error) { toast('Error: ' + error.message, 'error'); return; }
+
+  ['eq-tipo','eq-marca','eq-modelo','eq-nombre','eq-descripcion'].forEach(id => {
+    const el = $(id); if (el.tagName === 'SELECT') el.value = ''; else el.value = '';
+  });
+
+  toast('✓ Equipo agregado', 'success');
+  await eqLoad();
+}
+
+async function eqCambiarEstado(id, nuevoEstado, sel) {
+  const { error } = await sb.from('equipos').update({ estado: nuevoEstado }).eq('id', id);
+  if (error) { toast('Error actualizando estado', 'error'); return; }
+
+  sel.className = `estado-select estado-${nuevoEstado}`;
+  _equipos = _equipos.map(e => e.id === id ? {...e, estado: nuevoEstado} : e);
+  eqUpdateStats();
+  toast('✓ Estado actualizado', 'success');
+}
+
+async function eqEliminar(id) {
+  if (!confirm('¿Eliminar este equipo del inventario?')) return;
+  const { error } = await sb.from('equipos').delete().eq('id', id);
+  if (error) { toast('Error eliminando: ' + error.message, 'error'); return; }
+  toast('Equipo eliminado');
+  await eqLoad();
+}
+
 async function boot() {
   // initComponents verifica sesión, carga perfil+apps, renderiza header+sidebar
   const result = await initComponents({ active: 'admin' });
