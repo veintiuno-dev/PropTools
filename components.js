@@ -8,14 +8,9 @@
  * Requiere que `sb` (Supabase client) esté definido antes de este script.
  */
 
-// ─── SVG Logo ─────────────────────────────────────────────────────────────────
+// ─── Logo ─────────────────────────────────────────────────────────────────────
 
-const PROPTOOLS_SVG = `<svg width="28" height="32" viewBox="0 0 32 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect x="1.375" y="1.375" width="7.25"  height="33.25" rx="2.75" fill="#1B6EF3" stroke="#1B6EF3" stroke-width="0.75"/>
-  <rect x="1.375" y="1.375" width="30.25" height="7.25"  rx="2.75" fill="#1B6EF3" stroke="#1B6EF3" stroke-width="0.75"/>
-  <rect x="1.375" y="14.375" width="20.25" height="7.25" rx="2.75" fill="#1B6EF3" stroke="#1B6EF3" stroke-width="0.75"/>
-  <rect x="23.375" y="14.375" width="8.25" height="22.25" rx="2.75" fill="#1B6EF3" stroke="#1B6EF3" stroke-width="0.75"/>
-</svg>`;
+const PROPTOOLS_SVG = `<span class="pt-logo-bar"></span><span class="pt-logo-wordmark"><span class="pt-logo-prop">Prop</span><span class="pt-logo-tools">TOOLS</span></span>`;
 
 // ─── CSS ──────────────────────────────────────────────────────────────────────
 
@@ -25,9 +20,12 @@ function injectComponentStyles() {
   style.id = 'pt-components-css';
   style.textContent = `
     :root {
-      --blue:      #1B6EF3;
-      --blue-dark: #1558C9;
-      --ink:       #0D0F12;
+      --grad-start: #FF3A5C;
+      --grad-mid:   #C044E8;
+      --grad-end:   #5B4FE8;
+      --blue:      #5B4FE8;
+      --blue-dark: #4A3DB5;
+      --ink:       #0E0E1A;
       --ink-soft:  #4B5260;
       --surface:   #ffffff;
       --surface2:  #F4F5F7;
@@ -58,8 +56,14 @@ function injectComponentStyles() {
       display: flex; align-items: center; gap: 10px;
       text-decoration: none; color: var(--ink); flex-shrink: 0;
     }
-    #pt-header .pt-logo-mark span { font-weight: 700; font-size: 17px; letter-spacing: -0.3px; }
-    #pt-header .pt-app-badge { font-weight: 300; color: var(--ink-soft); }
+    .pt-logo-bar {
+      display: inline-block; width: 6px; height: 32px; border-radius: 3px; flex-shrink: 0;
+      background: linear-gradient(to bottom, var(--grad-start), var(--grad-mid), var(--grad-end));
+    }
+    .pt-logo-wordmark { font-size: 20px; line-height: 1; letter-spacing: -0.5px; white-space: nowrap; }
+    .pt-logo-prop  { font-weight: 300; color: var(--ink); }
+    .pt-logo-tools { font-weight: 900; letter-spacing: -1px; color: var(--ink); }
+    #pt-header .pt-app-badge { font-weight: 300; color: var(--ink-soft); font-size: 14px; }
     #pt-header .pt-header-spacer { flex: 1; }
     #pt-header .pt-tenant-logo { height: 50px; width: auto; object-fit: contain; }
 
@@ -83,7 +87,7 @@ function injectComponentStyles() {
       width: 18px; height: 18px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
     }
     #pt-sidebar a.pt-nav-item:hover       { background: var(--surface2); color: var(--ink); }
-    #pt-sidebar a.pt-nav-item.active      { background: #EBF2FF; color: var(--blue); }
+    #pt-sidebar a.pt-nav-item.active      { background: #EDEAFF; color: var(--blue); }
     #pt-sidebar a.pt-nav-item-admin:hover { background: #F5F3FF; color: #6D28D9; }
     #pt-sidebar a.pt-nav-item-admin.active{ background: #EDE9FE; color: #6D28D9; }
 
@@ -124,7 +128,7 @@ function injectComponentStyles() {
       white-space: nowrap;
     }
     #pt-header-nav a.pt-hnav-item:hover { background: var(--surface2); color: var(--ink); }
-    #pt-header-nav a.pt-hnav-item.active { background: #EBF2FF; color: var(--blue); }
+    #pt-header-nav a.pt-hnav-item.active { background: #EDEAFF; color: var(--blue); }
     #pt-header-nav a.pt-hnav-item-admin:hover { background: #F5F3FF; color: #6D28D9; }
     #pt-header-nav a.pt-hnav-item-admin.active { background: #EDE9FE; color: #6D28D9; }
     #pt-header-nav .pt-hnav-divider {
@@ -212,7 +216,6 @@ function renderHeader({ tenantLogo = '', tenantName = 'Tenant', apps = [], activ
     </button>
     <a href="/PropTools/" class="pt-logo-mark">
       ${PROPTOOLS_SVG}
-      <span>PropTools <span class="pt-app-badge">| App</span></span>
     </a>
     ${navHTML}
     <div class="pt-header-spacer"></div>
@@ -272,7 +275,7 @@ function renderFooter({ version = '' } = {}) {
   el.innerHTML = `
     <div class="pt-footer-brand">
       ${PROPTOOLS_SVG}
-      <span><strong>PropTools</strong> &mdash; Veintiuno &copy; ${new Date().getFullYear()}</span>
+      <span><strong>PropTools</strong> &copy; ${new Date().getFullYear()}</span>
     </div>
     ${version ? `<span class="pt-footer-version">${version}</span>` : ''}
   `;
