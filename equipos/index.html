@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reservar Equipos — PropTools</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;700;900&family=DM+Mono&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<style>
+:root {
+  --grad-start: #FF3A5C;
+  --grad-mid:   #C044E8;
+  --grad-end:   #5B4FE8;
+  --ink:        #0E0E1A;
+  --surface:    #FFFFFF;
+  --surface2:   #F4F5F7;
+  --border:     #E2E5EA;
+  --blue:       #1B6EF3;
+  --muted:      #6B7280;
+  --danger:     #EF4444;
+  --success:    #22C55E;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--surface2);
+  color: var(--ink);
+  min-height: 100vh;
+}
+
+/* ── HEADER ──────────────────────────────── */
+header {
+  height: 88px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 32px;
+  gap: 16px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.logo-lockup {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+}
+.logo-bar {
+  width: 7px; height: 40px; border-radius: 3.5px;
+  background: linear-gradient(to bottom, var(--grad-start), var(--grad-mid), var(--grad-end));
+  flex-shrink: 0;
+}
+.logo-text { font-size: 26px; letter-spacing: -0.5px; line-height: 1; color: var(--ink); }
+.logo-text .prop { font-weight: 300; }
+.logo-text .tools { font-weight: 900; letter-spacing: -1.5px; }
+
+.header-divider { width: 1px; height: 24px; background: var(--border); margin: 0 4px; }
+.header-app { font-size: 14px; font-weight: 500; color: var(--muted); }
+
+.header-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.agent-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px 6px 6px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.agent-avatar {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--grad-start), var(--grad-end));
+  color: white;
+  font-size: 11px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+.agent-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+/* ── LAYOUT ──────────────────────────────── */
+.layout { display: flex; min-height: calc(100vh - 88px); }
+
+aside {
+  width: 240px;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  padding: 28px 0;
+  flex-shrink: 0;
+}
+
+.nav-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px; letter-spacing: 2px;
+  color: var(--muted); text-transform: uppercase;
+  padding: 0 20px; margin-bottom: 8px;
+}
+
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 20px;
+  font-size: 14px; color: var(--muted);
+  text-decoration: none; cursor: pointer;
+  border-left: 3px solid transparent;
+  transition: all 0.15s;
+}
+.nav-item:hover { background: var(--surface2); color: var(--ink); }
+.nav-item.active {
+  color: var(--ink); font-weight: 700;
+  border-left-color: var(--grad-end);
+  background: #F0EEFF;
+}
+.nav-icon { width: 18px; height: 18px; flex-shrink: 0; }
+
+main { flex: 1; padding: 40px; min-width: 0; }
+
+/* ── PAGE ────────────────────────────────── */
+.page-header { margin-bottom: 32px; }
+.page-title { font-size: 28px; font-weight: 900; letter-spacing: -1px; }
+.page-subtitle { font-size: 14px; color: var(--muted); margin-top: 4px; }
+
+/* ── TWO-COL ─────────────────────────────── */
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 24px;
+  align-items: start;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.card-header {
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.card-title { font-size: 15px; font-weight: 700; }
+
+/* ── CALENDAR ────────────────────────────── */
+.cal-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.cal-month {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+}
+
+.cal-btn {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: transparent;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--ink);
+  font-size: 16px;
+  transition: all 0.15s;
+}
+.cal-btn:hover { background: var(--surface2); }
+
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  padding: 16px 12px;
+  gap: 4px;
+}
+
+.cal-dow {
+  text-align: center;
+  font-size: 11px;
+  font-family: 'DM Mono', monospace;
+  letter-spacing: 1px;
+  color: var(--muted);
+  text-transform: uppercase;
+  padding: 4px 0 12px;
+}
+
+.cal-day {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.12s;
+  position: relative;
+  user-select: none;
+}
+
+.cal-day:hover:not(.cal-empty):not(.cal-past) {
+  background: #EDE9FE;
+  color: #5B21B6;
+}
+
+.cal-day.cal-empty { cursor: default; }
+
+.cal-day.cal-past {
+  color: #D1D5DB;
+  cursor: not-allowed;
+}
+
+.cal-day.cal-today {
+  background: var(--surface2);
+  font-weight: 900;
+  color: var(--ink);
+}
+
+.cal-day.cal-selected {
+  background: linear-gradient(135deg, var(--grad-start), var(--grad-end));
+  color: white;
+  font-weight: 700;
+}
+
+.cal-day.cal-in-range {
+  background: #EDE9FE;
+  color: #5B21B6;
+  border-radius: 0;
+}
+
+.cal-day.cal-range-start {
+  background: linear-gradient(135deg, var(--grad-start), var(--grad-end));
+  color: white;
+  border-radius: 8px 0 0 8px;
+}
+
+.cal-day.cal-range-end {
+  background: linear-gradient(135deg, var(--grad-start), var(--grad-end));
+  color: white;
+  border-radius: 0 8px 8px 0;
+}
+
+.cal-day.has-reserva::after {
+  content: '';
+  position: absolute;
+  bottom: 3px; left: 50%; transform: translateX(-50%);
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  background: var(--grad-mid);
+}
+
+.cal-day.cal-selected.has-reserva::after,
+.cal-day.cal-range-start.has-reserva::after,
+.cal-day.cal-range-end.has-reserva::after { background: rgba(255,255,255,0.7); }
+
+/* ── DATE RANGE HINT ─────────────────────── */
+.range-hint {
+  padding: 12px 20px;
+  background: #F5F3FF;
+  border-top: 1px solid #DDD6FE;
+  font-size: 12px;
+  color: #5B21B6;
+  font-weight: 500;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ── PANEL RESERVA ───────────────────────── */
+.panel { display: flex; flex-direction: column; gap: 0; }
+
+.panel-section {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border);
+}
+.panel-section:last-child { border-bottom: none; }
+
+.section-label {
+  font-size: 11px;
+  font-family: 'DM Mono', monospace;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+
+/* ── EQUIPO LIST ─────────────────────────── */
+.equipo-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: all 0.12s;
+  user-select: none;
+}
+
+.equipo-item:last-child { margin-bottom: 0; }
+
+.equipo-item:hover { border-color: #C4B5FD; background: #FAF5FF; }
+
+.equipo-item.selected {
+  border-color: var(--grad-end);
+  background: #EDE9FE;
+}
+
+.equipo-item.unavailable {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.equipo-check {
+  width: 20px; height: 20px;
+  border-radius: 6px;
+  border: 2px solid var(--border);
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.12s;
+}
+
+.equipo-item.selected .equipo-check {
+  background: linear-gradient(135deg, var(--grad-start), var(--grad-end));
+  border-color: transparent;
+}
+
+.equipo-check svg { display: none; }
+.equipo-item.selected .equipo-check svg { display: block; }
+
+.equipo-info { flex: 1; min-width: 0; }
+.equipo-nombre { font-size: 13px; font-weight: 700; }
+.equipo-sub { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; }
+
+.tipo-pill-sm {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-family: 'DM Mono', monospace;
+  flex-shrink: 0;
+}
+.tipo-laptop    { background: #EDE9FE; color: #5B21B6; }
+.tipo-proyector { background: #DBEAFE; color: #1D4ED8; }
+.tipo-camara    { background: #FCE7F3; color: #9D174D; }
+.tipo-audio     { background: #D1FAE5; color: #065F46; }
+.tipo-otro      { background: var(--surface2); color: var(--muted); }
+
+/* ── RESUMEN ─────────────────────────────── */
+.resumen-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  padding: 4px 0;
+}
+.resumen-label { color: var(--muted); }
+.resumen-value { font-weight: 700; }
+
+/* ── FIELD ───────────────────────────────── */
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field label { font-size: 12px; font-weight: 700; }
+
+.field textarea {
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  color: var(--ink);
+  resize: vertical;
+  min-height: 72px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.field textarea:focus {
+  border-color: var(--grad-end);
+  box-shadow: 0 0 0 3px rgba(91,79,232,0.1);
+}
+
+/* ── BTN ─────────────────────────────────── */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: 8px; height: 44px; padding: 0 24px;
+  border-radius: 10px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px; font-weight: 700;
+  cursor: pointer; border: none;
+  transition: all 0.15s;
+  width: 100%;
+}
+.btn-primary {
+  background: linear-gradient(135deg, var(--grad-start), var(--grad-end));
+  color: white;
+}
+.btn-primary:hover:not(:disabled) { opacity: 0.9; transform: translateY(-1px); }
+.btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+/* ── MIS RESERVAS ────────────────────────── */
+.reserva-row {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+}
+.reserva-row:last-child { border-bottom: none; }
+
+.reserva-fecha-badge {
+  width: 48px; flex-shrink: 0;
+  text-align: center;
+  background: var(--surface2);
+  border-radius: 8px;
+  padding: 6px 4px;
+}
+.reserva-fecha-day { font-size: 20px; font-weight: 900; line-height: 1; }
+.reserva-fecha-mon { font-size: 10px; font-family: 'DM Mono', monospace; letter-spacing: 1px; color: var(--muted); text-transform: uppercase; }
+
+.reserva-content { flex: 1; min-width: 0; }
+.reserva-title { font-size: 13px; font-weight: 700; }
+.reserva-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+.reserva-equipos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.eq-tag {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-family: 'DM Mono', monospace;
+  background: var(--surface2);
+  color: var(--muted);
+  border: 1px solid var(--border);
+}
+
+.btn-cancel-res {
+  background: transparent;
+  border: 1px solid #FCA5A5;
+  color: var(--danger);
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-top: 2px;
+  transition: background 0.12s;
+}
+.btn-cancel-res:hover { background: #FEF2F2; }
+
+/* ── TABS ────────────────────────────────── */
+.tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--border);
+}
+.tab {
+  padding: 14px 20px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--muted);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.15s;
+  margin-bottom: -1px;
+}
+.tab.active {
+  color: var(--grad-end);
+  border-bottom-color: var(--grad-end);
+}
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* ── TOAST ───────────────────────────────── */
+#toast {
+  position: fixed; bottom: 32px; right: 32px;
+  background: var(--ink); color: white;
+  padding: 14px 20px; border-radius: 10px;
+  font-size: 14px; font-weight: 500;
+  opacity: 0; transform: translateY(8px);
+  transition: all 0.25s; z-index: 999;
+  pointer-events: none;
+}
+#toast.show { opacity: 1; transform: translateY(0); }
+
+.empty-small {
+  text-align: center;
+  padding: 24px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* ── LOADING SHIMMER ─────────────────────── */
+.shimmer {
+  background: linear-gradient(90deg, var(--surface2) 25%, #e8eaed 50%, var(--surface2) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 6px;
+  height: 48px;
+  margin-bottom: 8px;
+}
+@keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-lockup">
+    <div class="logo-bar"></div>
+    <div class="logo-text">
+      <span class="prop">Prop</span><span class="tools">TOOLS</span>
+    </div>
+  </div>
+  <div class="header-divider"></div>
+  <span class="header-app">Reserva de Equipos</span>
+  <div class="header-right">
+    <div class="agent-chip">
+      <div class="agent-avatar" id="avatar-wrap">
+        <span id="avatar-initials">?</span>
+      </div>
+      <span id="agent-name">Cargando...</span>
+    </div>
+    <img id="tenant-logo" src="" alt="" style="height:36px;display:none;border-radius:4px;">
+  </div>
+</header>
+
+<div class="layout">
+  <aside>
+    <div class="nav-label">Equipos</div>
+    <div class="nav-item active">
+      <svg class="nav-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="14" height="12" rx="2"/><path d="M7 9h6M7 12h4"/></svg>
+      Reservar equipo
+    </div>
+    <div class="nav-item" onclick="showMisReservas()">
+      <svg class="nav-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="3" width="12" height="14" rx="2"/><path d="M8 7h4M8 10h4M8 13h2"/></svg>
+      Mis reservas
+    </div>
+    <div style="border-top:1px solid var(--border);margin:20px 0;"></div>
+    <div class="nav-label">App</div>
+    <div class="nav-item" onclick="window.location.href='../perfil/'">
+      <svg class="nav-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="10" cy="7" r="3"/><path d="M4 17c0-3.314 2.686-6 6-6s6 2.686 6 6"/></svg>
+      Mi perfil
+    </div>
+    <div class="nav-item" onclick="window.location.href='../'">
+      <svg class="nav-icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M10 3L3 9v8h5v-5h4v5h5V9L10 3z"/></svg>
+      Inicio
+    </div>
+  </aside>
+
+  <main>
+    <div class="page-header">
+      <h1 class="page-title">Reservar Equipos</h1>
+      <p class="page-subtitle">Selecciona las fechas y los equipos que necesitas.</p>
+    </div>
+
+    <div class="two-col">
+
+      <!-- CALENDARIO -->
+      <div class="card">
+        <div class="cal-nav">
+          <button class="cal-btn" onclick="prevMonth()">‹</button>
+          <span class="cal-month" id="cal-title"></span>
+          <button class="cal-btn" onclick="nextMonth()">›</button>
+        </div>
+        <div class="cal-grid" id="cal-grid"></div>
+        <div class="range-hint" id="range-hint">
+          <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="14" height="14" rx="2"/><path d="M7 2v3M13 2v3M3 9h14"/></svg>
+          <span id="range-hint-text">Selecciona la fecha de inicio de la reserva.</span>
+        </div>
+      </div>
+
+      <!-- PANEL DERECHO: TABS -->
+      <div class="card panel">
+        <div class="tabs">
+          <div class="tab active" id="tab-nueva" onclick="switchTab('nueva')">Nueva reserva</div>
+          <div class="tab" id="tab-mis" onclick="switchTab('mis')">Mis reservas</div>
+        </div>
+
+        <!-- TAB NUEVA RESERVA -->
+        <div class="tab-panel active" id="panel-nueva">
+          <div class="panel-section">
+            <div class="section-label">Equipos disponibles</div>
+            <div id="equipo-list">
+              <div class="shimmer"></div>
+              <div class="shimmer" style="height:40px"></div>
+              <div class="shimmer" style="height:40px"></div>
+            </div>
+          </div>
+
+          <div class="panel-section">
+            <div class="section-label">Resumen</div>
+            <div class="resumen-item">
+              <span class="resumen-label">Fecha inicio</span>
+              <span class="resumen-value" id="res-inicio">—</span>
+            </div>
+            <div class="resumen-item">
+              <span class="resumen-label">Fecha fin</span>
+              <span class="resumen-value" id="res-fin">—</span>
+            </div>
+            <div class="resumen-item">
+              <span class="resumen-label">Duración</span>
+              <span class="resumen-value" id="res-duracion">—</span>
+            </div>
+            <div class="resumen-item">
+              <span class="resumen-label">Equipos sel.</span>
+              <span class="resumen-value" id="res-equipos">0 equipos</span>
+            </div>
+          </div>
+
+          <div class="panel-section">
+            <div class="field" style="margin-bottom:16px;">
+              <label>Motivo / Proyecto (opcional)</label>
+              <textarea id="f-motivo" placeholder="ej. Grabación video para Propiedad Escazú, Presentación cliente..."></textarea>
+            </div>
+            <button class="btn btn-primary" id="btn-reservar" onclick="crearReserva()" disabled>
+              Confirmar reserva
+            </button>
+          </div>
+        </div>
+
+        <!-- TAB MIS RESERVAS -->
+        <div class="tab-panel" id="panel-mis">
+          <div class="panel-section" style="padding:0;">
+            <div id="mis-reservas-list" style="padding:16px 24px;">
+              <div class="empty-small">Cargando reservas...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const SUPABASE_URL = 'https://zsldwaiwcvziqfajcmph.supabase.co';
+const SUPABASE_ANON_KEY = 'YOUR_ANON_KEY';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let currentUser = null;
+let profile = null;
+let equipos = [];
+let reservasAll = [];
+let selectedEquipos = new Set();
+let rangeStart = null;
+let rangeEnd = null;
+let viewYear = new Date().getFullYear();
+let viewMonth = new Date().getMonth();
+
+const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const DIAS = ['Do','Lu','Ma','Mi','Ju','Vi','Sá'];
+
+async function init() {
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) { window.location.href = '../perfil/'; return; }
+  currentUser = session.user;
+
+  const { data: p } = await sb.from('users').select('*, tenants(*)').eq('auth_id', currentUser.id).single();
+  profile = p;
+
+  if (profile) {
+    const nombre = profile.nombre || profile.email || 'Agente';
+    document.getElementById('agent-name').textContent = nombre.split(' ')[0];
+    const initials = nombre.split(' ').slice(0,2).map(n=>n[0]).join('').toUpperCase();
+    document.getElementById('avatar-initials').textContent = initials;
+
+    if (profile.foto_url) {
+      const wrap = document.getElementById('avatar-wrap');
+      wrap.innerHTML = `<img src="${profile.foto_url}" alt="">`;
+    }
+    if (profile.tenants?.logo_url) {
+      const img = document.getElementById('tenant-logo');
+      img.src = profile.tenants.logo_url;
+      img.style.display = 'block';
+    }
+  }
+
+  await Promise.all([cargarEquipos(), cargarTodasReservas()]);
+  renderCalendar();
+}
+
+async function cargarEquipos() {
+  const { data, error } = await sb.from('equipos').select('*').neq('estado','mantenimiento').order('tipo').order('nombre');
+  if (error) return;
+  equipos = data || [];
+  renderEquipoList();
+}
+
+async function cargarTodasReservas() {
+  const today = toISODate(new Date());
+  const { data } = await sb.from('reservas').select('*, reserva_equipos(equipo_id), users!inner(nombre)').gte('fecha_fin', today);
+  reservasAll = data || [];
+  renderMisReservas();
+}
+
+async function cargarMisReservas() {
+  const today = toISODate(new Date());
+  const { data } = await sb.from('reservas').select('*, reserva_equipos(equipo_id, equipos(nombre, tipo, marca, modelo))').eq('user_auth_id', currentUser.id).gte('fecha_fin', today).order('fecha_inicio');
+  return data || [];
+}
+
+function renderEquipoList() {
+  const container = document.getElementById('equipo-list');
+  if (!equipos.length) {
+    container.innerHTML = '<div class="empty-small">No hay equipos disponibles.</div>';
+    return;
+  }
+
+  const today = rangeStart ? toISODate(rangeStart) : null;
+  const todayEnd = rangeEnd ? toISODate(rangeEnd) : today;
+
+  container.innerHTML = equipos.map(e => {
+    const ocupado = today ? isEquipoOcupado(e.id, today, todayEnd) : false;
+    const sel = selectedEquipos.has(e.id);
+    return `
+    <div class="equipo-item ${sel ? 'selected' : ''} ${ocupado ? 'unavailable' : ''}"
+         onclick="toggleEquipo('${e.id}')">
+      <div class="equipo-check">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="white" stroke-width="2.5"><path d="M2 6l3 3 5-5"/></svg>
+      </div>
+      <div class="equipo-info">
+        <div class="equipo-nombre">${e.nombre}</div>
+        <div class="equipo-sub">${e.marca} · ${e.modelo}${ocupado ? ' · <span style="color:#EF4444">No disponible</span>' : ''}</div>
+      </div>
+      <span class="tipo-pill-sm tipo-${e.tipo || 'otro'}">${tipoLabel(e.tipo)}</span>
+    </div>`;
+  }).join('');
+}
+
+function isEquipoOcupado(equipoId, inicio, fin) {
+  return reservasAll.some(r => {
+    const tieneEquipo = r.reserva_equipos?.some(re => re.equipo_id === equipoId);
+    if (!tieneEquipo) return false;
+    return r.fecha_inicio <= fin && r.fecha_fin >= inicio;
+  });
+}
+
+function toggleEquipo(id) {
+  if (selectedEquipos.has(id)) selectedEquipos.delete(id);
+  else selectedEquipos.add(id);
+  updateResumen();
+  renderEquipoList();
+}
+
+function tipoLabel(t) {
+  return { laptop:'Laptop', proyector:'Proyector', camara:'Cámara', audio:'Audio', otro:'Otro' }[t] || t || 'Otro';
+}
+
+/* ── CALENDAR ── */
+function renderCalendar() {
+  const title = document.getElementById('cal-title');
+  title.textContent = `${MESES[viewMonth]} ${viewYear}`;
+
+  const grid = document.getElementById('cal-grid');
+  const today = new Date(); today.setHours(0,0,0,0);
+  const firstDay = new Date(viewYear, viewMonth, 1).getDay();
+  const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+
+  let html = DIAS.map(d => `<div class="cal-dow">${d}</div>`).join('');
+
+  for (let i = 0; i < firstDay; i++) html += `<div class="cal-day cal-empty"></div>`;
+
+  const reservedDates = getReservedDates();
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const date = new Date(viewYear, viewMonth, d);
+    date.setHours(0,0,0,0);
+    const isPast = date < today;
+    const isToday = date.getTime() === today.getTime();
+
+    const iso = toISODate(date);
+    const hasReserva = reservedDates.has(iso);
+
+    let cls = 'cal-day';
+    if (isPast) cls += ' cal-past';
+    else if (rangeStart && rangeEnd) {
+      const ds = new Date(rangeStart); ds.setHours(0,0,0,0);
+      const de = new Date(rangeEnd); de.setHours(0,0,0,0);
+      if (date.getTime() === ds.getTime()) cls += ' cal-range-start';
+      else if (date.getTime() === de.getTime()) cls += ' cal-range-end';
+      else if (date > ds && date < de) cls += ' cal-in-range';
+    } else if (rangeStart && !rangeEnd) {
+      const ds = new Date(rangeStart); ds.setHours(0,0,0,0);
+      if (date.getTime() === ds.getTime()) cls += ' cal-selected';
+    }
+
+    if (isToday && !cls.includes('range') && !cls.includes('selected')) cls += ' cal-today';
+    if (hasReserva) cls += ' has-reserva';
+
+    html += `<div class="${cls}" onclick="${isPast ? '' : `selectDay(${viewYear},${viewMonth},${d})`}">${d}</div>`;
+  }
+
+  grid.innerHTML = html;
+  updateRangeHint();
+  renderEquipoList();
+}
+
+function getReservedDates() {
+  const set = new Set();
+  reservasAll.forEach(r => {
+    let d = new Date(r.fecha_inicio + 'T00:00:00');
+    const end = new Date(r.fecha_fin + 'T00:00:00');
+    while (d <= end) { set.add(toISODate(d)); d.setDate(d.getDate() + 1); }
+  });
+  return set;
+}
+
+function selectDay(y, m, d) {
+  const date = new Date(y, m, d);
+  date.setHours(0,0,0,0);
+
+  if (!rangeStart || (rangeStart && rangeEnd)) {
+    rangeStart = date; rangeEnd = null;
+  } else {
+    if (date < rangeStart) { rangeEnd = rangeStart; rangeStart = date; }
+    else if (date.getTime() === rangeStart.getTime()) { rangeStart = null; rangeEnd = null; }
+    else rangeEnd = date;
+  }
+
+  selectedEquipos.clear();
+  updateResumen();
+  renderCalendar();
+}
+
+function updateRangeHint() {
+  const el = document.getElementById('range-hint-text');
+  if (!rangeStart) { el.textContent = 'Selecciona la fecha de inicio de la reserva.'; return; }
+  if (!rangeEnd) { el.textContent = `Inicio: ${formatDate(rangeStart)} — Ahora selecciona la fecha de fin.`; return; }
+  const dias = diffDays(rangeStart, rangeEnd) + 1;
+  el.textContent = `${formatDate(rangeStart)} → ${formatDate(rangeEnd)} · ${dias} día${dias>1?'s':''}.`;
+}
+
+function updateResumen() {
+  document.getElementById('res-inicio').textContent = rangeStart ? formatDate(rangeStart) : '—';
+  document.getElementById('res-fin').textContent = rangeEnd ? formatDate(rangeEnd) : (rangeStart ? formatDate(rangeStart) : '—');
+  const dias = rangeStart ? (rangeEnd ? diffDays(rangeStart, rangeEnd) + 1 : 1) : 0;
+  document.getElementById('res-duracion').textContent = dias > 0 ? `${dias} día${dias>1?'s':''}` : '—';
+  const n = selectedEquipos.size;
+  document.getElementById('res-equipos').textContent = `${n} equipo${n!==1?'s':''}`;
+
+  const canBook = rangeStart && n > 0;
+  document.getElementById('btn-reservar').disabled = !canBook;
+}
+
+function prevMonth() {
+  if (viewMonth === 0) { viewMonth = 11; viewYear--; } else viewMonth--;
+  renderCalendar();
+}
+function nextMonth() {
+  if (viewMonth === 11) { viewMonth = 0; viewYear++; } else viewMonth++;
+  renderCalendar();
+}
+
+/* ── RESERVAR ── */
+async function crearReserva() {
+  if (!rangeStart || selectedEquipos.size === 0) return;
+
+  const inicio = toISODate(rangeStart);
+  const fin = rangeEnd ? toISODate(rangeEnd) : inicio;
+  const motivo = document.getElementById('f-motivo').value.trim();
+  const btn = document.getElementById('btn-reservar');
+
+  btn.disabled = true;
+  btn.textContent = 'Guardando...';
+
+  const { data: reserva, error: errRes } = await sb.from('reservas').insert({
+    user_auth_id: currentUser.id,
+    fecha_inicio: inicio,
+    fecha_fin: fin,
+    motivo: motivo || null,
+    estado: 'activa'
+  }).select().single();
+
+  if (errRes) { toast('Error creando reserva: ' + errRes.message); btn.disabled = false; btn.textContent = 'Confirmar reserva'; return; }
+
+  const items = Array.from(selectedEquipos).map(eqId => ({ reserva_id: reserva.id, equipo_id: eqId }));
+  const { error: errItems } = await sb.from('reserva_equipos').insert(items);
+
+  if (errItems) {
+    await sb.from('reservas').delete().eq('id', reserva.id);
+    toast('Error asociando equipos: ' + errItems.message);
+    btn.disabled = false; btn.textContent = 'Confirmar reserva';
+    return;
+  }
+
+  await sb.from('equipos').update({ estado: 'reservado' }).in('id', Array.from(selectedEquipos));
+
+  toast('¡Reserva confirmada ✓');
+  rangeStart = null; rangeEnd = null;
+  selectedEquipos.clear();
+  document.getElementById('f-motivo').value = '';
+  updateResumen();
+
+  await Promise.all([cargarEquipos(), cargarTodasReservas()]);
+  renderCalendar();
+
+  btn.disabled = false;
+  btn.textContent = 'Confirmar reserva';
+}
+
+/* ── MIS RESERVAS ── */
+async function renderMisReservas() {
+  const container = document.getElementById('mis-reservas-list');
+  const data = await cargarMisReservas();
+
+  if (!data.length) {
+    container.innerHTML = '<div class="empty-small">No tienes reservas activas.</div>';
+    return;
+  }
+
+  container.innerHTML = data.map(r => {
+    const d = new Date(r.fecha_inicio + 'T00:00:00');
+    const day = d.getDate();
+    const mon = MESES[d.getMonth()].substring(0,3).toUpperCase();
+    const eqs = r.reserva_equipos || [];
+    const fin = r.fecha_fin !== r.fecha_inicio ? ` → ${formatDateShort(new Date(r.fecha_fin + 'T00:00:00'))}` : '';
+    return `
+    <div class="reserva-row">
+      <div class="reserva-fecha-badge">
+        <div class="reserva-fecha-day">${day}</div>
+        <div class="reserva-fecha-mon">${mon}</div>
+      </div>
+      <div class="reserva-content">
+        <div class="reserva-title">${r.motivo || 'Sin descripción'}${fin}</div>
+        <div class="reserva-sub">${eqs.length} equipo${eqs.length!==1?'s':''} · ${r.estado}</div>
+        <div class="reserva-equipos">
+          ${eqs.map(e => `<span class="eq-tag">${e.equipos?.nombre || '—'}</span>`).join('')}
+        </div>
+      </div>
+      <button class="btn-cancel-res" onclick="cancelarReserva('${r.id}', ${JSON.stringify(eqs.map(e=>e.equipo_id))})">Cancelar</button>
+    </div>`;
+  }).join('');
+}
+
+async function cancelarReserva(reservaId, equipoIds) {
+  if (!confirm('¿Cancelar esta reserva?')) return;
+  await sb.from('reservas').update({ estado: 'cancelada' }).eq('id', reservaId);
+  if (equipoIds.length) {
+    await sb.from('equipos').update({ estado: 'disponible' }).in('id', equipoIds);
+  }
+  toast('Reserva cancelada');
+  await Promise.all([cargarEquipos(), cargarTodasReservas()]);
+  renderMisReservas();
+  renderCalendar();
+}
+
+function showMisReservas() {
+  switchTab('mis');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+}
+
+function switchTab(t) {
+  ['nueva','mis'].forEach(id => {
+    document.getElementById(`tab-${id}`).classList.toggle('active', id === t);
+    document.getElementById(`panel-${id}`).classList.toggle('active', id === t);
+  });
+  if (t === 'mis') renderMisReservas();
+}
+
+/* ── UTILS ── */
+function toISODate(d) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,'0');
+  const day = String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
+}
+function formatDate(d) {
+  return `${d.getDate()} ${MESES[d.getMonth()].substring(0,3)} ${d.getFullYear()}`;
+}
+function formatDateShort(d) {
+  return `${d.getDate()} ${MESES[d.getMonth()].substring(0,3)}`;
+}
+function diffDays(a, b) {
+  return Math.round((b - a) / 86400000);
+}
+
+let toastTimer;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+init();
+</script>
+</body>
+</html>
