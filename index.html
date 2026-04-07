@@ -36,8 +36,8 @@ nav {
   border-bottom:1px solid var(--border);
 }
 .nav-brand { display:flex; align-items:center; gap:10px; text-decoration:none; }
-.nav-bar { width:5px; height:26px; border-radius:3px; flex-shrink:0; background:linear-gradient(to bottom,var(--grad-start),var(--grad-mid),var(--grad-end)); }
-.nav-wordmark { font-size:18px; line-height:1; letter-spacing:-0.5px; white-space:nowrap; display:flex; align-items:baseline; gap:0; }
+.nav-bar { display:inline-block; width:5px; height:26px; border-radius:3px; flex-shrink:0; background:linear-gradient(to bottom,var(--grad-start),var(--grad-mid),var(--grad-end)); font-size:0; line-height:0; }
+.nav-wordmark { font-size:18px; line-height:1; letter-spacing:-0.5px; white-space:nowrap; }
 .nav-wordmark .prop  { font-weight:300; color:var(--ink); }
 .nav-wordmark .tools { font-weight:900; letter-spacing:-1px; color:var(--ink); }
 .nav-cta {
@@ -237,7 +237,7 @@ h1 em { font-style:normal; color:var(--violet); }
   background:rgba(255,255,255,.04); border-bottom:1px solid rgba(255,255,255,.08);
   padding:14px 20px; display:flex; align-items:center; gap:10px;
 }
-.mock-logo-bar { width:4px; height:20px; border-radius:2px; background:linear-gradient(to bottom,var(--grad-start),var(--grad-mid),var(--grad-end)); flex-shrink:0; }
+.mock-logo-bar { display:inline-block; width:4px; height:20px; border-radius:2px; background:linear-gradient(to bottom,var(--grad-start),var(--grad-mid),var(--grad-end)); flex-shrink:0; font-size:0; line-height:0; }
 .mock-logo-text { font-size:13px; }
 .mock-logo-text .p { font-weight:300; color:rgba(255,255,255,.9); }
 .mock-logo-text .t { font-weight:900; letter-spacing:-0.5px; color:rgba(255,255,255,.9); }
@@ -268,7 +268,7 @@ footer {
   flex-wrap:wrap; gap:24px;
 }
 .footer-brand { display:flex; align-items:center; gap:10px; text-decoration:none; }
-.footer-bar { width:4px; height:24px; border-radius:2px; flex-shrink:0; background:linear-gradient(to bottom,var(--grad-start),var(--grad-mid),var(--grad-end)); }
+.footer-bar { display:inline-block; width:4px; height:24px; border-radius:2px; flex-shrink:0; background:linear-gradient(to bottom,var(--grad-start),var(--grad-mid),var(--grad-end)); font-size:0; line-height:0; }
 .footer-wordmark { font-size:18px; line-height:1; display:flex; align-items:baseline; gap:0; }
 .footer-wordmark .prop  { font-weight:300; color:rgba(255,255,255,.9); }
 .footer-wordmark .tools { font-weight:900; letter-spacing:-1px; color:rgba(255,255,255,.9); }
@@ -299,7 +299,7 @@ footer {
 <!-- NAV -->
 <nav>
   <a href="#" class="nav-brand">
-    <div class="nav-bar"></div>
+    <span class="nav-bar"></span>
     <div class="nav-wordmark"><span class="prop">Prop</span><span class="tools">TOOLS</span></div>
   </a>
   <a href="./perfil/" class="nav-cta">Ingresar</a>
@@ -429,7 +429,7 @@ footer {
       <!-- Mock UI oscura -->
       <div class="features-visual">
         <div class="mock-nav">
-          <div class="mock-logo-bar"></div>
+          <span class="mock-logo-bar"></span>
           <div class="mock-logo-text"><span class="p">Prop</span><span class="t">TOOLS</span></div>
           <div class="mock-nav-label">Mi información</div>
         </div>
@@ -464,7 +464,7 @@ footer {
 <!-- FOOTER -->
 <footer>
   <a href="#" class="footer-brand">
-    <div class="footer-bar"></div>
+    <span class="footer-bar"></span>
     <div class="footer-wordmark"><span class="prop">Prop</span><span class="tools">TOOLS</span></div>
   </a>
   <div class="footer-links">
