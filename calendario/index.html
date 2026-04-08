@@ -6,6 +6,12 @@
 <title>Calendario — PropTools</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+  const SUPABASE_URL  = 'https://zsldwaiwcvziqfajcmph.supabase.co';
+  const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpzbGR3YWl3Y3Z6aXFmYWpjbXBoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1NjQ4NzcsImV4cCI6MjA5MDE0MDg3N30.eFlAAk-fPHI8r8YQPjP8kYnohziRpGu9whGpgfaW-KU';
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+</script>
 <script src="../components.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 
@@ -546,11 +552,7 @@
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
-const SUPABASE_URL  = 'https://zsldwaiwcvziqfajcmph.supabase.co';
-const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpzbGR3YWl3Y3Z6aXFmYWpjbXBoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1NjQ4NzcsImV4cCI6MjA5MDE0MDg3N30.eFlAAk-fPHI8r8YQPjP8kYnohziRpGu9whGpgfaW-KU';
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 const $ = id => document.getElementById(id);
 
 let currentUser    = null;
