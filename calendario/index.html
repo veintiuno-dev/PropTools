@@ -569,9 +569,9 @@ let detalleEventoId = null;
 
 const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 const DIAS  = ['Lu','Ma','Mi','Ju','Vi','Sá','Do'];
-const HORAS = Array.from({length: 14}, (_, i) => i + 7); // 7am–8pm
+const HORAS = Array.from({length: 14}, (_, i) => i + 7); // 7am-8pm
 
-// ── BOOT ───────────────────────────────────────────────────────
+// -- BOOT -------------------------------------------------------
 async function boot() {
   const result = await initComponents({ active: 'calendario' });
   if (!result) return;
@@ -591,7 +591,7 @@ async function boot() {
   updateMyEventsCount();
 }
 
-// ── UTILS ──────────────────────────────────────────────────────
+// -- UTILS ------------------------------------------------------
 function toISO(d) {
   return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
 }
@@ -613,7 +613,7 @@ function fmtFecha(iso) {
   return d.getDate() + ' ' + MESES[d.getMonth()].substring(0,3) + ' ' + d.getFullYear();
 }
 
-// ── CARGAR DATOS ───────────────────────────────────────────────
+// -- CARGAR DATOS -----------------------------------------------
 async function loadCalendarios() {
   const { data } = await sb.from('calendarios').select('*').order('nombre');
   calendarios = data || [];
@@ -702,7 +702,7 @@ function colorEvento(e) {
   return '#6B7280';
 }
 
-// ── MINI CALENDARIO ────────────────────────────────────────────
+// -- MINI CALENDARIO --------------------------------------------
 function renderMiniCal() {
   $('mini-cal-title').textContent = MESES[miniMonth].substring(0,3) + ' ' + miniYear;
 
@@ -751,11 +751,11 @@ function miniSelectDay(y, m, d) {
   renderWeek();
 }
 
-// ── SEMANA ─────────────────────────────────────────────────────
+// -- SEMANA -----------------------------------------------------
 function renderWeekLabel() {
   const end = new Date(weekStart); end.setDate(end.getDate() + 6);
   const fmt = d => d.getDate() + ' ' + MESES[d.getMonth()].substring(0,3);
-  $('week-label').textContent = fmt(weekStart) + ' – ' + fmt(end) + ' ' + weekStart.getFullYear();
+  $('week-label').textContent = fmt(weekStart) + ' - ' + fmt(end) + ' ' + weekStart.getFullYear();
 }
 
 function prevWeek() {
@@ -816,7 +816,7 @@ function renderWeek() {
   $('week-body').innerHTML = body;
 }
 
-// ── VISTA DÍA ──────────────────────────────────────────────────
+// -- VISTA DÍA --------------------------------------------------
 function renderDay() {
   const iso   = toISO(selectedDate);
   const today = toISO(new Date());
@@ -835,7 +835,7 @@ function renderDay() {
         ${cellEvs.map(e => `
           <div class="ev-block" style="background:${colorEvento(e)};position:relative;"
                onclick="event.stopPropagation();showDetalle('${e.id}')">
-            ${fmtHora(e.hora_inicio)}${e.hora_fin?' – '+fmtHora(e.hora_fin):''} · ${e.titulo}
+            ${fmtHora(e.hora_inicio)}${e.hora_fin?' - '+fmtHora(e.hora_fin):''} . ${e.titulo}
           </div>`).join('')}
       </div>
     </div>`;
@@ -844,7 +844,7 @@ function renderDay() {
   $('day-content').innerHTML = html;
 }
 
-// ── SWITCH VIEW ────────────────────────────────────────────────
+// -- SWITCH VIEW ------------------------------------------------
 function switchView(v) {
   currentView = v;
   ['semana','dia'].forEach(t => {
@@ -855,7 +855,7 @@ function switchView(v) {
   if (v === 'dia') renderDay();
 }
 
-// ── CLICK CELDA ────────────────────────────────────────────────
+// -- CLICK CELDA ------------------------------------------------
 function clickCell(fecha, hora) {
   $('ev-fecha').value    = fecha;
   $('ev-hora-ini').value = hora.padStart(5,'0');
@@ -877,7 +877,7 @@ function showModalNuevoEvento() {
   $('modal-nuevo-evento').classList.add('open');
 }
 
-// ── CREAR EVENTO ───────────────────────────────────────────────
+// -- CREAR EVENTO -----------------------------------------------
 async function crearEvento() {
   const titulo   = $('ev-titulo').value.trim();
   const fecha    = $('ev-fecha').value;
@@ -894,14 +894,14 @@ async function crearEvento() {
     hora_inicio:   horaIni,
     hora_fin:      horaFin || null,
     descripcion:   desc || null,
-    calendario_id: null,       // privado — sin calendario de oficina
+    calendario_id: null,       // privado - sin calendario de oficina
     user_auth_id:  currentUser.id,
     creado_por:    currentUser.id
   });
 
   if (error) { toast('Error: ' + error.message, 'error'); return; }
 
-  toast('✓ Evento creado', 'success');
+  toast('v Evento creado', 'success');
   closeModal('modal-nuevo-evento');
   await loadEventos();
   renderWeek();
@@ -909,7 +909,7 @@ async function crearEvento() {
   if (currentView === 'dia') renderDay();
 }
 
-// ── DETALLE / ELIMINAR ─────────────────────────────────────────
+// -- DETALLE / ELIMINAR -----------------------------------------
 function showDetalle(id) {
   const e = allEventos.find(ev => ev.id === id);
   if (!e) return;
@@ -919,9 +919,9 @@ function showDetalle(id) {
   $('ev-detail-color').style.background = color;
   $('ev-detail-titulo').textContent      = e.titulo;
   $('ev-detail-fecha').textContent       = fmtFecha(e.fecha);
-  $('ev-detail-hora').textContent        = fmtHora(e.hora_inicio) + (e.hora_fin ? ' – ' + fmtHora(e.hora_fin) : '');
+  $('ev-detail-hora').textContent        = fmtHora(e.hora_inicio) + (e.hora_fin ? ' - ' + fmtHora(e.hora_fin) : '');
   $('ev-detail-desc').textContent        = e.descripcion || '';
-  $('ev-detail-asignado').textContent    = e.calendarios?.nombre ? '📅 ' + e.calendarios.nombre : '';
+  $('ev-detail-asignado').textContent    = e.calendarios?.nombre ? ' ' + e.calendarios.nombre : '';
 
   // Solo puede eliminar si es su evento privado
   const canDelete = e._privado && e.creado_por === currentUser.id;
@@ -932,7 +932,7 @@ function showDetalle(id) {
   const tituloEl = $('ev-detail-titulo');
   if (soloLectura) {
     tituloEl.insertAdjacentHTML('afterend',
-      '<div style="font-size:11px;font-family:'DM Mono',monospace;color:var(--ink-light);margin-top:4px;margin-bottom:8px;">📅 Calendario de oficina · Solo lectura</div>');
+      '<div style="font-size:11px;font-family:'DM Mono',monospace;color:var(--ink-light);margin-top:4px;margin-bottom:8px;"> Calendario de oficina . Solo lectura</div>');
   }
 
   $('modal-detalle-evento').classList.add('open');
@@ -951,7 +951,7 @@ async function eliminarEventoDetalle() {
   if (currentView === 'dia') renderDay();
 }
 
-// ── MODALES ────────────────────────────────────────────────────
+// -- MODALES ----------------------------------------------------
 function closeModal(id) { $(id).classList.remove('open'); }
 
 // Cerrar con click fuera
@@ -962,7 +962,7 @@ document.addEventListener('click', e => {
   });
 });
 
-// ── TOAST ──────────────────────────────────────────────────────
+// -- TOAST ------------------------------------------------------
 function toast(msg, type = 'default') {
   const el = document.createElement('div');
   el.className = `toast ${type}`;
