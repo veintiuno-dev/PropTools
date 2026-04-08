@@ -424,14 +424,35 @@
         </div>
       </div>
 
-      <!-- Mis calendarios -->
+      <!-- Mi calendario privado -->
       <div class="card">
         <div class="card-header">
-          <span class="card-title">Mis calendarios</span>
+          <div>
+            <span class="card-title">Mi calendario</span>
+            <div style="font-size:11px;color:var(--ink-mid);margin-top:2px;">Eventos personales</div>
+          </div>
           <button class="btn btn-ghost btn-sm" onclick="showModalNuevoEvento()">
             <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v10M1 6h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-            Evento
+            Nuevo
           </button>
+        </div>
+        <!-- Siempre visible, sin toggle -->
+        <div style="padding:10px 16px;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="width:10px;height:10px;border-radius:50%;background:var(--blue);flex-shrink:0;"></div>
+            <span style="font-size:13px;font-weight:500;color:var(--ink);">Mis eventos</span>
+            <span style="font-size:11px;font-family:'DM Mono',monospace;color:var(--ink-light);margin-left:auto;" id="my-events-count">—</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Calendarios de oficina -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <span class="card-title">Calendarios de oficina</span>
+            <div style="font-size:11px;color:var(--ink-mid);margin-top:2px;">Solo lectura</div>
+          </div>
         </div>
         <div id="cal-sidebar-list" style="padding:8px 0;">
           <div style="padding:16px;text-align:center;color:var(--ink-light);font-size:13px;">Cargando…</div>
@@ -482,17 +503,9 @@
       <label>Título</label>
       <input type="text" id="ev-titulo" placeholder="Título del evento">
     </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label>Fecha</label>
-        <input type="date" id="ev-fecha">
-      </div>
-      <div class="form-group">
-        <label>Calendario</label>
-        <select id="ev-calendario">
-          <option value="">Mis eventos</option>
-        </select>
-      </div>
+    <div class="form-group">
+      <label>Fecha</label>
+      <input type="date" id="ev-fecha">
     </div>
     <div class="form-row">
       <div class="form-group">
@@ -573,6 +586,7 @@ async function boot() {
   renderMiniCal();
   renderWeekLabel();
   renderWeek();
+  updateMyEventsCount();
 }
 
 // ── UTILS ──────────────────────────────────────────────────────
@@ -619,40 +633,48 @@ async function loadCalendarios() {
       </div>`).join('');
   }
 
-  // Selector en modal nuevo evento
-  const sel = $('ev-calendario');
-  if (sel) {
-    sel.innerHTML = '<option value="">Mis eventos</option>' +
-      calendarios.map(c => `<option value="${c.id}">${c.nombre}</option>`).join('');
-  }
+  // Actualizar contador de mis eventos
+  updateMyEventsCount();
 }
 
 async function loadEventos() {
   const weekEnd = new Date(weekStart);
-  weekEnd.setDate(weekEnd.getDate() + 13); // +2 semanas para buffer
+  weekEnd.setDate(weekEnd.getDate() + 13);
 
   const ini = toISO(weekStart);
   const fin = toISO(weekEnd);
 
-  // Eventos propios del agente
-  const { data: propios } = await sb.from('eventos_calendario')
+  // Mis eventos privados: calendario_id IS NULL y son míos
+  const { data: privados } = await sb.from('eventos_calendario')
     .select('*, calendarios(nombre, color)')
+    .is('calendario_id', null)
     .eq('user_auth_id', currentUser.id)
     .gte('fecha', ini).lte('fecha', fin);
 
-  // Eventos de oficina (sin user_auth_id = toda la oficina, o asignados a este user)
+  // Eventos de oficina: tienen calendario_id y son para mí o toda la oficina
   const { data: oficina } = await sb.from('eventos_calendario')
     .select('*, calendarios(nombre, color)')
     .not('calendario_id', 'is', null)
     .gte('fecha', ini).lte('fecha', fin)
     .or(`user_auth_id.is.null,user_auth_id.eq.${currentUser.id}`);
 
-  // Combinar sin duplicados
+  // Marcar cada evento con su tipo para control de edición
   const mapaIds = new Set();
   allEventos = [];
-  [...(propios||[]), ...(oficina||[])].forEach(e => {
-    if (!mapaIds.has(e.id)) { mapaIds.add(e.id); allEventos.push(e); }
+  (privados||[]).forEach(e => {
+    if (!mapaIds.has(e.id)) { mapaIds.add(e.id); allEventos.push({ ...e, _privado: true }); }
   });
+  (oficina||[]).forEach(e => {
+    if (!mapaIds.has(e.id)) { mapaIds.add(e.id); allEventos.push({ ...e, _privado: false }); }
+  });
+
+  updateMyEventsCount();
+}
+
+function updateMyEventsCount() {
+  const n = allEventos.filter(e => e._privado).length;
+  const el = $('my-events-count');
+  if (el) el.textContent = n + (n === 1 ? ' evento' : ' eventos');
 }
 
 function toggleCal(id) {
@@ -666,14 +688,16 @@ function toggleCal(id) {
 
 function eventosVisibles() {
   return allEventos.filter(e => {
+    if (e._privado) return true; // mis eventos privados siempre visibles
     if (e.calendario_id && !activeCalIds.has(e.calendario_id)) return false;
     return true;
   });
 }
 
 function colorEvento(e) {
+  if (e._privado) return '#1B6EF3'; // mis eventos = azul siempre
   if (e.calendarios?.color) return e.calendarios.color;
-  return '#1B6EF3';
+  return '#6B7280';
 }
 
 // ── MINI CALENDARIO ────────────────────────────────────────────
@@ -837,7 +861,7 @@ function clickCell(fecha, hora) {
   $('ev-hora-fin').value = String(h+1).padStart(2,'0') + ':00';
   $('ev-titulo').value   = '';
   $('ev-desc').value     = '';
-  $('ev-calendario').value = '';
+  
   $('modal-nuevo-evento').classList.add('open');
 }
 
@@ -847,7 +871,7 @@ function showModalNuevoEvento() {
   $('ev-hora-fin').value = '10:00';
   $('ev-titulo').value   = '';
   $('ev-desc').value     = '';
-  $('ev-calendario').value = '';
+  
   $('modal-nuevo-evento').classList.add('open');
 }
 
@@ -858,17 +882,17 @@ async function crearEvento() {
   const horaIni  = $('ev-hora-ini').value;
   const horaFin  = $('ev-hora-fin').value;
   const desc     = $('ev-desc').value.trim();
-  const calId    = $('ev-calendario').value;
 
   if (!titulo || !fecha || !horaIni) { toast('Completá título, fecha y hora', 'error'); return; }
 
+  // Siempre va al calendario privado del agente (calendario_id = null)
   const { error } = await sb.from('eventos_calendario').insert({
     titulo,
     fecha,
     hora_inicio:   horaIni,
     hora_fin:      horaFin || null,
     descripcion:   desc || null,
-    calendario_id: calId || null,
+    calendario_id: null,       // privado — sin calendario de oficina
     user_auth_id:  currentUser.id,
     creado_por:    currentUser.id
   });
@@ -897,9 +921,17 @@ function showDetalle(id) {
   $('ev-detail-desc').textContent        = e.descripcion || '';
   $('ev-detail-asignado').textContent    = e.calendarios?.nombre ? '📅 ' + e.calendarios.nombre : '';
 
-  // Solo puede eliminar el creador
-  const canDelete = e.creado_por === currentUser.id || e.user_auth_id === currentUser.id;
+  // Solo puede eliminar si es su evento privado
+  const canDelete = e._privado && e.creado_por === currentUser.id;
   $('btn-eliminar-evento').style.display = canDelete ? '' : 'none';
+
+  // Indicar si es evento de oficina (solo lectura)
+  const soloLectura = !e._privado;
+  const tituloEl = $('ev-detail-titulo');
+  if (soloLectura) {
+    tituloEl.insertAdjacentHTML('afterend',
+      '<div style="font-size:11px;font-family:'DM Mono',monospace;color:var(--ink-light);margin-top:4px;margin-bottom:8px;">📅 Calendario de oficina · Solo lectura</div>');
+  }
 
   $('modal-detalle-evento').classList.add('open');
 }
