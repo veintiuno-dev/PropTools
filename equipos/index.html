@@ -485,13 +485,10 @@
 <!-- Toast container -->
 <div id="toast-container"></div>
 
-<!-- LAYOUT (header + sidebar + main inyectados por components.js) -->
+<!-- Header inyectado por components.js (nav horizontal) -->
 <header id="pt-header"></header>
 
-<div id="pt-layout">
-  <aside id="pt-sidebar"></aside>
-
-  <main id="pt-main">
+<main id="pt-main">
 
     <div class="page-header">
       <div class="page-title">Reservar Equipos</div>
@@ -564,10 +561,7 @@
       </div><!-- end panel card -->
     </div><!-- end two-col -->
 
-  </main>
-
-  <footer id="pt-footer"></footer>
-</div>
+</main>
 
 <!-- SUPABASE CDN -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
@@ -674,7 +668,7 @@ function toggleEq(id) {
 }
 
 function tipoLabel(t) {
-  return {  camara:'Cámara', dron:'Dron', laptop:'Laptop', proyector:'Proyector', audio:'Audio', otro:'Otro' }[t] || t || 'Otro';
+  return { laptop:'Laptop', proyector:'Proyector', camara:'Cámara', audio:'Audio', otro:'Otro' }[t] || t || 'Otro';
 }
 
 // ── CALENDAR ───────────────────────────────────────────────
