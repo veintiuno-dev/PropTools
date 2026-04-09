@@ -1346,13 +1346,13 @@
       </div>
     </div>
     <div class="form-group">
-      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:400;">
-        <input type="checkbox" id="ev-admin-todo-dia" style="width:16px;height:16px;cursor:pointer;accent-color:var(--blue);"
-          onclick="document.getElementById('ev-admin-horas-row').style.display=this.checked?'none':'grid'">
+      <button type="button" id="ev-admin-todo-dia-btn" onclick="calAdminToggleTodoDia()"
+        style="height:28px;padding:0 14px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;color:var(--ink-mid);cursor:pointer;transition:all .15s;">
         Todo el dia
-      </label>
+      </button>
+      <input type="hidden" id="ev-admin-todo-dia" value="0">
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;" id="ev-admin-horas-row">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;" id="ev-admin-horas-row">
       <div class="form-group">
         <label>Hora inicio</label>
         <input type="time" id="ev-admin-hora-ini" value="09:00">
@@ -1912,7 +1912,16 @@ async function calAdminEliminarCalendario(id) {
 
 // ── Nuevo evento ──
 function calAdminToggleTodoDia() {
-  $('ev-admin-horas-row').style.display = $('ev-admin-todo-dia').checked ? 'none' : 'grid';
+  const input = $('ev-admin-todo-dia');
+  const btn   = $('ev-admin-todo-dia-btn');
+  const isOn  = input.value === '1';
+  input.value = isOn ? '0' : '1';
+  $('ev-admin-horas-row').style.display = isOn ? 'grid' : 'none';
+  if (btn) {
+    btn.style.background = isOn ? 'var(--surface2)' : 'var(--blue)';
+    btn.style.color      = isOn ? 'var(--ink-mid)'  : 'white';
+    btn.style.borderColor= isOn ? 'var(--border)'   : 'var(--blue)';
+  }
 }
 
 function calAdminAbrirModalEvento(opts) {
@@ -1926,8 +1935,14 @@ function calAdminAbrirModalEvento(opts) {
   $('ev-admin-desc').value   = o.desc    || '';
   $('ev-admin-agente').value = o.agente  || '';
   const td = o.todo_dia || false;
-  $('ev-admin-todo-dia').checked = td;
+  $('ev-admin-todo-dia').value = td ? '1' : '0';
   $('ev-admin-horas-row').style.display = td ? 'none' : 'grid';
+  const _btn = $('ev-admin-todo-dia-btn');
+  if (_btn) {
+    _btn.style.background  = td ? 'var(--blue)'    : 'var(--surface2)';
+    _btn.style.color       = td ? 'white'           : 'var(--ink-mid)';
+    _btn.style.borderColor = td ? 'var(--blue)'     : 'var(--border)';
+  }
   $('ev-admin-hora-ini').value = td ? '09:00' : (o.hora_ini ? o.hora_ini.substring(0,5) : '09:00');
   $('ev-admin-hora-fin').value = (!td && o.hora_fin) ? o.hora_fin.substring(0,5) : '10:00';
   let del = $('btn-admin-delete-ev');
@@ -1966,7 +1981,7 @@ async function calAdminGuardarEvento() {
   const editId  = $('ev-admin-edit-id').value;
   const titulo  = $('ev-admin-titulo').value.trim();
   const fecha   = $('ev-admin-fecha').value;
-  const todoDia = $('ev-admin-todo-dia').checked;
+  const todoDia = $('ev-admin-todo-dia').value === '1';
   const horaIni = todoDia ? '00:00' : $('ev-admin-hora-ini').value;
   const horaFin = todoDia ? null    : ($('ev-admin-hora-fin').value || null);
   const desc    = $('ev-admin-desc').value.trim();
