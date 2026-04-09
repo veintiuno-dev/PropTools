@@ -357,6 +357,15 @@
     width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0;
   }
 
+  .btn-danger-sm {
+    background: var(--red-light); color: var(--red);
+    border: 1px solid #FECACA; height: 38px; padding: 0 14px;
+    border-radius: 8px; font-family: 'DM Sans', sans-serif;
+    font-size: 13px; font-weight: 500; cursor: pointer;
+    transition: background .12s; white-space: nowrap;
+  }
+  .btn-danger-sm:hover { background: #FEE2E2; }
+
   /* ── GATE ──────────────────────────────────────────── */
   #gate {
     position: fixed; inset: 0;
@@ -501,19 +510,28 @@
 
 </main>
 
-<!-- MODAL: Nuevo evento -->
+<!-- MODAL: Nuevo / Editar evento -->
 <div class="modal-backdrop" id="modal-nuevo-evento">
   <div class="modal-box">
-    <div class="modal-title">Nuevo evento</div>
+    <div class="modal-title" id="modal-ev-titulo-label">Nuevo evento</div>
+    <input type="hidden" id="ev-edit-id" value="">
     <div class="form-group">
       <label>Título</label>
       <input type="text" id="ev-titulo" placeholder="Título del evento">
     </div>
-    <div class="form-group">
-      <label>Fecha</label>
-      <input type="date" id="ev-fecha">
-    </div>
     <div class="form-row">
+      <div class="form-group">
+        <label>Fecha</label>
+        <input type="date" id="ev-fecha">
+      </div>
+      <div class="form-group" style="display:flex;align-items:flex-end;padding-bottom:2px;">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:400;color:var(--ink-mid);margin:0;">
+          <input type="checkbox" id="ev-todo-dia" onchange="toggleTodoDia()" style="width:16px;height:16px;cursor:pointer;accent-color:var(--blue);">
+          Todo el dia
+        </label>
+      </div>
+    </div>
+    <div class="form-row" id="ev-horas-row">
       <div class="form-group">
         <label>Hora inicio</label>
         <input type="time" id="ev-hora-ini" value="09:00">
@@ -524,30 +542,29 @@
       </div>
     </div>
     <div class="form-group">
-      <label>Descripción <span class="optional">(opcional)</span></label>
-      <textarea id="ev-desc" rows="2" placeholder="Detalles del evento…"></textarea>
+      <label>Descripcion <span class="optional">(opcional)</span></label>
+      <textarea id="ev-desc" rows="2" placeholder="Detalles del evento..."></textarea>
     </div>
-    <div class="modal-actions">
+    <div class="modal-actions" id="modal-ev-actions">
       <button class="btn btn-ghost" onclick="closeModal('modal-nuevo-evento')">Cancelar</button>
-      <button class="btn btn-primary" onclick="crearEvento()">Crear evento</button>
+      <button class="btn btn-primary" id="btn-guardar-evento" onclick="guardarEvento()">Crear evento</button>
     </div>
   </div>
 </div>
 
-<!-- MODAL: Detalle evento -->
+<!-- MODAL: Detalle evento de oficina -->
 <div class="modal-backdrop" id="modal-detalle-evento">
   <div class="modal-box">
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px;">
       <div class="ev-detail-color" id="ev-detail-color"></div>
       <div class="modal-title" style="margin:0;" id="ev-detail-titulo"></div>
     </div>
-    <div style="font-size:13px;color:var(--ink-mid);margin-bottom:6px;" id="ev-detail-fecha"></div>
+    <div style="font-size:11px;font-family:DM Mono,monospace;color:var(--ink-light);margin-bottom:12px;" id="ev-detail-cal-label"></div>
+    <div style="font-size:13px;color:var(--ink-mid);margin-bottom:4px;" id="ev-detail-fecha"></div>
     <div style="font-size:13px;color:var(--ink-mid);margin-bottom:12px;" id="ev-detail-hora"></div>
     <div style="font-size:13px;color:var(--ink);margin-bottom:16px;line-height:1.6;" id="ev-detail-desc"></div>
-    <div id="ev-detail-asignado" style="font-size:12px;font-family:'DM Mono',monospace;color:var(--ink-light);margin-bottom:16px;"></div>
     <div class="modal-actions">
-      <button class="btn btn-ghost" onclick="closeModal('modal-detalle-evento')">Cerrar</button>
-      <button class="btn btn-danger btn-sm" id="btn-eliminar-evento" onclick="eliminarEventoDetalle()">Eliminar</button>
+      <button class="btn btn-primary" onclick="closeModal('modal-detalle-evento')">Cerrar</button>
     </div>
   </div>
 </div>
@@ -807,7 +824,7 @@ function renderWeek() {
       const evHTML  = cellEvs.map(e => `
         <div class="ev-block" style="background:${colorEvento(e)}"
              onclick="event.stopPropagation();showDetalle('${e.id}')">
-          ${fmtHora(e.hora_inicio)} ${e.titulo}
+          ${e.todo_dia ? '' : fmtHora(e.hora_inicio) + ' '}${e.titulo}
         </div>`).join('');
       body += `<div class="week-cell" onclick="clickCell('${iso}','${h}:00')">${evHTML}</div>`;
     });
@@ -857,102 +874,121 @@ function switchView(v) {
 
 // -- CLICK CELDA ------------------------------------------------
 function clickCell(fecha, hora) {
-  $('ev-fecha').value    = fecha;
-  $('ev-hora-ini').value = hora.padStart(5,'0');
   const h = parseInt(hora);
-  $('ev-hora-fin').value = String(h+1).padStart(2,'0') + ':00';
-  $('ev-titulo').value   = '';
-  $('ev-desc').value     = '';
-  
-  $('modal-nuevo-evento').classList.add('open');
+  abrirModalEvento({ fecha, hora_ini: hora.padStart(5,'0'), hora_fin: String(h+1).padStart(2,'0') + ':00' });
 }
 
 function showModalNuevoEvento() {
-  $('ev-fecha').value    = toISO(selectedDate);
-  $('ev-hora-ini').value = '09:00';
-  $('ev-hora-fin').value = '10:00';
-  $('ev-titulo').value   = '';
-  $('ev-desc').value     = '';
-  
+  abrirModalEvento({ fecha: toISO(selectedDate) });
+}
+
+
+// -- TODO DIA --------------------------------------------------------
+function toggleTodoDia() {
+  $('ev-horas-row').style.display = $('ev-todo-dia').checked ? 'none' : '';
+}
+
+// -- ABRIR MODAL EVENTO -----------------------------------------------
+function abrirModalEvento(opts) {
+  const o = opts || {};
+  $('ev-edit-id').value = o.editId || '';
+  $('modal-ev-titulo-label').textContent = o.editId ? 'Editar evento' : 'Nuevo evento';
+  $('btn-guardar-evento').textContent    = o.editId ? 'Guardar cambios' : 'Crear evento';
+  $('ev-titulo').value  = o.titulo  || '';
+  $('ev-fecha').value   = o.fecha   || toISO(selectedDate);
+  $('ev-desc').value    = o.desc    || '';
+  const td = o.todo_dia || false;
+  $('ev-todo-dia').checked = td;
+  $('ev-horas-row').style.display = td ? 'none' : '';
+  $('ev-hora-ini').value = td ? '09:00' : (o.hora_ini ? o.hora_ini.substring(0,5) : '09:00');
+  $('ev-hora-fin').value = (!td && o.hora_fin) ? o.hora_fin.substring(0,5) : '10:00';
+  // Delete button
+  let del = $('btn-delete-from-edit');
+  if (o.editId) {
+    if (!del) {
+      del = document.createElement('button');
+      del.id = 'btn-delete-from-edit';
+      del.className = 'btn-danger-sm';
+      del.textContent = 'Eliminar';
+      $('modal-ev-actions').insertBefore(del, $('modal-ev-actions').firstChild);
+    }
+    del.onclick = () => eliminarEvento(o.editId);
+    del.style.display = '';
+  } else if (del) {
+    del.style.display = 'none';
+  }
   $('modal-nuevo-evento').classList.add('open');
 }
 
-// -- CREAR EVENTO -----------------------------------------------
-async function crearEvento() {
-  const titulo   = $('ev-titulo').value.trim();
-  const fecha    = $('ev-fecha').value;
-  const horaIni  = $('ev-hora-ini').value;
-  const horaFin  = $('ev-hora-fin').value;
-  const desc     = $('ev-desc').value.trim();
-
-  if (!titulo || !fecha || !horaIni) { toast('Completá título, fecha y hora', 'error'); return; }
-
-  // Siempre va al calendario privado del agente (calendario_id = null)
-  const { error } = await sb.from('eventos_calendario').insert({
-    titulo,
-    fecha,
-    hora_inicio:   horaIni,
-    hora_fin:      horaFin || null,
-    descripcion:   desc || null,
-    calendario_id: null,       // privado - sin calendario de oficina
-    user_auth_id:  currentUser.id,
-    creado_por:    currentUser.id
-  });
-
+// -- GUARDAR EVENTO ---------------------------------------------------
+async function guardarEvento() {
+  const editId  = $('ev-edit-id').value;
+  const titulo  = $('ev-titulo').value.trim();
+  const fecha   = $('ev-fecha').value;
+  const todoDia = $('ev-todo-dia').checked;
+  const horaIni = todoDia ? '00:00' : $('ev-hora-ini').value;
+  const horaFin = todoDia ? null    : ($('ev-hora-fin').value || null);
+  const desc    = $('ev-desc').value.trim();
+  if (!titulo || !fecha) { toast('Ingresa titulo y fecha', 'error'); return; }
+  let error;
+  if (editId) {
+    ({ error } = await sb.from('eventos_calendario')
+      .update({ titulo, fecha, hora_inicio: horaIni, hora_fin: horaFin,
+                descripcion: desc || null, todo_dia: todoDia })
+      .eq('id', editId).eq('creado_por', currentUser.id));
+  } else {
+    ({ error } = await sb.from('eventos_calendario').insert({
+      titulo, fecha,
+      hora_inicio: horaIni, hora_fin: horaFin,
+      descripcion: desc || null, todo_dia: todoDia,
+      calendario_id: null,
+      user_auth_id: currentUser.id, creado_por: currentUser.id,
+    }));
+  }
   if (error) { toast('Error: ' + error.message, 'error'); return; }
-
-  toast('v Evento creado', 'success');
+  toast(editId ? 'Evento actualizado' : 'Evento creado', 'success');
   closeModal('modal-nuevo-evento');
-  await loadEventos();
-  renderWeek();
-  renderMiniCal();
+  await loadEventos(); renderWeek(); renderMiniCal();
   if (currentView === 'dia') renderDay();
 }
+
+// -- ELIMINAR EVENTO --------------------------------------------------
+async function eliminarEvento(id) {
+  if (!confirm('Eliminar este evento?')) return;
+  const { error } = await sb.from('eventos_calendario').delete()
+    .eq('id', id).eq('creado_por', currentUser.id);
+  if (error) { toast('Error: ' + error.message, 'error'); return; }
+  toast('Evento eliminado');
+  closeModal('modal-nuevo-evento');
+  await loadEventos(); renderWeek(); renderMiniCal();
+  if (currentView === 'dia') renderDay();
+}
+
 
 // -- DETALLE / ELIMINAR -----------------------------------------
 function showDetalle(id) {
   const e = allEventos.find(ev => ev.id === id);
   if (!e) return;
-  detalleEventoId = id;
-
-  const color = colorEvento(e);
-  $('ev-detail-color').style.background = color;
-  $('ev-detail-titulo').textContent      = e.titulo;
-  $('ev-detail-fecha').textContent       = fmtFecha(e.fecha);
-  $('ev-detail-hora').textContent        = fmtHora(e.hora_inicio) + (e.hora_fin ? ' - ' + fmtHora(e.hora_fin) : '');
-  $('ev-detail-desc').textContent        = e.descripcion || '';
-  $('ev-detail-asignado').textContent    = e.calendarios?.nombre ? ' ' + e.calendarios.nombre : '';
-
-  // Solo puede eliminar si es su evento privado
-  const canDelete = e._privado && e.creado_por === currentUser.id;
-  $('btn-eliminar-evento').style.display = canDelete ? '' : 'none';
-
-  // Indicar si es evento de oficina (solo lectura)
-  const soloLectura = !e._privado;
-  const tituloEl = $('ev-detail-titulo');
-  if (soloLectura) {
-    tituloEl.insertAdjacentHTML('afterend',
-      '<div style="font-size:11px;font-family:DM Mono,monospace;color:var(--ink-light);margin-top:4px;margin-bottom:8px;">Calendario de oficina - Solo lectura</div>');
+  if (e._privado && e.creado_por === currentUser.id) {
+    abrirModalEvento({ editId: e.id, titulo: e.titulo, fecha: e.fecha,
+      hora_ini: e.hora_inicio, hora_fin: e.hora_fin, todo_dia: e.todo_dia, desc: e.descripcion });
+  } else {
+    $('ev-detail-color').style.background = colorEvento(e);
+    $('ev-detail-titulo').textContent     = e.titulo;
+    $('ev-detail-cal-label').textContent  = e.calendarios?.nombre ? 'Calendario: ' + e.calendarios.nombre + ' - Solo lectura' : '';
+    $('ev-detail-fecha').textContent      = fmtFecha(e.fecha);
+    $('ev-detail-hora').textContent       = e.todo_dia ? 'Todo el dia'
+      : fmtHora(e.hora_inicio) + (e.hora_fin ? ' - ' + fmtHora(e.hora_fin) : '');
+    $('ev-detail-desc').textContent       = e.descripcion || '';
+    $('modal-detalle-evento').classList.add('open');
   }
-
-  $('modal-detalle-evento').classList.add('open');
-}
-
-async function eliminarEventoDetalle() {
-  if (!detalleEventoId) return;
-  if (!confirm('¿Eliminar este evento?')) return;
-  await sb.from('eventos_calendario').delete().eq('id', detalleEventoId);
-  toast('Evento eliminado');
-  closeModal('modal-detalle-evento');
-  detalleEventoId = null;
-  await loadEventos();
-  renderWeek();
-  renderMiniCal();
-  if (currentView === 'dia') renderDay();
 }
 
 // -- MODALES ----------------------------------------------------
-function closeModal(id) { $(id).classList.remove('open'); }
+function closeModal(id) {
+  $(id).classList.remove('open');
+  if (id === 'modal-nuevo-evento') { const d = $('btn-delete-from-edit'); if (d) d.style.display = 'none'; }
+}
 
 // Cerrar con click fuera
 document.addEventListener('click', e => {
