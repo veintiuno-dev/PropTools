@@ -1320,130 +1320,132 @@
         </div>
       </div>
 
-      <!-- Modal: Nuevo / Editar evento (admin) -->
-      <div id="modal-nuevo-evento-admin" style="display:none;position:fixed;inset:0;background:rgba(13,15,18,.45);z-index:200;align-items:center;justify-content:center;">
-        <div style="background:var(--surface);border-radius:12px;padding:28px;width:480px;max-width:95vw;box-shadow:0 8px 40px rgba(13,15,18,.18);">
-          <div style="font-size:16px;font-weight:600;margin-bottom:20px;" id="modal-admin-ev-label">Nuevo evento</div>
-          <input type="hidden" id="ev-admin-edit-id" value="">
-          <div class="form-group">
-            <label>Título</label>
-            <input type="text" id="ev-admin-titulo" placeholder="Título del evento">
-          </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
-            <div class="form-group">
-              <label>Fecha</label>
-              <input type="date" id="ev-admin-fecha">
-            </div>
-            <div class="form-group">
-              <label>Asignar a agente <span class="optional">(opcional)</span></label>
-              <select id="ev-admin-agente">
-                <option value="">Toda la oficina</option>
-              </select>
-            </div>
-          </div>
-          <div class="form-group">
-            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:400;">
-              <input type="checkbox" id="ev-admin-todo-dia" onchange="calAdminToggleTodoDia()" style="width:16px;height:16px;cursor:pointer;accent-color:var(--blue);">
-              Todo el día
-            </label>
-          </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;" id="ev-admin-horas-row">
-            <div class="form-group">
-              <label>Hora inicio</label>
-              <input type="time" id="ev-admin-hora-ini" value="09:00">
-            </div>
-            <div class="form-group">
-              <label>Hora fin <span class="optional">(opcional)</span></label>
-              <input type="time" id="ev-admin-hora-fin" value="10:00">
-            </div>
-          </div>
-          <div class="form-group">
-            <label>Descripción <span class="optional">(opcional)</span></label>
-            <textarea id="ev-admin-desc" rows="2" placeholder="Detalles del evento…"></textarea>
-          </div>
-          <div style="display:flex;gap:10px;margin-top:4px;" id="modal-admin-ev-actions">
-            <button class="btn btn-ghost" onclick="calAdminCloseModal('modal-nuevo-evento-admin')" style="flex:1;">Cancelar</button>
-            <button class="btn btn-primary" id="btn-admin-guardar-evento" onclick="calAdminGuardarEvento()" style="flex:1;">Crear evento</button>
-          </div>
-        </div>
+        </div><!-- end panel-calendario -->
+
+
+<!-- Modales calendario admin (fuera del panel) -->
+<!-- Modal: Nuevo / Editar evento (admin) -->
+<div id="modal-nuevo-evento-admin" style="display:none;position:fixed;inset:0;background:rgba(13,15,18,.45);z-index:200;align-items:center;justify-content:center;">
+  <div style="background:var(--surface);border-radius:12px;padding:28px;width:480px;max-width:95vw;box-shadow:0 8px 40px rgba(13,15,18,.18);">
+    <div style="font-size:16px;font-weight:600;margin-bottom:20px;" id="modal-admin-ev-label">Nuevo evento</div>
+    <input type="hidden" id="ev-admin-edit-id" value="">
+    <div class="form-group">
+      <label>Título</label>
+      <input type="text" id="ev-admin-titulo" placeholder="Título del evento">
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+      <div class="form-group">
+        <label>Fecha</label>
+        <input type="date" id="ev-admin-fecha">
       </div>
-
-
-      <!-- Modal: Nuevo calendario -->
-      <div id="modal-nuevo-cal" style="display:none;position:fixed;inset:0;background:rgba(13,15,18,.45);z-index:200;display:none;align-items:center;justify-content:center;">
-        <div style="background:var(--surface);border-radius:12px;padding:28px;width:440px;max-width:95vw;box-shadow:0 8px 40px rgba(13,15,18,.18);">
-          <div style="font-size:16px;font-weight:600;margin-bottom:20px;">Nuevo calendario</div>
-          <div class="form-group">
-            <label>Nombre del calendario</label>
-            <input type="text" id="new-cal-nombre" placeholder="ej. Reuniones de equipo, Turnos, etc.">
-          </div>
-          <div class="form-group">
-            <label>Color</label>
-            <div style="display:flex;gap:8px;flex-wrap:wrap;" id="cal-color-picker">
-              <div class="cal-color-opt" data-color="#1B6EF3" style="width:28px;height:28px;border-radius:50%;background:#1B6EF3;cursor:pointer;border:3px solid transparent;" onclick="calSelectColor('#1B6EF3',this)"></div>
-              <div class="cal-color-opt" data-color="#16A34A" style="width:28px;height:28px;border-radius:50%;background:#16A34A;cursor:pointer;border:3px solid transparent;" onclick="calSelectColor('#16A34A',this)"></div>
-              <div class="cal-color-opt" data-color="#DC2626" style="width:28px;height:28px;border-radius:50%;background:#DC2626;cursor:pointer;border:3px solid transparent;" onclick="calSelectColor('#DC2626',this)"></div>
-              <div class="cal-color-opt" data-color="#D97706" style="width:28px;height:28px;border-radius:50%;background:#D97706;cursor:pointer;border:3px solid transparent;" onclick="calSelectColor('#D97706',this)"></div>
-              <div class="cal-color-opt" data-color="#7C3AED" style="width:28px;height:28px;border-radius:50%;background:#7C3AED;cursor:pointer;border:3px solid transparent;" onclick="calSelectColor('#7C3AED',this)"></div>
-              <div class="cal-color-opt" data-color="#0891B2" style="width:28px;height:28px;border-radius:50%;background:#0891B2;cursor:pointer;border:3px solid transparent;" onclick="calSelectColor('#0891B2',this)"></div>
-              <div class="cal-color-opt" data-color="#BE185D" style="width:28px;height:28px;border-radius:50%;background:#BE185D;cursor:pointer;border:3px solid transparent;" onclick="calSelectColor('#BE185D',this)"></div>
-              <div class="cal-color-opt" data-color="#065F46" style="width:28px;height:28px;border-radius:50%;background:#065F46;cursor:pointer;border:3px solid transparent;" onclick="calSelectColor('#065F46',this)"></div>
-            </div>
-            <input type="hidden" id="new-cal-color" value="#1B6EF3">
-          </div>
-          <div class="form-group">
-            <label>Descripción <span class="optional">(opcional)</span></label>
-            <input type="text" id="new-cal-desc" placeholder="Descripción del calendario">
-          </div>
-          <div style="display:flex;gap:10px;margin-top:4px;">
-            <button class="btn btn-ghost" onclick="calAdminCloseModal('modal-nuevo-cal')" style="flex:1;">Cancelar</button>
-            <button class="btn btn-primary" onclick="calAdminCrearCalendario()" style="flex:1;">Crear calendario</button>
-          </div>
-        </div>
+      <div class="form-group">
+        <label>Asignar a agente <span class="optional">(opcional)</span></label>
+        <select id="ev-admin-agente">
+          <option value="">Toda la oficina</option>
+        </select>
       </div>
-
-      <!-- Modal: Nuevo evento (admin) -->
-      <div id="modal-nuevo-evento-admin" style="display:none;position:fixed;inset:0;background:rgba(13,15,18,.45);z-index:200;align-items:center;justify-content:center;">
-        <div style="background:var(--surface);border-radius:12px;padding:28px;width:480px;max-width:95vw;box-shadow:0 8px 40px rgba(13,15,18,.18);">
-          <div style="font-size:16px;font-weight:600;margin-bottom:20px;">Nuevo evento</div>
-          <div class="form-group">
-            <label>Título</label>
-            <input type="text" id="ev-admin-titulo" placeholder="Título del evento">
-          </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
-            <div class="form-group">
-              <label>Fecha</label>
-              <input type="date" id="ev-admin-fecha">
-            </div>
-            <div class="form-group">
-              <label>Asignar a agente <span class="optional">(opcional)</span></label>
-              <select id="ev-admin-agente">
-                <option value="">Toda la oficina</option>
-              </select>
-            </div>
-          </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
-            <div class="form-group">
-              <label>Hora inicio</label>
-              <input type="time" id="ev-admin-hora-ini" value="09:00">
-            </div>
-            <div class="form-group">
-              <label>Hora fin</label>
-              <input type="time" id="ev-admin-hora-fin" value="10:00">
-            </div>
-          </div>
-          <div class="form-group">
-            <label>Descripción <span class="optional">(opcional)</span></label>
-            <textarea id="ev-admin-desc" rows="2" placeholder="Detalles del evento…"></textarea>
-          </div>
-          <div style="display:flex;gap:10px;margin-top:4px;">
-            <button class="btn btn-ghost" onclick="calAdminCloseModal('modal-nuevo-evento-admin')" style="flex:1;">Cancelar</button>
-            <button class="btn btn-primary" onclick="calAdminCrearEvento()" style="flex:1;">Crear evento</button>
-          </div>
-        </div>
+    </div>
+    <div class="form-group">
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:400;">
+        <input type="checkbox" id="ev-admin-todo-dia" onchange="calAdminToggleTodoDia()" style="width:16px;height:16px;cursor:pointer;accent-color:var(--blue);">
+        Todo el día
+      </label>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;" id="ev-admin-horas-row">
+      <div class="form-group">
+        <label>Hora inicio</label>
+        <input type="time" id="ev-admin-hora-ini" value="09:00">
       </div>
+      <div class="form-group">
+        <label>Hora fin <span class="optional">(opcional)</span></label>
+        <input type="time" id="ev-admin-hora-fin" value="10:00">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Descripción <span class="optional">(opcional)</span></label>
+      <textarea id="ev-admin-desc" rows="2" placeholder="Detalles del evento…"></textarea>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:4px;" id="modal-admin-ev-actions">
+      <button class="btn btn-ghost" onclick="calAdminCloseModal('modal-nuevo-evento-admin')" style="flex:1;">Cancelar</button>
+      <button class="btn btn-primary" id="btn-admin-guardar-evento" onclick="calAdminGuardarEvento()" style="flex:1;">Crear evento</button>
+    </div>
+  </div>
+</div>
 
-    </div><!-- end panel-calendario -->
+
+<!-- Modal: Nuevo calendario -->
+<div id="modal-nuevo-cal" style="display:none;position:fixed;inset:0;background:rgba(13,15,18,.45);z-index:200;display:none;align-items:center;justify-content:center;">
+  <div style="background:var(--surface);border-radius:12px;padding:28px;width:440px;max-width:95vw;box-shadow:0 8px 40px rgba(13,15,18,.18);">
+    <div style="font-size:16px;font-weight:600;margin-bottom:20px;">Nuevo calendario</div>
+    <div class="form-group">
+      <label>Nombre del calendario</label>
+      <input type="text" id="new-cal-nombre" placeholder="ej. Reuniones de equipo, Turnos, etc.">
+    </div>
+    <div class="form-group">
+      <label>Color</label>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;" id="cal-color-picker">
+        <div class="cal-color-opt" data-color="#1B6EF3" style="width:28px;height:28px;border-radius:50%;background:#1B6EF3;cursor:pointer;border:3px solid transparent;" onclick="calSelectColor('#1B6EF3',this)"></div>
+        <div class="cal-color-opt" data-color="#16A34A" style="width:28px;height:28px;border-radius:50%;background:#16A34A;cursor:pointer;border:3px solid transparent;" onclick="calSelectColor('#16A34A',this)"></div>
+        <div class="cal-color-opt" data-color="#DC2626" style="width:28px;height:28px;border-radius:50%;background:#DC2626;cursor:pointer;border:3px solid transparent;" onclick="calSelectColor('#DC2626',this)"></div>
+        <div class="cal-color-opt" data-color="#D97706" style="width:28px;height:28px;border-radius:50%;background:#D97706;cursor:pointer;border:3px solid transparent;" onclick="calSelectColor('#D97706',this)"></div>
+        <div class="cal-color-opt" data-color="#7C3AED" style="width:28px;height:28px;border-radius:50%;background:#7C3AED;cursor:pointer;border:3px solid transparent;" onclick="calSelectColor('#7C3AED',this)"></div>
+        <div class="cal-color-opt" data-color="#0891B2" style="width:28px;height:28px;border-radius:50%;background:#0891B2;cursor:pointer;border:3px solid transparent;" onclick="calSelectColor('#0891B2',this)"></div>
+        <div class="cal-color-opt" data-color="#BE185D" style="width:28px;height:28px;border-radius:50%;background:#BE185D;cursor:pointer;border:3px solid transparent;" onclick="calSelectColor('#BE185D',this)"></div>
+        <div class="cal-color-opt" data-color="#065F46" style="width:28px;height:28px;border-radius:50%;background:#065F46;cursor:pointer;border:3px solid transparent;" onclick="calSelectColor('#065F46',this)"></div>
+      </div>
+      <input type="hidden" id="new-cal-color" value="#1B6EF3">
+    </div>
+    <div class="form-group">
+      <label>Descripción <span class="optional">(opcional)</span></label>
+      <input type="text" id="new-cal-desc" placeholder="Descripción del calendario">
+    </div>
+    <div style="display:flex;gap:10px;margin-top:4px;">
+      <button class="btn btn-ghost" onclick="calAdminCloseModal('modal-nuevo-cal')" style="flex:1;">Cancelar</button>
+      <button class="btn btn-primary" onclick="calAdminCrearCalendario()" style="flex:1;">Crear calendario</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Nuevo evento (admin) -->
+<div id="modal-nuevo-evento-admin" style="display:none;position:fixed;inset:0;background:rgba(13,15,18,.45);z-index:200;align-items:center;justify-content:center;">
+  <div style="background:var(--surface);border-radius:12px;padding:28px;width:480px;max-width:95vw;box-shadow:0 8px 40px rgba(13,15,18,.18);">
+    <div style="font-size:16px;font-weight:600;margin-bottom:20px;">Nuevo evento</div>
+    <div class="form-group">
+      <label>Título</label>
+      <input type="text" id="ev-admin-titulo" placeholder="Título del evento">
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+      <div class="form-group">
+        <label>Fecha</label>
+        <input type="date" id="ev-admin-fecha">
+      </div>
+      <div class="form-group">
+        <label>Asignar a agente <span class="optional">(opcional)</span></label>
+        <select id="ev-admin-agente">
+          <option value="">Toda la oficina</option>
+        </select>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+      <div class="form-group">
+        <label>Hora inicio</label>
+        <input type="time" id="ev-admin-hora-ini" value="09:00">
+      </div>
+      <div class="form-group">
+        <label>Hora fin</label>
+        <input type="time" id="ev-admin-hora-fin" value="10:00">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Descripción <span class="optional">(opcional)</span></label>
+      <textarea id="ev-admin-desc" rows="2" placeholder="Detalles del evento…"></textarea>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:4px;">
+      <button class="btn btn-ghost" onclick="calAdminCloseModal('modal-nuevo-evento-admin')" style="flex:1;">Cancelar</button>
+      <button class="btn btn-primary" onclick="calAdminCrearEvento()" style="flex:1;">Crear evento</button>
+    </div>
+  </div>
+</div>
 
   </main>
 </div>
