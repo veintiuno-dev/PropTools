@@ -1320,6 +1320,88 @@
         </div>
       </div>
 
+      <!-- Modal: Nuevo / Editar evento (admin) -->
+      <div id="modal-nuevo-evento-admin" style="display:none;position:fixed;inset:0;background:rgba(13,15,18,.45);z-index:200;align-items:center;justify-content:center;">
+        <div style="background:var(--surface);border-radius:12px;padding:28px;width:480px;max-width:95vw;box-shadow:0 8px 40px rgba(13,15,18,.18);">
+          <div style="font-size:16px;font-weight:600;margin-bottom:20px;" id="modal-admin-ev-label">Nuevo evento</div>
+          <input type="hidden" id="ev-admin-edit-id" value="">
+          <div class="form-group">
+            <label>Título</label>
+            <input type="text" id="ev-admin-titulo" placeholder="Título del evento">
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+            <div class="form-group">
+              <label>Fecha</label>
+              <input type="date" id="ev-admin-fecha">
+            </div>
+            <div class="form-group">
+              <label>Asignar a agente <span class="optional">(opcional)</span></label>
+              <select id="ev-admin-agente">
+                <option value="">Toda la oficina</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:400;">
+              <input type="checkbox" id="ev-admin-todo-dia" onchange="calAdminToggleTodoDia()" style="width:16px;height:16px;cursor:pointer;accent-color:var(--blue);">
+              Todo el día
+            </label>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;" id="ev-admin-horas-row">
+            <div class="form-group">
+              <label>Hora inicio</label>
+              <input type="time" id="ev-admin-hora-ini" value="09:00">
+            </div>
+            <div class="form-group">
+              <label>Hora fin <span class="optional">(opcional)</span></label>
+              <input type="time" id="ev-admin-hora-fin" value="10:00">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Descripción <span class="optional">(opcional)</span></label>
+            <textarea id="ev-admin-desc" rows="2" placeholder="Detalles del evento…"></textarea>
+          </div>
+          <div style="display:flex;gap:10px;margin-top:4px;" id="modal-admin-ev-actions">
+            <button class="btn btn-ghost" onclick="calAdminCloseModal('modal-nuevo-evento-admin')" style="flex:1;">Cancelar</button>
+            <button class="btn btn-primary" id="btn-admin-guardar-evento" onclick="calAdminGuardarEvento()" style="flex:1;">Crear evento</button>
+          </div>
+        </div>
+      </div>
+
+
+      <!-- Modal: Nuevo calendario -->
+      <div id="modal-nuevo-cal" style="display:none;position:fixed;inset:0;background:rgba(13,15,18,.45);z-index:200;display:none;align-items:center;justify-content:center;">
+        <div style="background:var(--surface);border-radius:12px;padding:28px;width:440px;max-width:95vw;box-shadow:0 8px 40px rgba(13,15,18,.18);">
+          <div style="font-size:16px;font-weight:600;margin-bottom:20px;">Nuevo calendario</div>
+          <div class="form-group">
+            <label>Nombre del calendario</label>
+            <input type="text" id="new-cal-nombre" placeholder="ej. Reuniones de equipo, Turnos, etc.">
+          </div>
+          <div class="form-group">
+            <label>Color</label>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;" id="cal-color-picker">
+              <div class="cal-color-opt" data-color="#1B6EF3" style="width:28px;height:28px;border-radius:50%;background:#1B6EF3;cursor:pointer;border:3px solid transparent;" onclick="calSelectColor('#1B6EF3',this)"></div>
+              <div class="cal-color-opt" data-color="#16A34A" style="width:28px;height:28px;border-radius:50%;background:#16A34A;cursor:pointer;border:3px solid transparent;" onclick="calSelectColor('#16A34A',this)"></div>
+              <div class="cal-color-opt" data-color="#DC2626" style="width:28px;height:28px;border-radius:50%;background:#DC2626;cursor:pointer;border:3px solid transparent;" onclick="calSelectColor('#DC2626',this)"></div>
+              <div class="cal-color-opt" data-color="#D97706" style="width:28px;height:28px;border-radius:50%;background:#D97706;cursor:pointer;border:3px solid transparent;" onclick="calSelectColor('#D97706',this)"></div>
+              <div class="cal-color-opt" data-color="#7C3AED" style="width:28px;height:28px;border-radius:50%;background:#7C3AED;cursor:pointer;border:3px solid transparent;" onclick="calSelectColor('#7C3AED',this)"></div>
+              <div class="cal-color-opt" data-color="#0891B2" style="width:28px;height:28px;border-radius:50%;background:#0891B2;cursor:pointer;border:3px solid transparent;" onclick="calSelectColor('#0891B2',this)"></div>
+              <div class="cal-color-opt" data-color="#BE185D" style="width:28px;height:28px;border-radius:50%;background:#BE185D;cursor:pointer;border:3px solid transparent;" onclick="calSelectColor('#BE185D',this)"></div>
+              <div class="cal-color-opt" data-color="#065F46" style="width:28px;height:28px;border-radius:50%;background:#065F46;cursor:pointer;border:3px solid transparent;" onclick="calSelectColor('#065F46',this)"></div>
+            </div>
+            <input type="hidden" id="new-cal-color" value="#1B6EF3">
+          </div>
+          <div class="form-group">
+            <label>Descripción <span class="optional">(opcional)</span></label>
+            <input type="text" id="new-cal-desc" placeholder="Descripción del calendario">
+          </div>
+          <div style="display:flex;gap:10px;margin-top:4px;">
+            <button class="btn btn-ghost" onclick="calAdminCloseModal('modal-nuevo-cal')" style="flex:1;">Cancelar</button>
+            <button class="btn btn-primary" onclick="calAdminCrearCalendario()" style="flex:1;">Crear calendario</button>
+          </div>
+        </div>
+      </div>
+
       <!-- Modal: Nuevo evento (admin) -->
       <div id="modal-nuevo-evento-admin" style="display:none;position:fixed;inset:0;background:rgba(13,15,18,.45);z-index:200;align-items:center;justify-content:center;">
         <div style="background:var(--surface);border-radius:12px;padding:28px;width:480px;max-width:95vw;box-shadow:0 8px 40px rgba(13,15,18,.18);">
@@ -1684,7 +1766,11 @@ async function calAdminLoadCalendarios() {
   const sel = $('cal-admin-selector');
   sel.innerHTML = '<option value="">Seleccionar calendario…</option>' +
     _calendarios.map(c => `<option value="${c.id}">${c.nombre}</option>`).join('');
-  if (_calSelId) sel.value = _calSelId;
+  if (_calSelId) {
+    sel.value = _calSelId;
+  } else if (_calendarios.length) {
+    calAdminSelectCalendario(_calendarios[0].id);
+  }
 }
 
 async function calAdminLoadAgentes() {
@@ -1767,9 +1853,10 @@ function calAdminRenderWeek(eventos, color) {
       const dayEvs = eventos.filter(e => e.fecha === iso && parseInt(e.hora_inicio) === h);
       const evHTML = dayEvs.map(e => {
         const agente = e.user_auth_id ? (_calAgentes.find(a=>a.auth_id===e.user_auth_id)?.nombre || 'Agente') : '';
+        const horaStr = e.todo_dia ? 'Todo el dia' : (e.hora_inicio ? e.hora_inicio.substring(0,5) : '');
         return `<div class="cal-event-block" style="background:${color};position:relative;top:0;left:2px;right:2px;margin-bottom:2px;" 
-          onclick="calAdminEditEvento('${e.id}')" title="${e.titulo}${agente?' — '+agente:''}">
-          ${e.titulo}${agente?`<br><span style="font-weight:400;opacity:.85;">${agente}</span>`:''}
+          onclick="calAdminEditEvento('${e.id}')" title="${e.titulo}${agente?' - '+agente:''}">
+          ${horaStr ? `<span style="opacity:.8;font-size:10px;font-weight:400;">${horaStr}</span> ` : ''}${e.titulo}${agente?`<br><span style="font-weight:400;opacity:.85;">${agente}</span>`:''}
         </div>`;
       }).join('');
       html += `<div style="border-left:1px solid var(--surface2);padding:2px;position:relative;cursor:pointer;transition:background .1s;" 
@@ -1821,65 +1908,125 @@ async function calAdminEliminarCalendario(id) {
 }
 
 // ── Nuevo evento ──
-function calAdminShowNuevoEvento() {
+function calAdminToggleTodoDia() {
+  $('ev-admin-horas-row').style.display = $('ev-admin-todo-dia').checked ? 'none' : '';
+}
+
+function calAdminAbrirModalEvento(opts) {
   if (!_calSelId) return;
-  $('ev-admin-titulo').value = '';
-  $('ev-admin-fecha').value = toISODate(new Date());
-  $('ev-admin-hora-ini').value = '09:00';
-  $('ev-admin-hora-fin').value = '10:00';
-  $('ev-admin-desc').value = '';
-  $('ev-admin-agente').value = '';
+  const o = opts || {};
+  $('ev-admin-edit-id').value = o.editId || '';
+  $('modal-admin-ev-label').textContent = o.editId ? 'Editar evento' : 'Nuevo evento';
+  $('btn-admin-guardar-evento').textContent = o.editId ? 'Guardar cambios' : 'Crear evento';
+  $('ev-admin-titulo').value = o.titulo  || '';
+  $('ev-admin-fecha').value  = o.fecha   || toISODate(new Date());
+  $('ev-admin-desc').value   = o.desc    || '';
+  $('ev-admin-agente').value = o.agente  || '';
+  const td = o.todo_dia || false;
+  $('ev-admin-todo-dia').checked = td;
+  $('ev-admin-horas-row').style.display = td ? 'none' : '';
+  $('ev-admin-hora-ini').value = td ? '09:00' : (o.hora_ini ? o.hora_ini.substring(0,5) : '09:00');
+  $('ev-admin-hora-fin').value = (!td && o.hora_fin) ? o.hora_fin.substring(0,5) : '10:00';
+  let del = $('btn-admin-delete-ev');
+  if (o.editId) {
+    if (!del) {
+      del = document.createElement('button');
+      del.id = 'btn-admin-delete-ev';
+      del.className = 'btn btn-danger btn-sm';
+      del.textContent = 'Eliminar';
+      del.style.cssText = 'flex:0;white-space:nowrap;';
+      $('modal-admin-ev-actions').insertBefore(del, $('modal-admin-ev-actions').firstChild);
+    }
+    del.onclick = () => calAdminEliminarEvento(o.editId);
+    del.style.display = '';
+  } else if (del) {
+    del.style.display = 'none';
+  }
   $('modal-nuevo-evento-admin').style.display = 'flex';
+}
+
+function calAdminShowNuevoEvento() {
+  calAdminAbrirModalEvento({});
 }
 
 function calAdminClickCell(fecha, hora) {
   if (!_calSelId) return;
-  $('ev-admin-titulo').value = '';
-  $('ev-admin-fecha').value = fecha;
   const h = hora.split(':')[0].padStart(2,'0');
-  $('ev-admin-hora-ini').value = h + ':00';
-  $('ev-admin-hora-fin').value = (parseInt(h)+1).toString().padStart(2,'0') + ':00';
-  $('ev-admin-desc').value = '';
-  $('ev-admin-agente').value = '';
-  $('modal-nuevo-evento-admin').style.display = 'flex';
+  calAdminAbrirModalEvento({
+    fecha,
+    hora_ini: h + ':00',
+    hora_fin: (parseInt(h)+1).toString().padStart(2,'0') + ':00',
+  });
 }
 
-async function calAdminCrearEvento() {
-  const titulo    = $('ev-admin-titulo').value.trim();
-  const fecha     = $('ev-admin-fecha').value;
-  const horaIni   = $('ev-admin-hora-ini').value;
-  const horaFin   = $('ev-admin-hora-fin').value;
-  const desc      = $('ev-admin-desc').value.trim();
-  const agente    = $('ev-admin-agente').value;
+async function calAdminGuardarEvento() {
+  const editId  = $('ev-admin-edit-id').value;
+  const titulo  = $('ev-admin-titulo').value.trim();
+  const fecha   = $('ev-admin-fecha').value;
+  const todoDia = $('ev-admin-todo-dia').checked;
+  const horaIni = todoDia ? '00:00' : $('ev-admin-hora-ini').value;
+  const horaFin = todoDia ? null    : ($('ev-admin-hora-fin').value || null);
+  const desc    = $('ev-admin-desc').value.trim();
+  const agente  = $('ev-admin-agente').value;
 
-  if (!titulo || !fecha || !horaIni) { toast('Completá título, fecha y hora', 'error'); return; }
+  if (!titulo || !fecha) { toast('Completá título y fecha', 'error'); return; }
 
-  const { error } = await sb.from('eventos_calendario').insert({
-    calendario_id: _calSelId,
-    titulo,
-    fecha,
-    hora_inicio: horaIni,
-    hora_fin: horaFin || null,
-    descripcion: desc || null,
-    user_auth_id: agente || null,
-    creado_por: currentUser.id
-  });
+  let error;
+  if (editId) {
+    ({ error } = await sb.from('eventos_calendario')
+      .update({ titulo, fecha, hora_inicio: horaIni, hora_fin: horaFin,
+                descripcion: desc || null, todo_dia: todoDia,
+                user_auth_id: agente || null })
+      .eq('id', editId));
+  } else {
+    ({ error } = await sb.from('eventos_calendario').insert({
+      calendario_id: _calSelId,
+      titulo, fecha,
+      hora_inicio: horaIni,
+      hora_fin:    horaFin,
+      descripcion: desc || null,
+      todo_dia:    todoDia,
+      user_auth_id: agente || null,
+      creado_por:   currentUser.id,
+    }));
+  }
 
   if (error) { toast('Error: ' + error.message, 'error'); return; }
-  toast('✓ Evento creado', 'success');
+  toast(editId ? 'Evento actualizado' : 'Evento creado', 'success');
   calAdminCloseModal('modal-nuevo-evento-admin');
   calAdminLoadCalendar();
 }
 
-async function calAdminEditEvento(id) {
-  if (!confirm('¿Eliminar este evento?')) return;
+async function calAdminEliminarEvento(id) {
+  if (!confirm('Eliminar este evento?')) return;
   await sb.from('eventos_calendario').delete().eq('id', id);
   toast('Evento eliminado');
+  calAdminCloseModal('modal-nuevo-evento-admin');
   calAdminLoadCalendar();
+}
+
+
+async function calAdminEditEvento(id) {
+  const { data: ev } = await sb.from('eventos_calendario').select('*').eq('id', id).single();
+  if (!ev) { toast('No se encontro el evento', 'error'); return; }
+  calAdminAbrirModalEvento({
+    editId:   ev.id,
+    titulo:   ev.titulo,
+    fecha:    ev.fecha,
+    hora_ini: ev.hora_inicio,
+    hora_fin: ev.hora_fin,
+    todo_dia: ev.todo_dia,
+    desc:     ev.descripcion,
+    agente:   ev.user_auth_id || '',
+  });
 }
 
 function calAdminCloseModal(id) {
   $(id).style.display = 'none';
+  if (id === 'modal-nuevo-evento-admin') {
+    const d = $('btn-admin-delete-ev');
+    if (d) d.style.display = 'none';
+  }
 }
 
 function toISODate(d) {
