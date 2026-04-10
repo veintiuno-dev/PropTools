@@ -12,10 +12,6 @@
 
 const PROPTOOLS_SVG = `<span class="pt-logo-bar"></span><span class="pt-logo-wordmark"><span class="pt-logo-prop">Prop</span><span class="pt-logo-tools">TOOLS</span></span>`;
 
-// ─── Versión ─────────────────────────────────────────────────────────────────
-
-const PT_VERSION = '1.0.0';
-
 // ─── CSS ──────────────────────────────────────────────────────────────────────
 
 function injectComponentStyles() {
@@ -109,13 +105,16 @@ function injectComponentStyles() {
     /* Main */
     #pt-main { padding: 32px 36px; min-width: 0; }
 
-    /* Footer */
+    /* Versión */
+    .pt-footer-version { font-family: var(--font-mono); font-size: 10px; color: #B0B8C8; letter-spacing: .04em; }
+
+    /* Footer — fixed al fondo, nunca en el flujo del documento */
     #pt-footer {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 50;
       border-top: 1px solid var(--border); background: var(--surface);
       height: 48px; padding: 0 28px;
-      display: flex; align-items: center; position: relative;
+      display: flex; align-items: center;
     }
-    body { padding-bottom: 48px; }
     /* Izquierda */
     #pt-footer .pt-footer-left {
       display: flex; align-items: center; gap: 6px; flex: 1;
@@ -123,13 +122,9 @@ function injectComponentStyles() {
     #pt-footer .pt-footer-proptools-name {
       font-size: 12px; font-weight: 700; color: var(--ink);
     }
-    #pt-footer .pt-footer-version {
-      font-family: var(--font-mono); font-size: 10px; color: #B0B8C8; letter-spacing: .04em;
-    }
     /* Centro */
     #pt-footer .pt-footer-center {
       position: absolute; left: 50%; transform: translateX(-50%);
-      display: flex; align-items: center;
     }
     #pt-footer .pt-footer-sig {
       font-family: var(--font-mono); font-size: 12px; color: #B0B8C8; letter-spacing: .04em;
@@ -307,6 +302,9 @@ function renderSidebar({ apps = [], active = '', role = 'agent' } = {}) {
 }
 
 // ─── Footer ───────────────────────────────────────────────────────────────────
+
+// ─── Versión ─────────────────────────────────────────────────────────────────
+const PT_VERSION = '1.0.0';
 
 function renderFooter() {
   const el = document.getElementById('pt-footer');
