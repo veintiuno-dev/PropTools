@@ -1800,27 +1800,36 @@ function calAdminSelectCalendario(id) {
 // ── Vista semanal ──
 async function calAdminLoadCalendar() {
   const selId = $('cal-admin-selector').value;
-  if (!selId) { _calSelId = null; $('btn-nuevo-evento-admin').disabled = true; return; }
-  _calSelId = selId;
-  $('btn-nuevo-evento-admin').disabled = false;
+  // _calSelId para nuevos eventos usa el selector; pero la vista muestra TODOS
+  if (selId) { _calSelId = selId; $('btn-nuevo-evento-admin').disabled = false; }
+  else { $('btn-nuevo-evento-admin').disabled = true; }
+
+  if (!_calendarios.length) return;
 
   const weekEnd = new Date(_calAdminWeekStart);
   weekEnd.setDate(weekEnd.getDate() + 6);
   const ini = toISODate(_calAdminWeekStart);
   const fin = toISODate(weekEnd);
 
+  // Cargar eventos de TODOS los calendarios a la vez
+  const calIds = _calendarios.map(c => c.id);
   const { data: eventos } = await sb.from('eventos_calendario')
     .select('*')
-    .eq('calendario_id', selId)
+    .in('calendario_id', calIds)
     .gte('fecha', ini)
     .lte('fecha', fin)
     .order('hora_inicio');
 
-  const cal = _calendarios.find(c => c.id === selId);
-  calAdminRenderWeek(eventos || [], cal?.color || '#1B6EF3');
+  // Pasar mapa de colores por calendario_id
+  const colorMap = {};
+  _calendarios.forEach(c => { colorMap[c.id] = c.color || '#1B6EF3'; });
+
+  calAdminRenderWeek(eventos || [], colorMap);
 }
 
-function calAdminRenderWeek(eventos, color) {
+function calAdminRenderWeek(eventos, colorMap) {
+  // colorMap: { calendario_id -> color } o string de color legacy
+  const getColor = (e) => typeof colorMap === 'string' ? colorMap : (colorMap[e.calendario_id] || '#1B6EF3');
   const grid = $('cal-admin-week-grid');
   const today = toISODate(new Date());
   const days = [];
@@ -1859,7 +1868,7 @@ function calAdminRenderWeek(eventos, color) {
       const dayTodosDia = todosDia.filter(e => e.fecha === iso);
       const tdHTML = dayTodosDia.map(e => {
         const agente = e.user_auth_id ? (_calAgentes.find(a=>a.auth_id===e.user_auth_id)?.nombre || '') : '';
-        return `<div style="background:${color};border-radius:4px;padding:2px 6px;margin:3px 2px;font-size:11px;font-weight:600;color:white;cursor:pointer;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;"
+        return `<div style="background:${getColor(e)};border-radius:4px;padding:2px 6px;margin:3px 2px;font-size:11px;font-weight:600;color:white;cursor:pointer;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;"
           onclick="calAdminEditEvento('${e.id}')" title="${e.titulo}${agente?' - '+agente:''}">
           ${e.titulo}${agente?` <span style="opacity:.8;font-weight:400;">(${agente})</span>`:''}
         </div>`;
@@ -1880,7 +1889,7 @@ function calAdminRenderWeek(eventos, color) {
       const evHTML = dayEvs.map(e => {
         const agente = e.user_auth_id ? (_calAgentes.find(a=>a.auth_id===e.user_auth_id)?.nombre || 'Agente') : '';
         const horaStr = e.todo_dia ? 'Todo el dia' : (e.hora_inicio ? e.hora_inicio.substring(0,5) : '');
-        return `<div class="cal-event-block" style="background:${color};position:relative;top:0;left:2px;right:2px;margin-bottom:2px;" 
+        return `<div class="cal-event-block" style="background:${getColor(e)};position:relative;top:0;left:2px;right:2px;margin-bottom:2px;" 
           onclick="calAdminEditEvento('${e.id}')" title="${e.titulo}${agente?' - '+agente:''}">
           ${horaStr ? `<span style="opacity:.8;font-size:10px;font-weight:400;">${horaStr}</span> ` : ''}${e.titulo}${agente?`<br><span style="font-weight:400;opacity:.85;">${agente}</span>`:''}
         </div>`;
@@ -2032,7 +2041,11 @@ async function calAdminGuardarEvento() {
     }));
   }
 
-  if (error) { toast('Error: ' + error.message, 'error'); return; }
+  if (error) {
+    console.error('guardarEvento error:', error);
+    toast('Error: ' + error.message, 'error');
+    return;
+  }
   toast(editId ? 'Evento actualizado' : 'Evento creado', 'success');
   calAdminCloseModal('modal-nuevo-evento-admin');
   calAdminLoadCalendar();
