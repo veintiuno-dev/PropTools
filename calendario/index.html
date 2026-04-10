@@ -800,7 +800,9 @@ function renderWeek() {
     const d = new Date(weekStart); d.setDate(d.getDate() + i); days.push(d);
   }
 
-  const evs = eventosVisibles();
+  const evs      = eventosVisibles();
+  const todosDia = evs.filter(e => e.todo_dia);
+  const conHora  = evs.filter(e => !e.todo_dia);
 
   // Header
   let hdr = '<div></div>';
@@ -813,6 +815,33 @@ function renderWeek() {
   });
   $('week-header').innerHTML = hdr;
 
+  // Fila todo el dia
+  let allDayRow = document.getElementById('week-allday-row');
+  if (!allDayRow) {
+    allDayRow = document.createElement('div');
+    allDayRow.id = 'week-allday-row';
+    $('week-header').after(allDayRow);
+  }
+  if (todosDia.length) {
+    let tr = '<div style="display:grid;grid-template-columns:52px repeat(7,1fr);border-bottom:2px solid var(--border);background:var(--surface2);">';
+    tr += `<div style="font-size:9px;font-family:'DM Mono',monospace;color:var(--ink-light);padding:6px 4px 0;text-align:right;line-height:1.2;">TODO<br>DIA</div>`;
+    days.forEach(d => {
+      const iso2 = toISO(d);
+      tr += '<div style="border-left:1px solid var(--surface2);padding:2px;min-height:28px;">';
+      todosDia.filter(e => e.fecha === iso2).forEach(e => {
+        tr += `<div class="ev-block" style="background:${colorEvento(e)};margin-bottom:2px;cursor:pointer;"
+          onclick="event.stopPropagation();showDetalle('${e.id}')">${e.titulo}</div>`;
+      });
+      tr += '</div>';
+    });
+    tr += '</div>';
+    allDayRow.innerHTML = tr;
+    allDayRow.style.display = '';
+  } else {
+    allDayRow.innerHTML = '';
+    allDayRow.style.display = 'none';
+  }
+
   // Body
   let body = '';
   HORAS.forEach(h => {
@@ -820,7 +849,7 @@ function renderWeek() {
       <div class="week-hour-label">${h}:00</div>`;
     days.forEach(d => {
       const iso = toISO(d);
-      const cellEvs = evs.filter(e => e.fecha === iso && parseInt(e.hora_inicio) === h);
+      const cellEvs = conHora.filter(e => e.fecha === iso && parseInt(e.hora_inicio) === h);
       const evHTML  = cellEvs.map(e => `
         <div class="ev-block" style="background:${colorEvento(e)}"
              onclick="event.stopPropagation();showDetalle('${e.id}')">
@@ -844,8 +873,19 @@ function renderDay() {
     ${iso === today ? '<span style="font-size:11px;background:var(--blue);color:white;border-radius:20px;padding:2px 8px;margin-left:8px;font-weight:600;">Hoy</span>' : ''}
   </div>`;
 
+  // Eventos todo el dia arriba
+  const tdEvs = evs.filter(e => e.todo_dia);
+  if (tdEvs.length) {
+    html += '<div style="padding:6px 8px 6px 60px;background:var(--surface2);border-bottom:2px solid var(--border);">';
+    tdEvs.forEach(e => {
+      html += `<div class="ev-block" style="background:${colorEvento(e)};display:inline-block;margin-right:4px;margin-bottom:2px;cursor:pointer;"
+        onclick="event.stopPropagation();showDetalle('${e.id}')">${e.titulo}</div>`;
+    });
+    html += '</div>';
+  }
+
   HORAS.forEach(h => {
-    const cellEvs = evs.filter(e => parseInt(e.hora_inicio) === h);
+    const cellEvs = evs.filter(e => !e.todo_dia && parseInt(e.hora_inicio) === h);
     html += `<div style="display:flex;border-bottom:1px solid var(--surface2);min-height:56px;" onclick="clickCell('${iso}','${h}:00')">
       <div style="width:52px;font-size:10px;font-family:'DM Mono',monospace;color:var(--ink-light);padding:6px 6px 0;text-align:right;flex-shrink:0;">${h}:00</div>
       <div style="flex:1;padding:4px 8px;cursor:pointer;transition:background .1s;" onmouseenter="this.style.background='var(--blue-light)'" onmouseleave="this.style.background=''">
