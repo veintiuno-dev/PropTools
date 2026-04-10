@@ -1833,6 +1833,10 @@ function calAdminRenderWeek(eventos, color) {
   const DIAS = ['Lu','Ma','Mi','Ju','Vi','Sá','Do'];
   const HORAS = Array.from({length: 14}, (_, i) => i + 7); // 7am–8pm
 
+  // Separar eventos todo el dia de los eventos con hora
+  const todosDia = eventos.filter(e => e.todo_dia);
+  const conHora  = eventos.filter(e => !e.todo_dia);
+
   // Header
   let html = `<div style="display:grid;grid-template-columns:48px repeat(7,1fr);border-bottom:1px solid var(--border);">
     <div></div>`;
@@ -1846,6 +1850,25 @@ function calAdminRenderWeek(eventos, color) {
   });
   html += '</div>';
 
+  // Fila "Todo el dia" — solo si hay eventos de todo el dia en la semana
+  if (todosDia.length > 0) {
+    html += `<div style="display:grid;grid-template-columns:48px repeat(7,1fr);border-bottom:2px solid var(--border);background:var(--surface2);">
+      <div style="font-size:9px;font-family:'DM Mono',monospace;color:var(--ink-light);padding:6px 4px 0;text-align:right;line-height:1.2;">TODO<br>DIA</div>`;
+    days.forEach(d => {
+      const iso = toISODate(d);
+      const dayTodosDia = todosDia.filter(e => e.fecha === iso);
+      const tdHTML = dayTodosDia.map(e => {
+        const agente = e.user_auth_id ? (_calAgentes.find(a=>a.auth_id===e.user_auth_id)?.nombre || '') : '';
+        return `<div style="background:${color};border-radius:4px;padding:2px 6px;margin:3px 2px;font-size:11px;font-weight:600;color:white;cursor:pointer;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;"
+          onclick="calAdminEditEvento('${e.id}')" title="${e.titulo}${agente?' - '+agente:''}">
+          ${e.titulo}${agente?` <span style="opacity:.8;font-weight:400;">(${agente})</span>`:''}
+        </div>`;
+      }).join('');
+      html += `<div style="border-left:1px solid var(--surface2);padding:2px;min-height:32px;">${tdHTML}</div>`;
+    });
+    html += '</div>';
+  }
+
   // Body rows
   html += `<div style="overflow-y:auto;max-height:520px;">`;
   HORAS.forEach(h => {
@@ -1853,7 +1876,7 @@ function calAdminRenderWeek(eventos, color) {
       <div style="font-size:10px;font-family:'DM Mono',monospace;color:var(--ink-light);padding:4px 6px 0;text-align:right;line-height:1;">${h}:00</div>`;
     days.forEach(d => {
       const iso = toISODate(d);
-      const dayEvs = eventos.filter(e => e.fecha === iso && parseInt(e.hora_inicio) === h);
+      const dayEvs = conHora.filter(e => e.fecha === iso && parseInt(e.hora_inicio) === h);
       const evHTML = dayEvs.map(e => {
         const agente = e.user_auth_id ? (_calAgentes.find(a=>a.auth_id===e.user_auth_id)?.nombre || 'Agente') : '';
         const horaStr = e.todo_dia ? 'Todo el dia' : (e.hora_inicio ? e.hora_inicio.substring(0,5) : '');
