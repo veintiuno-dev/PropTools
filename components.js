@@ -12,6 +12,10 @@
 
 const PROPTOOLS_SVG = `<span class="pt-logo-bar"></span><span class="pt-logo-wordmark"><span class="pt-logo-prop">Prop</span><span class="pt-logo-tools">TOOLS</span></span>`;
 
+// ─── Versión ─────────────────────────────────────────────────────────────────
+
+const PT_VERSION = '1.0.0';
+
 // ─── CSS ──────────────────────────────────────────────────────────────────────
 
 function injectComponentStyles() {
@@ -108,13 +112,48 @@ function injectComponentStyles() {
     /* Footer */
     #pt-footer {
       border-top: 1px solid var(--border); background: var(--surface);
-      padding: 16px 28px; display: flex; align-items: center; justify-content: space-between; gap: 16px;
+      height: 48px; padding: 0 28px;
+      display: flex; align-items: center; position: relative;
     }
-    #pt-footer .pt-footer-brand {
-      display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--ink-soft);
+    body { padding-bottom: 48px; }
+    /* Izquierda */
+    #pt-footer .pt-footer-left {
+      display: flex; align-items: center; gap: 6px; flex: 1;
     }
-    #pt-footer .pt-footer-brand strong { color: var(--ink); font-weight: 600; }
-    #pt-footer .pt-footer-version { font-family: var(--font-mono); font-size: 11px; color: var(--ink-soft); opacity: 0.6; }
+    #pt-footer .pt-footer-proptools-name {
+      font-size: 12px; font-weight: 700; color: var(--ink);
+    }
+    #pt-footer .pt-footer-version {
+      font-family: var(--font-mono); font-size: 10px; color: #B0B8C8; letter-spacing: .04em;
+    }
+    /* Centro */
+    #pt-footer .pt-footer-center {
+      position: absolute; left: 50%; transform: translateX(-50%);
+      display: flex; align-items: center;
+    }
+    #pt-footer .pt-footer-sig {
+      font-family: var(--font-mono); font-size: 12px; color: #B0B8C8; letter-spacing: .04em;
+    }
+    /* Derecha */
+    #pt-footer .pt-footer-right {
+      flex: 1; display: flex; justify-content: flex-end; align-items: center; gap: 8px;
+    }
+    #pt-footer .pt-footer-10101 {
+      font-family: var(--font-mono); font-size: 15px; font-weight: 700;
+      color: var(--ink); letter-spacing: .02em;
+      display: flex; align-items: baseline; text-decoration: none;
+    }
+    #pt-footer .pt-footer-10101:hover { opacity: .75; }
+    #pt-footer .pt-footer-cursor {
+      color: #22c55e; animation: pt-blink 1.1s step-end infinite;
+    }
+    @keyframes pt-blink { 0%,100%{opacity:1} 50%{opacity:0} }
+    #pt-footer .pt-footer-domain {
+      font-family: var(--font-mono); font-size: 11px; color: #9BA3AF;
+    }
+    #pt-footer .pt-footer-year {
+      font-family: var(--font-mono); font-size: 11px; color: #C4C9D4;
+    }
 
     /* Nav horizontal en header (cuando no hay sidebar) */
     #pt-header-nav {
@@ -269,15 +308,25 @@ function renderSidebar({ apps = [], active = '', role = 'agent' } = {}) {
 
 // ─── Footer ───────────────────────────────────────────────────────────────────
 
-function renderFooter({ version = '' } = {}) {
+function renderFooter() {
   const el = document.getElementById('pt-footer');
   if (!el) return;
+  const year = new Date().getFullYear();
   el.innerHTML = `
-    <div class="pt-footer-brand">
-      ${PROPTOOLS_SVG}
-      <span><strong>PropTools</strong> &copy; ${new Date().getFullYear()}</span>
+    <div class="pt-footer-left">
+      <span class="pt-footer-proptools-name">PropTools</span>
+      <span class="pt-footer-version">v${PT_VERSION}</span>
     </div>
-    ${version ? `<span class="pt-footer-version">${version}</span>` : ''}
+    <div class="pt-footer-center">
+      <span class="pt-footer-sig">dB^r&gt;</span>
+    </div>
+    <div class="pt-footer-right">
+      <a href="https://diezdiez.uno" target="_blank" rel="noopener" class="pt-footer-10101">
+        10101<span class="pt-footer-cursor">&#x258C;</span>
+      </a>
+      <span class="pt-footer-domain">diezdiez.uno</span>
+      <span class="pt-footer-year">&copy; ${year}</span>
+    </div>
   `;
 }
 
@@ -334,7 +383,7 @@ async function initComponents({ active = '', version = '' } = {}) {
     console.warn('[PropTools] No se encontró perfil:', profileError);
     renderHeader();
     renderSidebar({ apps: [], active, role: 'agent' });
-    renderFooter({ version });
+    renderFooter();
     return null;
   }
 
@@ -367,7 +416,7 @@ async function initComponents({ active = '', version = '' } = {}) {
 
   renderSidebar({ apps: resolvedApps, active, role: profile.role });
 
-  renderFooter({ version });
+  renderFooter();
 
   return { profile, apps: resolvedApps };
 }
