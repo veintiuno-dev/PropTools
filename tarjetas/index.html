@@ -107,7 +107,7 @@ input[type="file"] { display: none; }
 .font-status { font-size: 11px; color: var(--muted); padding: 4px 0; display: flex; align-items: center; gap: 6px; }
 .font-dot { width: 7px; height: 7px; border-radius: 50%; background: #f0a500; flex-shrink: 0; }
 .font-dot.ok { background: #22c55e; }
-main { background: var(--bg); overflow-y: auto; display: flex; flex-direction: column; }
+main { background: var(--bg); overflow-y: auto; display: flex; flex-direction: column; padding-bottom: 56px; }
 .preview-toolbar { padding: 18px 28px 0; display: flex; align-items: center; justify-content: space-between; }
 .preview-toolbar h2 { font-size: 16px; font-weight: 700; }
 .toolbar-btns { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
@@ -187,7 +187,6 @@ canvas { display: block; }
     }
     .login-logo .logo-bar  { width: 6px; height: 36px; }
     .login-logo .logo-wordmark { font-size: 26px; }
-    main, .app-screen.visible { padding-bottom: 64px; }
   </style>
 </head>
 <body>
@@ -1018,5 +1017,6 @@ el('guidelines-toggle').addEventListener('click',()=>{
   }
 }
 </script>
+  <footer id="pt-footer"></footer>
 </body>
 </html>
