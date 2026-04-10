@@ -142,7 +142,7 @@ aside { background:var(--surface);border-right:1px solid var(--border);overflow-
 .saved-empty { font-size:12px;color:var(--muted);text-align:center;padding:16px 0;font-style:italic; }
 
 /* Main area */
-main { background:var(--bg);overflow-y:auto;display:flex;flex-direction:column; }
+main { background:var(--bg);overflow-y:auto;display:flex;flex-direction:column;padding-bottom:56px; }
 .preview-toolbar { padding:18px 28px 0;display:flex;align-items:center;justify-content:space-between; }
 .preview-toolbar h2 { font-size:16px;font-weight:700; }
 .toolbar-btns { display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end; }
@@ -199,7 +199,6 @@ canvas { display:block; }
     }
     .login-logo .logo-bar  { width: 6px; height: 36px; }
     .login-logo .logo-wordmark { font-size: 26px; }
-    main, .app-screen.visible { padding-bottom: 64px; }
   </style>
 </head>
 <body>
@@ -1143,5 +1142,6 @@ async function delRotulo(id, name){
   }
 }
 </script>
+  <footer id="pt-footer"></footer>
 </body>
 </html>
