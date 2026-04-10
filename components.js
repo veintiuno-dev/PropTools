@@ -105,31 +105,28 @@ function injectComponentStyles() {
     /* Main */
     #pt-main { padding: 32px 36px; min-width: 0; }
 
-    /* Versión */
-    .pt-footer-version { font-family: var(--font-mono); font-size: 10px; color: #B0B8C8; letter-spacing: .04em; }
-
-    /* Footer — fixed al fondo, nunca en el flujo del documento */
+    /* Footer — fixed al fondo */
     #pt-footer {
       position: fixed; bottom: 0; left: 0; right: 0; z-index: 50;
       border-top: 1px solid var(--border); background: var(--surface);
       height: 48px; padding: 0 28px;
       display: flex; align-items: center;
     }
-    /* Izquierda */
     #pt-footer .pt-footer-left {
       display: flex; align-items: center; gap: 6px; flex: 1;
     }
     #pt-footer .pt-footer-proptools-name {
       font-size: 12px; font-weight: 700; color: var(--ink);
     }
-    /* Centro */
+    #pt-footer .pt-footer-version {
+      font-family: var(--font-mono); font-size: 10px; color: #B0B8C8; letter-spacing: .04em;
+    }
     #pt-footer .pt-footer-center {
       position: absolute; left: 50%; transform: translateX(-50%);
     }
     #pt-footer .pt-footer-sig {
       font-family: var(--font-mono); font-size: 12px; color: #B0B8C8; letter-spacing: .04em;
     }
-    /* Derecha */
     #pt-footer .pt-footer-right {
       flex: 1; display: flex; justify-content: flex-end; align-items: center; gap: 8px;
     }
