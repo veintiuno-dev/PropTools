@@ -1024,6 +1024,7 @@
                 <th>Cargo</th>
                 <th>Email</th>
                 <th>Rol</th>
+                <th>Acciones</th>
               </tr>
             </thead>
             <tbody id="users-tbody"></tbody>
@@ -1095,11 +1096,6 @@
             <div class="form-group">
               <label for="inv-name">Nombre completo <span class="optional">(opcional)</span></label>
               <input type="text" id="inv-name" placeholder="Ana García" />
-            </div>
-
-            <div class="form-group">
-              <label for="inv-role">Cargo / Puesto <span class="optional">(opcional)</span></label>
-              <input type="text" id="inv-role" placeholder="Agente de bienes raíces" />
             </div>
 
             <div class="form-group">
@@ -1484,6 +1480,33 @@
   </div>
 </div>
 
+<!-- Modal: Editar agente -->
+<div id="modal-edit-user" style="display:none;position:fixed;inset:0;background:rgba(13,15,18,.45);z-index:200;align-items:center;justify-content:center;">
+  <div style="background:var(--surface);border-radius:12px;padding:28px;width:420px;max-width:95vw;box-shadow:0 8px 40px rgba(13,15,18,.18);">
+    <div style="font-size:16px;font-weight:600;margin-bottom:20px;">Editar agente</div>
+    <input type="hidden" id="edit-user-id">
+    <div class="form-group">
+      <label>Nombre completo</label>
+      <input type="text" id="edit-user-name" placeholder="Ana García">
+    </div>
+    <div class="form-group">
+      <label>Cargo / Puesto <span class="optional">(opcional)</span></label>
+      <input type="text" id="edit-user-jobtitle" placeholder="Agente de bienes raíces">
+    </div>
+    <div class="form-group" style="margin-bottom:0;">
+      <label>Rol</label>
+      <select id="edit-user-role">
+        <option value="agent">Agente</option>
+        <option value="admin">Admin</option>
+      </select>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:20px;">
+      <button class="btn btn-ghost" onclick="$('modal-edit-user').style.display='none'" style="flex:1;">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveEditUser()" style="flex:1;">Guardar cambios</button>
+    </div>
+  </div>
+</div>
+
 <!-- Modal: Editar invitación -->
 <div id="modal-edit-invite" style="display:none;position:fixed;inset:0;background:rgba(13,15,18,.45);z-index:200;align-items:center;justify-content:center;">
   <div style="background:var(--surface);border-radius:12px;padding:28px;width:420px;max-width:95vw;box-shadow:0 8px 40px rgba(13,15,18,.18);">
@@ -1584,7 +1607,7 @@ $('btn-send').addEventListener('click', async () => {
   hideAlert();
   const email   = $('inv-email').value.trim();
   const name    = $('inv-name').value.trim();
-  const role    = $('inv-role').value.trim();
+  const role    = '';  // campo eliminado del formulario
   const message = $('inv-message').value.trim();
 
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
@@ -1627,7 +1650,7 @@ $('btn-send').addEventListener('click', async () => {
     showAlert(`Invitación enviada a <strong>${email}</strong>. El agente recibirá un link para crear su cuenta.`, 'success');
 
     // Clear form
-    ['inv-email','inv-name','inv-role','inv-message'].forEach(id => $(id).value = '');
+    ['inv-email','inv-name','inv-message'].forEach(id => $(id).value = '');
     updatePreview();
 
     // Reload invites list
@@ -1858,6 +1881,18 @@ function renderUsers(rows) {
         <div class="td-email" style="font-size:11px;">${row.email || '—'}</div>
       </td>
       <td>${roleTag}</td>
+      <td>
+        <div style="display:flex;gap:6px;justify-content:flex-end;">
+          <button class="btn btn-ghost btn-sm" onclick="openEditUser('${row.id}','${(row.name||'').replace(/'/g,"\\'")}','${(row.job_title||'').replace(/'/g,"\\'")}','${row.role}')">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M8.5 1.5l2 2-7 7H1.5V9l7-7z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Editar
+          </button>
+          <button class="btn btn-danger btn-sm" onclick="deleteUser('${row.id}','${(row.name||row.email||'').replace(/'/g,"\\'")}')">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1.5 3h9M4.5 3V1.5h3V3M5 5.5v3M7 5.5v3M2.5 3l.75 7.5h5.5L9.5 3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Borrar
+          </button>
+        </div>
+      </td>
     `;
     tbody.appendChild(tr);
   });
@@ -1865,7 +1900,52 @@ function renderUsers(rows) {
   $('users-table').style.display = 'table';
 }
 
-// ── REFRESH BUTTONS ────────────────────────────────────────
+// ── EDIT USER ──────────────────────────────────────────────
+function openEditUser(id, name, jobTitle, role) {
+  $('edit-user-id').value       = id;
+  $('edit-user-name').value     = name;
+  $('edit-user-jobtitle').value = jobTitle;
+  $('edit-user-role').value     = role;
+  $('modal-edit-user').style.display = 'flex';
+}
+
+async function saveEditUser() {
+  const id       = $('edit-user-id').value;
+  const name     = $('edit-user-name').value.trim();
+  const jobTitle = $('edit-user-jobtitle').value.trim();
+  const role     = $('edit-user-role').value;
+
+  if (!name) { toast('El nombre es requerido', 'error'); return; }
+
+  const { error } = await sb.from('users')
+    .update({ name, job_title: jobTitle || null, role })
+    .eq('id', id);
+
+  if (error) { toast('Error al guardar: ' + error.message, 'error'); return; }
+
+  toast('✓ Agente actualizado', 'success');
+  $('modal-edit-user').style.display = 'none';
+  await loadUsers();
+}
+
+// ── DELETE USER ────────────────────────────────────────────
+async function deleteUser(id, name) {
+  if (!confirm(`¿Eliminar el perfil de "${name}"?\n\nEsto borrará su perfil del sistema pero no eliminará su cuenta de autenticación.`)) return;
+
+  const { error } = await sb.from('users').delete().eq('id', id);
+  if (error) { toast('Error al eliminar: ' + error.message, 'error'); return; }
+
+  toast('Perfil eliminado');
+  await Promise.all([loadUsers(), updateStatsAfterDelete()]);
+}
+
+async function updateStatsAfterDelete() {
+  const { count } = await sb.from('users')
+    .select('id', { count: 'exact', head: true })
+    .eq('tenant_id', currentProfile?.tenant_id)
+    .eq('role', 'agent');
+  $('stat-active').textContent = count ?? '–';
+}
 document.addEventListener('DOMContentLoaded', () => {
   const btnRefreshUsers = $('btn-refresh-users');
   if (btnRefreshUsers) btnRefreshUsers.addEventListener('click', loadUsers);
