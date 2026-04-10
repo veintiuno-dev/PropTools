@@ -1482,24 +1482,45 @@
 
 <!-- Modal: Editar agente -->
 <div id="modal-edit-user" style="display:none;position:fixed;inset:0;background:rgba(13,15,18,.45);z-index:200;align-items:center;justify-content:center;">
-  <div style="background:var(--surface);border-radius:12px;padding:28px;width:420px;max-width:95vw;box-shadow:0 8px 40px rgba(13,15,18,.18);">
+  <div style="background:var(--surface);border-radius:12px;padding:28px;width:500px;max-width:95vw;max-height:90vh;overflow-y:auto;box-shadow:0 8px 40px rgba(13,15,18,.18);">
     <div style="font-size:16px;font-weight:600;margin-bottom:20px;">Editar agente</div>
     <input type="hidden" id="edit-user-id">
-    <div class="form-group">
-      <label>Nombre completo</label>
-      <input type="text" id="edit-user-name" placeholder="Ana García">
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+      <div class="form-group" style="margin:0;grid-column:1/-1;">
+        <label>Nombre completo</label>
+        <input type="text" id="edit-user-name" placeholder="Ana García">
+      </div>
+      <div class="form-group" style="margin:0;">
+        <label>Cargo / Puesto <span class="optional">(opcional)</span></label>
+        <input type="text" id="edit-user-jobtitle" placeholder="Agente de bienes raíces">
+      </div>
+      <div class="form-group" style="margin:0;">
+        <label>Rol</label>
+        <select id="edit-user-role">
+          <option value="agent">Agente</option>
+          <option value="admin">Admin</option>
+        </select>
+      </div>
+      <div class="form-group" style="margin:0;">
+        <label>Email <span class="optional">(opcional)</span></label>
+        <input type="email" id="edit-user-email" placeholder="ana@remax.cr">
+      </div>
+      <div class="form-group" style="margin:0;">
+        <label>WhatsApp <span class="optional">(opcional)</span></label>
+        <input type="text" id="edit-user-whatsapp" placeholder="+506 8888-8888">
+      </div>
+      <div class="form-group" style="margin:0;grid-column:1/-1;">
+        <label>Instagram <span class="optional">(opcional)</span></label>
+        <input type="text" id="edit-user-instagram" placeholder="@usuario">
+      </div>
+      <div class="form-group" style="margin:0;grid-column:1/-1;">
+        <label>URL de foto <span class="optional">(opcional)</span></label>
+        <input type="text" id="edit-user-photo" placeholder="https://…">
+        <div class="input-hint">URL de imagen en Cloudinary o cualquier CDN público.</div>
+      </div>
     </div>
-    <div class="form-group">
-      <label>Cargo / Puesto <span class="optional">(opcional)</span></label>
-      <input type="text" id="edit-user-jobtitle" placeholder="Agente de bienes raíces">
-    </div>
-    <div class="form-group" style="margin-bottom:0;">
-      <label>Rol</label>
-      <select id="edit-user-role">
-        <option value="agent">Agente</option>
-        <option value="admin">Admin</option>
-      </select>
-    </div>
+
     <div style="display:flex;gap:10px;margin-top:20px;">
       <button class="btn btn-ghost" onclick="$('modal-edit-user').style.display='none'" style="flex:1;">Cancelar</button>
       <button class="btn btn-primary" onclick="saveEditUser()" style="flex:1;">Guardar cambios</button>
@@ -1517,13 +1538,9 @@
       <label>Email</label>
       <input type="email" id="edit-inv-email" disabled style="opacity:.6;cursor:not-allowed;">
     </div>
-    <div class="form-group">
+    <div class="form-group" style="margin-bottom:0;">
       <label>Nombre completo <span class="optional">(opcional)</span></label>
       <input type="text" id="edit-inv-name" placeholder="Ana García">
-    </div>
-    <div class="form-group" style="margin-bottom:0;">
-      <label>Cargo / Puesto <span class="optional">(opcional)</span></label>
-      <input type="text" id="edit-inv-role" placeholder="Agente de bienes raíces">
     </div>
     <div style="display:flex;gap:10px;margin-top:20px;">
       <button class="btn btn-ghost" onclick="$('modal-edit-invite').style.display='none'" style="flex:1;">Cancelar</button>
@@ -1724,7 +1741,7 @@ function renderInvites(rows) {
         <div style="display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap;">
           ${isPending ? `
             <button class="btn btn-ghost btn-sm" onclick="resendInvite('${row.id}','${row.email}')">Reenviar</button>
-            <button class="btn btn-ghost btn-sm" onclick="openEditInvite('${row.id}','${row.email}','${(row.name||'').replace(/'/g,"\\'")}','${(row.job_title||'').replace(/'/g,"\\'")}')">
+            <button class="btn btn-ghost btn-sm" onclick="openEditInvite('${row.id}','${row.email}','${(row.name||'').replace(/'/g,"\\'")}')">
               <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M8.5 1.5l2 2-7 7H1.5V9l7-7z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
               Editar
             </button>
@@ -1745,21 +1762,19 @@ function renderInvites(rows) {
 }
 
 // ── EDIT INVITE ────────────────────────────────────────────
-function openEditInvite(id, email, name, jobTitle) {
-  $('edit-inv-id').value       = id;
-  $('edit-inv-email').value    = email;
-  $('edit-inv-name').value     = name;
-  $('edit-inv-role').value     = jobTitle;
+function openEditInvite(id, email, name) {
+  $('edit-inv-id').value    = id;
+  $('edit-inv-email').value = email;
+  $('edit-inv-name').value  = name;
   $('modal-edit-invite').style.display = 'flex';
 }
 
 async function saveEditInvite() {
-  const id       = $('edit-inv-id').value;
-  const name     = $('edit-inv-name').value.trim();
-  const jobTitle = $('edit-inv-role').value.trim();
+  const id   = $('edit-inv-id').value;
+  const name = $('edit-inv-name').value.trim();
 
   const { error } = await sb.from('invitations')
-    .update({ name: name || null, job_title: jobTitle || null })
+    .update({ name: name || null })
     .eq('id', id);
 
   if (error) { toast('Error al actualizar: ' + error.message, 'error'); return; }
@@ -1895,7 +1910,7 @@ function renderUsers(rows) {
       <td>${roleTag}</td>
       <td>
         <div style="display:flex;gap:6px;justify-content:flex-end;">
-          <button class="btn btn-ghost btn-sm" onclick="openEditUser('${row.id}','${(row.name||'').replace(/'/g,"\\'")}','${(row.job_title||'').replace(/'/g,"\\'")}','${row.role}')">
+          <button class="btn btn-ghost btn-sm" onclick="openEditUser(${JSON.stringify(row)})">
             <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M8.5 1.5l2 2-7 7H1.5V9l7-7z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
             Editar
           </button>
@@ -1913,25 +1928,32 @@ function renderUsers(rows) {
 }
 
 // ── EDIT USER ──────────────────────────────────────────────
-function openEditUser(id, name, jobTitle, role) {
-  $('edit-user-id').value       = id;
-  $('edit-user-name').value     = name;
-  $('edit-user-jobtitle').value = jobTitle;
-  $('edit-user-role').value     = role;
+function openEditUser(row) {
+  $('edit-user-id').value        = row.id;
+  $('edit-user-name').value      = row.name      || '';
+  $('edit-user-jobtitle').value  = row.job_title || '';
+  $('edit-user-role').value      = row.role      || 'agent';
+  $('edit-user-email').value     = row.email     || '';
+  $('edit-user-whatsapp').value  = row.whatsapp  || '';
+  $('edit-user-instagram').value = row.instagram || '';
+  $('edit-user-photo').value     = row.photo_url || '';
   $('modal-edit-user').style.display = 'flex';
 }
 
 async function saveEditUser() {
-  const id       = $('edit-user-id').value;
-  const name     = $('edit-user-name').value.trim();
-  const jobTitle = $('edit-user-jobtitle').value.trim();
-  const role     = $('edit-user-role').value;
-
+  const id = $('edit-user-id').value;
+  const name = $('edit-user-name').value.trim();
   if (!name) { toast('El nombre es requerido', 'error'); return; }
 
-  const { error } = await sb.from('users')
-    .update({ name, job_title: jobTitle || null, role })
-    .eq('id', id);
+  const { error } = await sb.from('users').update({
+    name,
+    job_title:  $('edit-user-jobtitle').value.trim()  || null,
+    role:       $('edit-user-role').value,
+    email:      $('edit-user-email').value.trim()     || null,
+    whatsapp:   $('edit-user-whatsapp').value.trim()  || null,
+    instagram:  $('edit-user-instagram').value.trim() || null,
+    photo_url:  $('edit-user-photo').value.trim()     || null,
+  }).eq('id', id);
 
   if (error) { toast('Error al guardar: ' + error.message, 'error'); return; }
 
