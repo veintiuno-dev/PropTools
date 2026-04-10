@@ -1723,11 +1723,11 @@ function renderInvites(rows) {
       <td>
         <div style="display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap;">
           ${isPending ? `
+            <button class="btn btn-ghost btn-sm" onclick="resendInvite('${row.id}','${row.email}')">Reenviar</button>
             <button class="btn btn-ghost btn-sm" onclick="openEditInvite('${row.id}','${row.email}','${(row.name||'').replace(/'/g,"\\'")}','${(row.job_title||'').replace(/'/g,"\\'")}')">
               <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M8.5 1.5l2 2-7 7H1.5V9l7-7z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
               Editar
             </button>
-            <button class="btn btn-ghost btn-sm" onclick="resendInvite('${row.id}','${row.email}')">Reenviar</button>
             <button class="btn btn-danger btn-sm" onclick="deleteInvite('${row.id}','${row.email}')">
               <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1.5 3h9M4.5 3V1.5h3V3M5 5.5v3M7 5.5v3M2.5 3l.75 7.5h5.5L9.5 3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
               Eliminar
@@ -1773,11 +1773,23 @@ async function saveEditInvite() {
 async function deleteInvite(id, email) {
   if (!confirm(`¿Eliminar la invitación enviada a ${email}?`)) return;
 
-  const { error } = await sb.from('invitations').delete().eq('id', id);
-  if (error) { toast('Error al eliminar: ' + error.message, 'error'); return; }
-
-  toast('Invitación eliminada');
-  await loadInvites();
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/delete-user`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session?.access_token}`
+      },
+      body: JSON.stringify({ type: 'invitation', invitation_id: id })
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.error || `Error ${res.status}`);
+    toast('Invitación eliminada');
+    await loadInvites();
+  } catch (err) {
+    toast('Error: ' + err.message, 'error');
+  }
 }
 
 function updateStats(rows) {
@@ -1832,7 +1844,7 @@ async function loadUsers() {
   try {
     const { data, error } = await sb
       .from('users')
-      .select('id, name, email, job_title, role, photo_url')
+      .select('id, auth_id, name, email, job_title, role, photo_url')
       .eq('tenant_id', currentProfile?.tenant_id)
       .order('name');
 
@@ -1887,9 +1899,9 @@ function renderUsers(rows) {
             <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M8.5 1.5l2 2-7 7H1.5V9l7-7z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
             Editar
           </button>
-          <button class="btn btn-danger btn-sm" onclick="deleteUser('${row.id}','${(row.name||row.email||'').replace(/'/g,"\\'")}')">
+          <button class="btn btn-danger btn-sm" onclick="deleteUser('${row.id}','${(row.name||row.email||'').replace(/'/g,"\\'")}','${(row.auth_id||'')}')">
             <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1.5 3h9M4.5 3V1.5h3V3M5 5.5v3M7 5.5v3M2.5 3l.75 7.5h5.5L9.5 3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            Borrar
+            Eliminar
           </button>
         </div>
       </td>
@@ -1929,14 +1941,26 @@ async function saveEditUser() {
 }
 
 // ── DELETE USER ────────────────────────────────────────────
-async function deleteUser(id, name) {
-  if (!confirm(`¿Eliminar el perfil de "${name}"?\n\nEsto borrará su perfil del sistema pero no eliminará su cuenta de autenticación.`)) return;
+async function deleteUser(id, name, authId) {
+  if (!confirm(`¿Eliminar el perfil y cuenta de "${name}"?\n\nEsto eliminará su acceso al sistema por completo.`)) return;
 
-  const { error } = await sb.from('users').delete().eq('id', id);
-  if (error) { toast('Error al eliminar: ' + error.message, 'error'); return; }
-
-  toast('Perfil eliminado');
-  await Promise.all([loadUsers(), updateStatsAfterDelete()]);
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/delete-user`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session?.access_token}`
+      },
+      body: JSON.stringify({ type: 'user', user_id: id, auth_id: authId })
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.error || `Error ${res.status}`);
+    toast('✓ Agente eliminado', 'success');
+    await Promise.all([loadUsers(), updateStatsAfterDelete()]);
+  } catch (err) {
+    toast('Error: ' + err.message, 'error');
+  }
 }
 
 async function updateStatsAfterDelete() {
