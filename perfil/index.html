@@ -48,6 +48,7 @@ body { font-family:'DM Sans',-apple-system,sans-serif; background:var(--bg); col
 /* APP */
 .app-screen { display:none; min-height:100vh; flex-direction:column; }
 .app-screen.visible { display:flex; }
+main { padding-bottom: 64px; }
 
 /* HEADER */
 header { height:88px; padding:0 28px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:16px; background:var(--surface); flex-shrink:0; }
@@ -105,7 +106,7 @@ input[type="file"] { display:none; }
 .field-with-icon input { padding-left:32px; }
 
 /* SAVE BAR */
-.save-bar { background:var(--surface); border-top:1px solid var(--border); padding:16px 28px; display:flex; align-items:center; justify-content:space-between; flex-shrink:0; }
+.save-bar-inline { display:flex; align-items:center; justify-content:space-between; padding:20px 0 4px; }
 .save-status { font-size:12px; color:var(--muted); display:flex; align-items:center; gap:6px; }
 .save-status.saved { color:var(--success); }
 .btn-save-profile { font-family:inherit; font-size:13px; font-weight:600; padding:9px 22px; border-radius:8px; border:none; background:var(--blue); color:#fff; cursor:pointer; transition:background .15s; }
@@ -283,12 +284,14 @@ input[type="file"] { display:none; }
         </div>
       </div>
     </div>
+      <div class="profile-section profile-section-save">
+        <div class="save-bar-inline">
+          <div class="save-status" id="save-status">Los cambios se guardan en todas las herramientas</div>
+          <button class="btn-save-profile" id="btn-save">Guardar cambios</button>
+        </div>
+      </div>
+    </div>
   </main>
-
-  <div class="save-bar">
-    <div class="save-status" id="save-status">Los cambios se guardan en todas las herramientas</div>
-    <button class="btn-save-profile" id="btn-save">Guardar cambios</button>
-  </div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -481,6 +484,5 @@ el('photo-upload').addEventListener('change', e => uploadPhoto(e.target.files[0]
   }
 }
 </script>
-  <footer id="pt-footer"></footer>
 </body>
 </html>
