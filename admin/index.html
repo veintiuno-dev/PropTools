@@ -746,6 +746,7 @@
     .tipo-laptop    { background: #EDE9FE; color: #5B21B6; }
     .tipo-proyector { background: #DBEAFE; color: #1D4ED8; }
     .tipo-camara    { background: #FCE7F3; color: #9D174D; }
+    .tipo-dron      { background: #FEF3C7; color: #92400E; }
     .tipo-audio     { background: #D1FAE5; color: #065F46; }
     .tipo-otro      { background: var(--surface2); color: var(--ink-mid); }
 
@@ -1215,9 +1216,10 @@
               <label>Tipo</label>
               <select id="eq-tipo">
                 <option value="">Seleccionar…</option>
+                <option value="camara">Cámara</option>
+                <option value="dron">Dron</option>
                 <option value="laptop">Laptop</option>
                 <option value="proyector">Proyector</option>
-                <option value="camara">Cámara</option>
                 <option value="audio">Equipo de audio</option>
                 <option value="otro">Otro</option>
               </select>
@@ -1957,7 +1959,7 @@ async function saveEditUser() {
   const name = $('edit-user-name').value.trim();
   if (!name) { toast('El nombre es requerido', 'error'); return; }
 
-  const { error } = await sb.from('users').update({
+  const payload = {
     name,
     job_title:  $('edit-user-jobtitle').value.trim()  || null,
     role:       $('edit-user-role').value,
@@ -1965,9 +1967,15 @@ async function saveEditUser() {
     whatsapp:   $('edit-user-whatsapp').value.trim()  || null,
     instagram:  $('edit-user-instagram').value.trim() || null,
     photo_url:  $('edit-user-photo').value.trim()     || null,
-  }).eq('id', id);
+  };
 
-  if (error) { toast('Error al guardar: ' + error.message, 'error'); return; }
+  const { error } = await sb.from('users').update(payload).eq('id', id);
+
+  if (error) {
+    console.error('saveEditUser error:', error);
+    toast('Error al guardar: ' + error.message, 'error');
+    return;
+  }
 
   toast('✓ Agente actualizado', 'success');
   $('modal-edit-user').style.display = 'none';
@@ -2442,7 +2450,7 @@ function eqUpdateStats() {
 }
 
 function eqTipoLabel(t) {
-  return { laptop:'Laptop', proyector:'Proyector', camara:'Cámara', audio:'Audio', otro:'Otro' }[t] || t || 'Otro';
+  return { camara:'Cámara', dron:'Dron', laptop:'Laptop', proyector:'Proyector', audio:'Audio', otro:'Otro' }[t] || t || 'Otro';
 }
 
 function eqRenderTable() {
