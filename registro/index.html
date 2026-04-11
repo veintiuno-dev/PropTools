@@ -556,11 +556,8 @@ async function register() {
       }
     }
 
-    // 4. Marcar invitación como aceptada
-    await sb.from('invitations').update({
-      status:      'accepted',
-      accepted_at: new Date().toISOString(),
-    }).eq('id', _invite.id);
+    // 4. Eliminar la invitación (ya fue usada)
+    await sb.from('invitations').delete().eq('id', _invite.id);
 
     // 5. Mostrar éxito y redirigir
     show('state-success');
