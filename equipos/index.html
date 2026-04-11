@@ -653,7 +653,7 @@ function renderMisReservasPanel() {
           ${eqs.map(e=>`<span class="eq-tag">${e.equipos?.nombre||'—'}</span>`).join('')}
         </div>
       </div>
-      <button class="btn-cancel-sm" onclick="cancelarReserva('${r.id}',${JSON.stringify(eqs.map(e=>e.equipo_id))})">Cancelar</button>
+      <button class="btn-cancel-sm" onclick="cancelarReserva('${r.id}')">Cancelar</button>
     </div>`;
   }).join('');
 }
@@ -847,9 +847,13 @@ async function crearReserva() {
 }
 
 // ── CANCELAR RESERVA ──────────────────────────────────────
-async function cancelarReserva(id, eqIds) {
-  if (!confirm('¿Cancelar esta reserva?')) return;
-  await sb.from('reservas').update({ estado: 'cancelada' }).eq('id', id);
+async function cancelarReserva(id) {
+  if (!confirm('Cancelar esta reserva?')) return;
+  const { error } = await sb.from('reservas')
+    .update({ estado: 'cancelada' })
+    .eq('id', id)
+    .eq('user_auth_id', currentUser.id);
+  if (error) { toast('Error: ' + error.message, 'error'); return; }
   toast('Reserva cancelada');
   await Promise.all([loadEquipos(), loadReservasAll()]);
   renderCalendar();
