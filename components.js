@@ -363,7 +363,7 @@ async function initComponents({ active = '', version = '' } = {}) {
     });
   }
   if (!session) {
-    window.location.href = '/PropTools/perfil/';
+    window.location.href = '/perfil/';
     return null;
   }
 
