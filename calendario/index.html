@@ -43,7 +43,6 @@
     font-size: 14px;
     color: var(--ink);
     background: var(--surface2);
-    padding-bottom: 64px;
   }
 
   /* ── PAGE ──────────────────────────────────────────── */
@@ -223,13 +222,13 @@
 
   .week-day-head.today .week-day-num { color: var(--blue); }
 
-  .week-body { overflow-y: auto; max-height: calc(100vh - 368px); min-height: 400px; }
+  .week-body { overflow-y: auto; max-height: calc(100vh - 320px); min-height: 400px; }
 
   .week-row {
     display: grid;
     grid-template-columns: 52px repeat(7, 1fr);
     border-bottom: 1px solid var(--surface2);
-    min-height: 52px;
+    height: 52px;
   }
 
   .week-hour-label {
@@ -262,7 +261,11 @@
     cursor: pointer;
     line-height: 1.3;
     box-shadow: 0 1px 3px rgba(0,0,0,.12);
-    margin-bottom: 2px;
+    position: absolute;
+    left: 2px;
+    right: 2px;
+    z-index: 2;
+    min-height: 20px;
   }
 
   /* ── FORMULARIO EVENTO ─────────────────────────────── */
@@ -501,7 +504,7 @@
       </div>
 
       <!-- Vista día -->
-      <div id="view-dia" style="display:none;overflow-y:auto;max-height:calc(100vh - 368px);" id="day-body">
+      <div id="view-dia" style="display:none;overflow-y:auto;max-height:calc(100vh - 320px);" id="day-body">
         <div id="day-content"></div>
       </div>
 
@@ -715,7 +718,7 @@ function eventosVisibles() {
 }
 
 function colorEvento(e) {
-  if (e._privado) return '#1B6EF3'; // mis eventos = azul siempre
+  if (e._privado) return '#ff38c9'; // mis eventos = magenta
   if (e.calendarios?.color) return e.calendarios.color;
   return '#6B7280';
 }
@@ -851,11 +854,17 @@ function renderWeek() {
     days.forEach(d => {
       const iso = toISO(d);
       const cellEvs = conHora.filter(e => e.fecha === iso && parseInt(e.hora_inicio) === h);
-      const evHTML  = cellEvs.map(e => `
-        <div class="ev-block" style="background:${colorEvento(e)}"
+      const evHTML = cellEvs.map(e => {
+        const [hi, mi] = e.hora_inicio.split(':').map(Number);
+        const [hf, mf] = e.hora_fin ? e.hora_fin.split(':').map(Number) : [hi + 1, mi];
+        const durMin = Math.max((hf * 60 + mf) - (hi * 60 + mi), 30);
+        const px     = Math.round(durMin / 60 * 52) - 3;
+        const topPx  = Math.round(mi / 60 * 52);
+        return `<div class="ev-block" style="background:${colorEvento(e)};height:${px}px;top:${topPx + 2}px;"
              onclick="event.stopPropagation();showDetalle('${e.id}')">
-          ${e.todo_dia ? '' : fmtHora(e.hora_inicio) + ' '}${e.titulo}
-        </div>`).join('');
+          ${fmtHora(e.hora_inicio)}${e.hora_fin ? ' - ' + fmtHora(e.hora_fin) : ''} ${e.titulo}
+        </div>`;
+      }).join('');
       body += `<div class="week-cell" onclick="clickCell('${iso}','${h}:00')">${evHTML}</div>`;
     });
     body += '</div>';
@@ -1050,6 +1059,5 @@ function toast(msg, type = 'default') {
 
 boot();
 </script>
-  <footer id="pt-footer"></footer>
 </body>
 </html>
