@@ -245,9 +245,9 @@ function renderHeader({ tenantLogo = '', tenantName = 'Tenant', apps = [], activ
         <line x1="3" y1="18" x2="21" y2="18"/>
       </svg>
     </button>
-    <a href="/PropTools/" class="pt-logo-mark">
+    <div class="pt-logo-mark">
       ${PROPTOOLS_SVG}
-    </a>
+    </div>
     ${navHTML}
     <div class="pt-header-spacer"></div>
     ${tenantLogo ? `<img src="${tenantLogo}" alt="${tenantName}" class="pt-tenant-logo" />` : ''}
@@ -301,7 +301,7 @@ function renderSidebar({ apps = [], active = '', role = 'agent' } = {}) {
 // ─── Footer ───────────────────────────────────────────────────────────────────
 
 // ─── Versión ─────────────────────────────────────────────────────────────────
-const PT_VERSION = '1.0.2';
+const PT_VERSION = '1.0.0';
 
 function renderFooter() {
   const el = document.getElementById('pt-footer');
@@ -363,7 +363,7 @@ async function initComponents({ active = '', version = '' } = {}) {
     });
   }
   if (!session) {
-    window.location.href = '/perfil/';
+    window.location.href = '/PropTools/perfil/';
     return null;
   }
 
@@ -430,7 +430,7 @@ window.__ptToggleSidebar = function (force) {
 window.__ptLogout = async function () {
   try { if (typeof sb !== 'undefined') await sb.auth.signOut(); }
   catch (e) { console.warn('[PropTools] Logout error:', e); }
-  window.location.href = '/';
+  window.location.href = '/PropTools/';
 };
 
 // export { renderHeader, renderSidebar, renderFooter, initComponents };
