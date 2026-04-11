@@ -245,7 +245,7 @@ function renderHeader({ tenantLogo = '', tenantName = 'Tenant', apps = [], activ
         <line x1="3" y1="18" x2="21" y2="18"/>
       </svg>
     </button>
-    <a href="/PropTools/" class="pt-logo-mark">
+    <a href="/" class="pt-logo-mark">
       ${PROPTOOLS_SVG}
     </a>
     ${navHTML}
@@ -363,7 +363,7 @@ async function initComponents({ active = '', version = '' } = {}) {
     });
   }
   if (!session) {
-    window.location.href = '/PropTools/perfil/';
+    window.location.href = '/perfil/';
     return null;
   }
 
@@ -430,7 +430,7 @@ window.__ptToggleSidebar = function (force) {
 window.__ptLogout = async function () {
   try { if (typeof sb !== 'undefined') await sb.auth.signOut(); }
   catch (e) { console.warn('[PropTools] Logout error:', e); }
-  window.location.href = '/PropTools/';
+  window.location.href = '/';
 };
 
 // export { renderHeader, renderSidebar, renderFooter, initComponents };
