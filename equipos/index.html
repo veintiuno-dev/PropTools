@@ -669,6 +669,10 @@ function getOcupadoPor(eqId, ini, fin) {
 }
 
 function toggleEq(id) {
+  // Verificar si el equipo sigue ocupado en el rango seleccionado
+  const ini = rangeStart ? toISO(rangeStart) : null;
+  const fin = rangeEnd   ? toISO(rangeEnd)   : ini;
+  if (ini && !selectedEqs.has(id) && isOcupado(id, ini, fin)) return; // bloquear seleccion
   if (selectedEqs.has(id)) selectedEqs.delete(id); else selectedEqs.add(id);
   updateResumen(); renderEqList();
 }
@@ -796,7 +800,7 @@ async function crearReserva() {
     const { error: e2 } = await sb.from('reserva_equipos').insert(items);
     if (e2) { await sb.from('reservas').delete().eq('id', res.id); throw e2; }
 
-    toast('✓ Reserva confirmada', 'success');
+    toast('Reserva confirmada', 'success');
     rangeStart = null; rangeEnd = null;
     selectedEqs.clear();
     $('f-motivo').value = '';
@@ -804,7 +808,8 @@ async function crearReserva() {
     await Promise.all([loadEquipos(), loadReservasAll()]);
     renderCalendar();
     renderProximasReservas();
-    } catch (err) {
+    renderMisReservasPanel();
+  } catch (err) {
     toast('✗ Error: ' + err.message, 'error');
   } finally {
     btn.disabled = false; btn.textContent = 'Confirmar reserva';
@@ -813,8 +818,9 @@ async function crearReserva() {
 
 // ── CANCELAR RESERVA ──────────────────────────────────────
 async function cancelarReserva(id, eqIds) {
-  if (!confirm('¿Cancelar esta reserva?')) return;
-  await sb.from('reservas').update({ estado: 'cancelada' }).eq('id', id);
+  if (!confirm('Cancelar esta reserva?')) return;
+  const { error } = await sb.from('reservas').update({ estado: 'cancelada' }).eq('id', id);
+  if (error) { toast('Error: ' + error.message, 'error'); return; }
   toast('Reserva cancelada');
   await Promise.all([loadEquipos(), loadReservasAll()]);
   renderCalendar();
