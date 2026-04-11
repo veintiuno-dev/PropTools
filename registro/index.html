@@ -526,9 +526,7 @@ async function register() {
     const { data: authData, error: signUpErr } = await sb.auth.signUp({
       email,
       password,
-      options: {
-        data: { name }  // metadata inicial
-      }
+      options: { data: { name } }
     });
 
     if (signUpErr) throw signUpErr;
@@ -536,7 +534,11 @@ async function register() {
     const authUser = authData.user;
     if (!authUser) throw new Error('No se pudo crear la cuenta. Intentá de nuevo.');
 
-    // 2. Crear perfil en tabla users
+    // 2. Iniciar sesión para tener auth.uid() activo antes del INSERT
+    const { error: signInErr } = await sb.auth.signInWithPassword({ email, password });
+    if (signInErr) throw signInErr;
+
+    // 3. Crear perfil en tabla users (ahora con sesión activa → RLS pasa)
     const { error: profileErr } = await sb.from('users').insert({
       auth_id:   authUser.id,
       name,
@@ -546,19 +548,19 @@ async function register() {
       tenant_id: _invite.tenant_id,
     });
 
-    // Si el perfil falla por duplicado (raro pero posible), no es crítico
-    if (profileErr && !profileErr.message.includes('duplicate')) {
-      console.error('profile insert error:', profileErr);
+    if (profileErr) {
+      // Si es duplicado, el perfil ya existe — no es crítico
+      if (!profileErr.message.includes('duplicate') && !profileErr.code?.includes('23505')) {
+        console.error('profile insert error:', profileErr.message);
+        // No lanzamos error — igual marcamos la invitación y redirigimos
+      }
     }
 
-    // 3. Marcar invitación como aceptada
+    // 4. Marcar invitación como aceptada
     await sb.from('invitations').update({
       status:      'accepted',
       accepted_at: new Date().toISOString(),
     }).eq('id', _invite.id);
-
-    // 4. Iniciar sesión automáticamente
-    await sb.auth.signInWithPassword({ email, password });
 
     // 5. Mostrar éxito y redirigir
     show('state-success');
