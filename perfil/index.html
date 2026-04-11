@@ -176,13 +176,35 @@ input[type="file"] { display:none; }
       <div class="logo-bar"></div>
       <div class="logo-wordmark"><span class="logo-prop">Prop</span><span class="logo-tools">TOOLS</span></div>
     </div>
-    <h2>Iniciar sesi&oacute;n</h2>
-    <p>Ingres&aacute; con tu cuenta para gestionar tu informaci&oacute;n.</p>
-    <div class="form-field"><label>Correo</label><input type="email" id="login-email" placeholder="tu@correo.com"></div>
-    <div class="form-field"><label>Contrase&ntilde;a</label><input type="password" id="login-password" placeholder="••••••••"></div>
-    <button class="btn-login" id="btn-login">Ingresar</button>
-    <div class="login-error" id="login-error"></div>
-    
+
+    <!-- Estado: login -->
+    <div id="login-state">
+      <h2>Iniciar sesi&oacute;n</h2>
+      <p>Ingres&aacute; con tu cuenta para gestionar tu informaci&oacute;n.</p>
+      <div class="form-field"><label>Correo</label><input type="email" id="login-email" placeholder="tu@correo.com"></div>
+      <div class="form-field"><label>Contrase&ntilde;a</label><input type="password" id="login-password" placeholder="••••••••"></div>
+      <button class="btn-login" id="btn-login">Ingresar</button>
+      <div class="login-error" id="login-error"></div>
+      <div class="login-footer">
+        <a href="#" id="link-forgot" style="color:var(--blue);text-decoration:none;font-size:12px;">Olvidé mi contraseña</a>
+      </div>
+    </div>
+
+    <!-- Estado: recuperar contraseña -->
+    <div id="reset-state" style="display:none;">
+      <h2>Recuperar contrase&ntilde;a</h2>
+      <p>Ingres&aacute; tu correo y te enviaremos un link para crear una nueva contrase&ntilde;a.</p>
+      <div class="form-field"><label>Correo</label><input type="email" id="reset-email" placeholder="tu@correo.com"></div>
+      <button class="btn-login" id="btn-reset">Enviar link</button>
+      <div class="login-error" id="reset-error"></div>
+      <div id="reset-success" style="display:none;margin-top:12px;padding:12px;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:8px;font-size:13px;color:#15803D;text-align:center;line-height:1.5;">
+        ✓ Email enviado. Revisá tu bandeja de entrada y seguí el link para crear tu nueva contraseña.
+      </div>
+      <div class="login-footer" style="margin-top:16px;">
+        <a href="#" id="link-back-login" style="color:var(--blue);text-decoration:none;font-size:12px;">← Volver al login</a>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -331,11 +353,56 @@ async function doLogin() {
   const { data, error } = await sb.auth.signInWithPassword({ email, password });
   if(error){ errEl.textContent='Correo o contraseña incorrectos.'; errEl.style.display='block'; btn.disabled=false; btn.textContent='Ingresar'; return; }
   currentUser = data.session.user;
-  window.sb = sb; // asegurar que components.js lo pueda ver
+  window.sb = sb;
   if (typeof initComponents !== 'undefined') {
     await initComponents({ active: 'perfil' });
   }
   await loadContext();
+}
+
+/* ── Recuperar contraseña ── */
+function showResetState() {
+  el('login-state').style.display = 'none';
+  el('reset-state').style.display = 'block';
+  el('reset-email').value = el('login-email').value || '';
+  el('reset-error').style.display = 'none';
+  el('reset-success').style.display = 'none';
+  el('btn-reset').disabled = false;
+  el('btn-reset').textContent = 'Enviar link';
+  setTimeout(() => el('reset-email').focus(), 50);
+}
+
+function showLoginState() {
+  el('reset-state').style.display = 'none';
+  el('login-state').style.display = 'block';
+}
+
+async function doReset() {
+  const email = el('reset-email').value.trim();
+  const errEl = el('reset-error');
+  const btn   = el('btn-reset');
+  errEl.style.display = 'none';
+  el('reset-success').style.display = 'none';
+
+  if (!email) { errEl.textContent = 'Ingresá tu correo.'; errEl.style.display = 'block'; return; }
+
+  btn.disabled = true;
+  btn.textContent = 'Enviando...';
+
+  const { error } = await sb.auth.resetPasswordForEmail(email, {
+    redirectTo: `${window.location.origin}/perfil/`
+  });
+
+  if (error) {
+    errEl.textContent = 'Error al enviar el email. Verificá el correo ingresado.';
+    errEl.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = 'Enviar link';
+    return;
+  }
+
+  el('reset-success').style.display = 'block';
+  btn.style.display = 'none';
 }
 
 async function doLogout() {
@@ -449,6 +516,10 @@ async function saveProfile() {
 /* ── Event listeners ── */
 el('btn-login').addEventListener('click', doLogin);
 el('login-password').addEventListener('keydown', e => { if(e.key === 'Enter') doLogin(); });
+el('link-forgot').addEventListener('click', e => { e.preventDefault(); showResetState(); });
+el('link-back-login').addEventListener('click', e => { e.preventDefault(); showLoginState(); });
+el('btn-reset').addEventListener('click', doReset);
+el('reset-email').addEventListener('keydown', e => { if(e.key === 'Enter') doReset(); });
 // logout manejado por components.js → window.__ptLogout
 el('btn-save').addEventListener('click', saveProfile);
 el('photo-upload').addEventListener('change', e => uploadPhoto(e.target.files[0]));
@@ -458,24 +529,101 @@ el('photo-upload').addEventListener('change', e => uploadPhoto(e.target.files[0]
 
 /* ── Init ── */
 {
-  // Intentar restaurar sesión (puede tomar un momento en el primer render)
-  let session = (await sb.auth.getSession()).data.session;
-  if (!session) {
-    session = await new Promise(resolve => {
-      const timeout = setTimeout(() => resolve(null), 2000);
-      const { data: { subscription } } = sb.auth.onAuthStateChange((_event, s) => {
-        if (s) { clearTimeout(timeout); subscription.unsubscribe(); resolve(s); }
-      });
-    });
-  }
-  if (session) {
-    currentUser = session.user;
-    await initComponents({ active: 'perfil' });
-    await loadContext();
+  // Detectar si viene de un link de reset de contraseña
+  // Supabase inyecta #access_token=...&type=recovery en la URL
+  const hashParams = new URLSearchParams(window.location.hash.replace('#', ''));
+  const isRecovery = hashParams.get('type') === 'recovery';
+
+  if (isRecovery) {
+    // Supabase ya maneja el token del hash automáticamente
+    // Esperamos a que establezca la sesión
+    const { data: { session: recSession } } = await sb.auth.getSession();
+    if (recSession) {
+      currentUser = recSession.user;
+      await initComponents({ active: 'perfil' });
+      await loadContext();
+      // Mostrar modal para nueva contraseña
+      showNewPasswordModal();
+    } else {
+      el('splash').classList.add('hidden');
+      el('login-screen').style.display = 'flex';
+    }
+    // Limpiar el hash de la URL
+    history.replaceState(null, '', window.location.pathname);
   } else {
-    el('splash').classList.add('hidden');
-    el('login-screen').style.display = 'flex';
+    // Flujo normal
+    let session = (await sb.auth.getSession()).data.session;
+    if (!session) {
+      session = await new Promise(resolve => {
+        const timeout = setTimeout(() => resolve(null), 2000);
+        const { data: { subscription } } = sb.auth.onAuthStateChange((_event, s) => {
+          if (s) { clearTimeout(timeout); subscription.unsubscribe(); resolve(s); }
+        });
+      });
+    }
+    if (session) {
+      currentUser = session.user;
+      await initComponents({ active: 'perfil' });
+      await loadContext();
+    } else {
+      el('splash').classList.add('hidden');
+      el('login-screen').style.display = 'flex';
+    }
   }
+}
+
+/* ── Modal nueva contraseña ── */
+function showNewPasswordModal() {
+  // Crear modal si no existe
+  if (document.getElementById('modal-new-password')) {
+    document.getElementById('modal-new-password').style.display = 'flex';
+    return;
+  }
+  const modal = document.createElement('div');
+  modal.id = 'modal-new-password';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(13,15,18,.5);z-index:500;display:flex;align-items:center;justify-content:center;padding:24px;';
+  modal.innerHTML = `
+    <div style="background:#fff;border-radius:16px;padding:36px;width:100%;max-width:400px;box-shadow:0 8px 40px rgba(13,15,18,.18);">
+      <div style="font-size:18px;font-weight:700;margin-bottom:6px;">Nueva contraseña</div>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:24px;">Elegí una contraseña segura para tu cuenta.</div>
+      <div class="form-field">
+        <label>Nueva contraseña</label>
+        <input type="password" id="new-pw-1" placeholder="Mínimo 8 caracteres" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-family:inherit;font-size:14px;outline:none;">
+      </div>
+      <div class="form-field">
+        <label>Confirmar contraseña</label>
+        <input type="password" id="new-pw-2" placeholder="Repetí tu contraseña" style="width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-family:inherit;font-size:14px;outline:none;">
+      </div>
+      <div id="new-pw-error" style="display:none;font-size:12px;color:var(--error);margin-bottom:12px;"></div>
+      <button id="btn-new-pw" onclick="saveNewPassword()" style="width:100%;background:var(--blue);color:#fff;border:none;border-radius:8px;padding:12px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;">Guardar contraseña</button>
+    </div>
+  `;
+  document.body.appendChild(modal);
+}
+
+async function saveNewPassword() {
+  const pw1 = document.getElementById('new-pw-1').value;
+  const pw2 = document.getElementById('new-pw-2').value;
+  const errEl = document.getElementById('new-pw-error');
+  const btn = document.getElementById('btn-new-pw');
+  errEl.style.display = 'none';
+
+  if (pw1.length < 8) { errEl.textContent = 'La contraseña debe tener al menos 8 caracteres.'; errEl.style.display = 'block'; return; }
+  if (pw1 !== pw2)    { errEl.textContent = 'Las contraseñas no coinciden.'; errEl.style.display = 'block'; return; }
+
+  btn.disabled = true; btn.textContent = 'Guardando...';
+
+  const { error } = await sb.auth.updateUser({ password: pw1 });
+
+  if (error) {
+    errEl.textContent = 'Error al guardar: ' + error.message;
+    errEl.style.display = 'block';
+    btn.disabled = false; btn.textContent = 'Guardar contraseña';
+    return;
+  }
+
+  document.getElementById('modal-new-password').style.display = 'none';
+  toast('✓ Contraseña actualizada');
 }
 </script>
   <footer id="pt-footer"></footer>
