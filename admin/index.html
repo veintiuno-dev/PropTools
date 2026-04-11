@@ -1129,32 +1129,47 @@
             </div>
             <div class="ep-body">
               <div class="email-frame">
-                <div class="ef-header">
-                  <div class="ef-logo">
-                    <div class="ef-logo-mark">
-                      <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><rect x="2" y="10" width="5" height="8" rx="1.5" fill="white" opacity=".8"/><rect x="7.5" y="5" width="5" height="13" rx="1.5" fill="white"/><rect x="13" y="2" width="5" height="16" rx="1.5" fill="white" opacity=".6"/></svg>
+
+                <!-- Header oscuro -->
+                <div style="background:#0D0F12;padding:24px 28px 20px;">
+                  <!-- Logo barra degradada + wordmark -->
+                  <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;">
+                    <div style="width:5px;height:30px;border-radius:2px;background:linear-gradient(to bottom,#FF3A5C,#C044E8,#5B4FE8);flex-shrink:0;"></div>
+                    <div style="font-size:18px;line-height:1;letter-spacing:-0.5px;">
+                      <span style="font-weight:300;color:#fff;">Prop</span><span style="font-weight:900;color:#fff;letter-spacing:-1px;">TOOLS</span>
                     </div>
-                    <span class="ef-logo-text">PropTools</span>
                   </div>
-                  <div class="ef-headline" id="prev-headline">Te invitamos a unirte al equipo</div>
+                  <div class="ef-headline" id="prev-headline" style="color:#fff;font-size:16px;font-weight:700;white-space:nowrap;">Te invitamos a unirte al equipo</div>
                 </div>
+
+                <!-- Body -->
                 <div class="ef-body">
-                  <div class="ef-greeting">
-                    Hola <strong id="prev-name">Agente</strong>,
-                  </div>
+                  <div class="ef-greeting">Hola <strong id="prev-name">Agente</strong>,</div>
                   <div class="ef-message" id="prev-message">
-                    Has sido invitado/a a unirte a <strong>Team Sunrise · REMAX Central</strong> en PropTools, la plataforma de marketing digital para profesionales inmobiliarios.
+                    Has sido invitado/a a unirte a <strong>REMAX Central</strong> en PropTools, la plataforma de marketing digital para profesionales inmobiliarios.
                   </div>
-                  <a class="ef-cta" href="#">Crear mi cuenta →</a>
+                  <!-- CTA degradado -->
+                  <a class="ef-cta" href="#" style="background:linear-gradient(to right,#FF3A5C,#C044E8,#5B4FE8);">Crear mi cuenta →</a>
                   <div class="ef-divider"></div>
                   <div class="ef-small">
-                    Si no esperabas esta invitación, puedes ignorar este mensaje.<br/>
-                    El enlace expirará en 7 días. <a href="#">sunrisecr.com</a>
+                    Si no esperabas esta invitación, podés ignorar este mensaje.<br/>
+                    El enlace expirará en 7 días.
                   </div>
                 </div>
-                <div class="ef-footer">
-                  PropTools · REMAX Central · San José, Costa Rica
+
+                <!-- Footer fondo claro -->
+                <div style="background:#F4F5F7;border-top:1px solid #E2E5EA;padding:12px 28px;display:flex;align-items:center;justify-content:space-between;">
+                  <div style="display:flex;align-items:center;gap:6px;">
+                    <div style="width:3px;height:16px;border-radius:2px;background:linear-gradient(to bottom,#FF3A5C,#C044E8,#5B4FE8);"></div>
+                    <span style="font-size:11px;font-weight:300;color:#0D0F12;">Prop</span><span style="font-size:11px;font-weight:900;color:#0D0F12;letter-spacing:-0.5px;">TOOLS</span>
+                  </div>
+                  <span style="font-size:10px;color:#0D0F12;">REMAX Central</span>
+                  <div style="display:flex;align-items:baseline;gap:4px;">
+                    <span style="font-family:'DM Mono',monospace;font-size:11px;font-weight:700;color:#0a0a0a;">10101<span style="color:#22c55e;">▌</span></span>
+                    <span style="font-family:'DM Mono',monospace;font-size:9px;color:#0D0F12;">dB^r&gt;</span>
+                  </div>
                 </div>
+
               </div>
             </div>
           </div>
@@ -1601,11 +1616,11 @@ function updatePreview() {
   const name = $('inv-name').value.trim() || 'Agente';
   const msg  = $('inv-message').value.trim();
   $('prev-name').textContent = name;
-  $('prev-headline').textContent = `${name}, te invitamos a unirte`;
+  $('prev-headline').textContent = `${name}, te invitamos a unirte al equipo`;
   if (msg) {
-    $('prev-message').innerHTML = `${msg}<br/><br/>Has sido invitado/a a <strong>PropTools</strong>, la plataforma de marketing digital para profesionales inmobiliarios de <strong>Team Sunrise · REMAX Central</strong>.`;
+    $('prev-message').innerHTML = `${msg}<br/><br/>Has sido invitado/a a <strong>PropTools</strong>, la plataforma de marketing digital para profesionales inmobiliarios de <strong>REMAX Central</strong>.`;
   } else {
-    $('prev-message').innerHTML = `Has sido invitado/a a unirte a <strong>Team Sunrise · REMAX Central</strong> en PropTools, la plataforma de marketing digital para profesionales inmobiliarios.`;
+    $('prev-message').innerHTML = `Has sido invitado/a a unirte a <strong>REMAX Central</strong> en PropTools, la plataforma de marketing digital para profesionales inmobiliarios.`;
   }
 }
 
@@ -1655,7 +1670,7 @@ $('btn-send').addEventListener('click', async () => {
         message: message || null,
         tenant_id: currentProfile?.tenant_id || null,
         invited_by: currentProfile?.name || 'Admin',
-        tenant_name: currentProfile?.tenants?.name || 'Team Sunrise · REMAX Central'
+        tenant_name: currentProfile?.tenants?.name || 'REMAX Central'
       })
     });
 
@@ -1840,7 +1855,7 @@ async function resendInvite(id, email) {
         invitation_id: id,
         tenant_id: currentProfile?.tenant_id,
         invited_by: currentProfile?.name,
-        tenant_name: currentProfile?.tenants?.name || 'Team Sunrise · REMAX Central'
+        tenant_name: currentProfile?.tenants?.name || 'REMAX Central'
       })
     });
     if (!res.ok) throw new Error((await res.json()).error);
