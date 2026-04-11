@@ -520,10 +520,15 @@ async function boot() {
 
 // ── USERS MAP ────────────────────────────────────────────
 async function loadUsersMap() {
-  const { data } = await sb.from('users').select('auth_id, name');
+  const { data } = await sb.from('users').select('auth_id, name, photo_url');
   usersMap = {};
-  (data || []).forEach(u => { usersMap[u.auth_id] = u.name || 'Agente'; });
+  (data || []).forEach(u => {
+    usersMap[u.auth_id] = { name: u.name || 'Agente', photo: u.photo_url || null };
+  });
 }
+
+function userName(id) { return usersMap[id]?.name || 'Agente'; }
+function userPhoto(id) { return usersMap[id]?.photo || null; }
 
 // ── EQUIPOS ──────────────────────────────────────────────
 async function loadEquipos() {
@@ -550,12 +555,12 @@ function buildReservasPorFecha() {
   reservasAll.forEach(r => {
     let d   = new Date(r.fecha_inicio + 'T00:00:00');
     const e = new Date(r.fecha_fin    + 'T00:00:00');
-    const agente = usersMap[r.user_auth_id] || 'Agente';
+    const agente = userName(r.user_auth_id);
     const eqNames = (r.reserva_equipos || []).map(re => re.equipos?.nombre).filter(Boolean);
     while (d <= e) {
       const iso = toISO(d);
       if (!map[iso]) map[iso] = [];
-      map[iso].push({ agente, eqNames, reservaId: r.id });
+      map[iso].push({ agente, eqNames, reservaId: r.id, userId: r.user_auth_id });
       d.setDate(d.getDate() + 1);
     }
   });
@@ -567,28 +572,54 @@ function renderProximasReservas() {
   const list = $('proximas-list');
   const proximas = reservasAll.slice(0, 10);
   if (!proximas.length) {
-    list.innerHTML = '<div class="empty-small">Sin reservas próximas.</div>';
+    list.innerHTML = '<div class="empty-small">Sin reservas proximas.</div>';
     return;
   }
   list.innerHTML = proximas.map(r => {
-    const d   = new Date(r.fecha_inicio + 'T00:00:00');
-    const day = d.getDate();
-    const mon = MESES[d.getMonth()].substring(0, 3).toUpperCase();
-    const agente = usersMap[r.user_auth_id] || 'Agente';
+    const ini   = new Date(r.fecha_inicio + 'T00:00:00');
+    const fin   = new Date(r.fecha_fin    + 'T00:00:00');
+    const multi = r.fecha_fin !== r.fecha_inicio;
+    const agente = userName(r.user_auth_id);
+    const photo  = userPhoto(r.user_auth_id);
     const eqs = r.reserva_equipos || [];
-    const finStr = r.fecha_fin !== r.fecha_inicio
-      ? ` – ${new Date(r.fecha_fin+'T00:00:00').getDate()} ${MESES[new Date(r.fecha_fin+'T00:00:00').getMonth()].substring(0,3)}`
-      : '';
+
+    // Badge: si es multidía mostramos "7 — 10 ABR", si es un día "7 ABR"
+    const iniDay = ini.getDate();
+    const iniMon = MESES[ini.getMonth()].substring(0,3).toUpperCase();
+    const finDay = fin.getDate();
+    const finMon = MESES[fin.getMonth()].substring(0,3).toUpperCase();
+
+    const badgeHTML = multi ? `
+      <div style="display:flex;align-items:center;gap:4px;justify-content:center;">
+        <div>
+          <div class="rfd-day">${iniDay}</div>
+          <div class="rfd-mon">${iniMon}</div>
+        </div>
+        <div style="font-size:10px;color:var(--ink-light);line-height:1;padding-bottom:2px;">→</div>
+        <div>
+          <div class="rfd-day">${finDay}</div>
+          <div class="rfd-mon">${finMon}</div>
+        </div>
+      </div>` : `
+      <div class="rfd-day">${iniDay}</div>
+      <div class="rfd-mon">${iniMon}</div>`;
+
+    const avatarHTML = photo
+      ? `<img src="${photo}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;flex-shrink:0;border:1.5px solid var(--border);">`
+      : `<div style="width:28px;height:28px;border-radius:50%;background:var(--blue-light);color:var(--blue);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${agente.charAt(0).toUpperCase()}</div>`;
+
     return `
     <div class="reserva-item">
       <div class="reserva-item-header">
-        <div class="reserva-fecha-badge">
-          <div class="rfd-day">${day}</div>
-          <div class="rfd-mon">${mon}${finStr}</div>
+        <div class="reserva-fecha-badge" style="width:auto;min-width:38px;padding:4px 6px;">
+          ${badgeHTML}
         </div>
-        <div class="reserva-info">
-          <div class="reserva-agente">${agente}</div>
-          <div class="reserva-motivo">${r.motivo || 'Sin descripción'}</div>
+        <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0;">
+          ${avatarHTML}
+          <div class="reserva-info">
+            <div class="reserva-agente">${agente}</div>
+            <div class="reserva-motivo">${r.motivo || 'Sin descripcion'}</div>
+          </div>
         </div>
       </div>
       <div class="reserva-equipos-tags">
@@ -622,7 +653,7 @@ function renderMisReservasPanel() {
           ${eqs.map(e=>`<span class="eq-tag">${e.equipos?.nombre||'—'}</span>`).join('')}
         </div>
       </div>
-      <button class="btn-cancel-sm" onclick="cancelarReserva('${r.id}')">Cancelar</button>
+      <button class="btn-cancel-sm" onclick="cancelarReserva('${r.id}',${JSON.stringify(eqs.map(e=>e.equipo_id))})">Cancelar</button>
     </div>`;
   }).join('');
 }
@@ -665,7 +696,7 @@ function getOcupadoPor(eqId, ini, fin) {
     r.reserva_equipos?.some(re => re.equipo_id === eqId) &&
     r.fecha_inicio <= fin && r.fecha_fin >= ini
   );
-  return r ? (usersMap[r.user_auth_id] || 'Agente') : null;
+  return r ? userName(r.user_auth_id) : null;
 }
 
 function toggleEq(id) {
@@ -717,8 +748,12 @@ function renderCalendar() {
     let tooltipHTML = '';
     if (hasRes) {
       const lines = resInfo.map(ri => {
+        const photo = userPhoto(ri.userId);
         const eqStr = ri.eqNames.length ? ri.eqNames.join(', ') : '';
-        return `<strong>${ri.agente}</strong>${eqStr ? ': ' + eqStr : ''}`;
+        const avatar = photo
+          ? `<img src="${photo}" style="width:16px;height:16px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:4px;">`
+          : '';
+        return `${avatar}<strong>${ri.agente}</strong>${eqStr ? ': ' + eqStr : ''}`;
       }).join('<br>');
       tooltipHTML = `<div class="cal-tooltip">${lines}</div>`;
     }
@@ -812,13 +847,9 @@ async function crearReserva() {
 }
 
 // ── CANCELAR RESERVA ──────────────────────────────────────
-async function cancelarReserva(id) {
-  if (!confirm('Cancelar esta reserva?')) return;
-  const { error } = await sb.from('reservas')
-    .update({ estado: 'cancelada' })
-    .eq('id', id)
-    .eq('user_auth_id', currentUser.id);
-  if (error) { toast('Error: ' + error.message, 'error'); return; }
+async function cancelarReserva(id, eqIds) {
+  if (!confirm('¿Cancelar esta reserva?')) return;
+  await sb.from('reservas').update({ estado: 'cancelada' }).eq('id', id);
   toast('Reserva cancelada');
   await Promise.all([loadEquipos(), loadReservasAll()]);
   renderCalendar();
