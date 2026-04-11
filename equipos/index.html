@@ -295,6 +295,7 @@
   .tipo-camara    { background: #FCE7F3; color: #9D174D; }
   .tipo-audio     { background: #D1FAE5; color: #065F46; }
   .tipo-otro      { background: var(--surface2); color: var(--ink-mid); }
+  .tipo-dron      { background: var(--amber-light); color: var(--amber); }
 
   /* Resumen */
   .resumen-row {
@@ -705,7 +706,7 @@ function toggleEq(id) {
 }
 
 function tipoLabel(t) {
-  return {laptop:'Laptop',proyector:'Proyector',camara:'Cámara',audio:'Audio',otro:'Otro'}[t]||t||'Otro';
+  return {laptop:'Laptop',proyector:'Proyector',camara:'Cámara',audio:'Audio',dron:'Dron',otro:'Otro'}[t]||t||'Otro';
 }
 
 // ── CALENDAR ─────────────────────────────────────────────
