@@ -2204,22 +2204,27 @@ function calAdminRenderWeek(eventos, colorMap) {
   // Body rows
   html += `<div style="overflow-y:auto;max-height:520px;">`;
   HORAS.forEach(h => {
-    html += `<div style="display:grid;grid-template-columns:48px repeat(7,1fr);border-bottom:1px solid var(--surface2);min-height:52px;">
+    html += `<div style="display:grid;grid-template-columns:48px repeat(7,1fr);border-bottom:1px solid var(--surface2);height:52px;position:relative;">
       <div style="font-size:10px;font-family:'DM Mono',monospace;color:var(--ink-light);padding:4px 6px 0;text-align:right;line-height:1;">${h}:00</div>`;
     days.forEach(d => {
       const iso = toISODate(d);
       const dayEvs = conHora.filter(e => e.fecha === iso && parseInt(e.hora_inicio) === h);
       const evHTML = dayEvs.map(e => {
         const agente = e.user_auth_id ? (_calAgentes.find(a=>a.auth_id===e.user_auth_id)?.nombre || 'Agente') : '';
-        const horaStr = e.todo_dia ? 'Todo el dia' : (e.hora_inicio ? e.hora_inicio.substring(0,5) : '');
-        return `<div class="cal-event-block" style="background:${getColor(e)};position:relative;top:0;left:2px;right:2px;margin-bottom:2px;" 
+        const [hi, mi] = e.hora_inicio.split(':').map(Number);
+        const [hf, mf] = e.hora_fin ? e.hora_fin.split(':').map(Number) : [hi + 1, mi];
+        const durMin = Math.max((hf * 60 + mf) - (hi * 60 + mi), 30);
+        const px     = Math.round(durMin / 60 * 52) - 3;
+        const topPx  = Math.round(mi / 60 * 52);
+        const horaStr = e.hora_inicio.substring(0,5) + (e.hora_fin ? ' - ' + e.hora_fin.substring(0,5) : '');
+        return `<div class="cal-event-block" style="background:${getColor(e)};height:${px}px;top:${topPx + 2}px;" 
           onclick="calAdminEditEvento('${e.id}')" title="${e.titulo}${agente?' - '+agente:''}">
-          ${horaStr ? `<span style="opacity:.8;font-size:10px;font-weight:400;">${horaStr}</span> ` : ''}${e.titulo}${agente?`<br><span style="font-weight:400;opacity:.85;">${agente}</span>`:''}
+          <span style="opacity:.8;font-size:10px;font-weight:400;">${horaStr}</span> ${e.titulo}${agente?`<br><span style="font-weight:400;opacity:.85;">${agente}</span>`:''}
         </div>`;
       }).join('');
       html += `<div style="border-left:1px solid var(--surface2);padding:2px;position:relative;cursor:pointer;transition:background .1s;" 
         onmouseenter="this.style.background='var(--blue-light)'" onmouseleave="this.style.background=''"
-        onclick="calAdminClickCell('${iso}','${h}:00')">${evHTML}</div>`;
+        onclick="calAdminClickCell('${iso}','${h}:00')" style="overflow:visible;position:relative;height:52px;">${evHTML}</div>`;
     });
     html += '</div>';
   });
