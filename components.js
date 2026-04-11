@@ -125,7 +125,7 @@ function injectComponentStyles() {
       position: absolute; left: 50%; transform: translateX(-50%);
     }
     #pt-footer .pt-footer-sig {
-      font-family: var(--font-mono); font-size: 12px; color: #B0B8C8; letter-spacing: .04em;
+      font-family: Helvetica, Arial, sans-serif; font-size: 12px; color: #B0B8C8; letter-spacing: .04em;
     }
     #pt-footer .pt-footer-right {
       flex: 1; display: flex; justify-content: flex-end; align-items: center; gap: 8px;
@@ -245,7 +245,7 @@ function renderHeader({ tenantLogo = '', tenantName = 'Tenant', apps = [], activ
         <line x1="3" y1="18" x2="21" y2="18"/>
       </svg>
     </button>
-    <a href="/" class="pt-logo-mark">
+    <a href="/PropTools/" class="pt-logo-mark">
       ${PROPTOOLS_SVG}
     </a>
     ${navHTML}
@@ -363,7 +363,7 @@ async function initComponents({ active = '', version = '' } = {}) {
     });
   }
   if (!session) {
-    window.location.href = '/perfil/';
+    window.location.href = '/PropTools/perfil/';
     return null;
   }
 
@@ -430,7 +430,7 @@ window.__ptToggleSidebar = function (force) {
 window.__ptLogout = async function () {
   try { if (typeof sb !== 'undefined') await sb.auth.signOut(); }
   catch (e) { console.warn('[PropTools] Logout error:', e); }
-  window.location.href = '/';
+  window.location.href = '/PropTools/';
 };
 
 // export { renderHeader, renderSidebar, renderFooter, initComponents };
