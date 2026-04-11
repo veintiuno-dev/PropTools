@@ -301,7 +301,7 @@ function renderSidebar({ apps = [], active = '', role = 'agent' } = {}) {
 // ─── Footer ───────────────────────────────────────────────────────────────────
 
 // ─── Versión ─────────────────────────────────────────────────────────────────
-const PT_VERSION = '1.0.0';
+const PT_VERSION = '1.0.2';
 
 function renderFooter() {
   const el = document.getElementById('pt-footer');
