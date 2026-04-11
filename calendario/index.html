@@ -195,7 +195,14 @@
     display: grid;
     grid-template-columns: 52px repeat(7, 1fr);
     border-bottom: 1px solid var(--border);
-    position: sticky; top: 0; background: var(--surface); z-index: 2;
+    position: sticky; top: 0; background: var(--surface); z-index: 3;
+  }
+
+  #week-allday-row {
+    position: sticky;
+    top: 57px;
+    z-index: 2;
+    background: var(--surface2);
   }
 
   .week-day-head {
@@ -459,7 +466,7 @@
         <!-- Siempre visible, sin toggle -->
         <div style="padding:10px 16px;">
           <div style="display:flex;align-items:center;gap:10px;">
-            <div style="width:10px;height:10px;border-radius:50%;background:var(--blue);flex-shrink:0;"></div>
+            <div style="width:10px;height:10px;border-radius:50%;background:#ff38c9;flex-shrink:0;"></div>
             <span style="font-size:13px;font-weight:500;color:var(--ink);">Mis eventos</span>
             <span style="font-size:11px;font-family:'DM Mono',monospace;color:var(--ink-light);margin-left:auto;" id="my-events-count">—</span>
           </div>
@@ -501,6 +508,7 @@
       <!-- Vista semana -->
       <div id="view-semana" class="week-container">
         <div class="week-header" id="week-header"></div>
+        <div id="week-allday-row" style="display:none;position:sticky;top:0;background:var(--surface);z-index:2;border-bottom:2px solid var(--border);"></div>
         <div class="week-body" id="week-body"></div>
       </div>
 
@@ -820,21 +828,16 @@ function renderWeek() {
   });
   $('week-header').innerHTML = hdr;
 
-  // Fila todo el dia
-  let allDayRow = document.getElementById('week-allday-row');
-  if (!allDayRow) {
-    allDayRow = document.createElement('div');
-    allDayRow.id = 'week-allday-row';
-    $('week-header').after(allDayRow);
-  }
+  // Fila todo el dia (elemento estatico en HTML)
+  const allDayRow = $('week-allday-row');
   if (todosDia.length) {
-    let tr = '<div style="display:grid;grid-template-columns:52px repeat(7,1fr);border-bottom:2px solid var(--border);background:var(--surface2);">';
+    let tr = '<div style="display:grid;grid-template-columns:52px repeat(7,1fr);">';
     tr += `<div style="font-size:9px;font-family:'DM Mono',monospace;color:var(--ink-light);padding:6px 4px 0;text-align:right;line-height:1.2;">TODO<br>DIA</div>`;
     days.forEach(d => {
       const iso2 = toISO(d);
       tr += '<div style="border-left:1px solid var(--surface2);padding:2px;min-height:28px;">';
       todosDia.filter(e => e.fecha === iso2).forEach(e => {
-        tr += `<div class="ev-block" style="background:${colorEvento(e)};margin-bottom:2px;cursor:pointer;"
+        tr += `<div class="ev-block" style="background:${colorEvento(e)};position:relative;height:auto;top:auto;margin-bottom:2px;"
           onclick="event.stopPropagation();showDetalle('${e.id}')">${e.titulo}</div>`;
       });
       tr += '</div>';
