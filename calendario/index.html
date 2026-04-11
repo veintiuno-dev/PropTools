@@ -43,6 +43,7 @@
     font-size: 14px;
     color: var(--ink);
     background: var(--surface2);
+    padding-bottom: 64px;
   }
 
   /* ── PAGE ──────────────────────────────────────────── */
@@ -222,7 +223,7 @@
 
   .week-day-head.today .week-day-num { color: var(--blue); }
 
-  .week-body { overflow-y: auto; max-height: calc(100vh - 320px); min-height: 400px; }
+  .week-body { overflow-y: auto; max-height: calc(100vh - 368px); min-height: 400px; }
 
   .week-row {
     display: grid;
@@ -504,7 +505,7 @@
       </div>
 
       <!-- Vista día -->
-      <div id="view-dia" style="display:none;overflow-y:auto;max-height:calc(100vh - 320px);" id="day-body">
+      <div id="view-dia" style="display:none;overflow-y:auto;max-height:calc(100vh - 368px);" id="day-body">
         <div id="day-content"></div>
       </div>
 
@@ -1059,5 +1060,6 @@ function toast(msg, type = 'default') {
 
 boot();
 </script>
+  <footer id="pt-footer"></footer>
 </body>
 </html>
