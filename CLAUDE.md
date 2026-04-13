@@ -24,13 +24,13 @@ Modelo de negocio: SaaS multi-tenant. Cada brokerage es un `tenant`. Los agentes
 ### Credenciales Supabase — PRODUCCIÓN
 ```
 URL:      https://zsldwaiwcvziqfajcmph.supabase.co
-ANON KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpzbGR3YWl3Y3Z6aXFmYWpjbXBoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1NjQ4NzcsImV4cCI6MjA5MDE0MDg3N30.eFlAAk-fPHI8r8YQPjP8kYnohziRpGu9whGpgfaW-KU
+ANON KEY: ver memorias de Claude / buscar en /perfil/index.html
 ```
 
 ### Credenciales Supabase — STAGING (proptools-dev)
 ```
 URL:      https://ttfkznarmavpfmvdwale.supabase.co
-ANON KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR0Zmt6bmFybWF2cGZtdmR3YWxlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYwOTQ0OTYsImV4cCI6MjA5MTY3MDQ5Nn0.Xw_JJBb1v6lXX-ImiRqf2dp0-EJ1MUvJwKNPViyVT0c
+ANON KEY: ver memorias de Claude / buscar en /dev/perfil/index.html
 ```
 
 ---
