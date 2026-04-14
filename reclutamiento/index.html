@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Únete a TEAM SUNRISE | REMAX Central</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black:   #111111;
+    --purple:  #6B3FA0;
+    --red:     #D44E2A;
+    --orange:  #E8920A;
+    --yellow:  #F0C830;
+    --bg:      #FFFFFF;
+    --surface: #F7F6F4;
+    --border:  #E8E4DF;
+    --muted:   #888480;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--black);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    overflow-x: hidden;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    padding: 0 40px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(255,255,255,0.9);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .nav-logo { display: flex; align-items: center; gap: 10px; }
+
+  .logo-mark {
+    width: 10px; height: 36px;
+    border-radius: 2px;
+    background: linear-gradient(to bottom,
+      var(--purple) 0% 25%, var(--red) 25% 50%,
+      var(--orange) 50% 75%, var(--yellow) 75% 100%);
+    flex-shrink: 0;
+  }
+
+  .logo-text {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 17px;
+    font-weight: 500;
+    letter-spacing: -.01em;
+    color: var(--black);
+  }
+  .logo-text span { color: var(--muted); font-weight: 300; }
+
+  .nav-cta {
+    background: var(--black);
+    color: #fff;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 10px 22px;
+    border-radius: 100px;
+    text-decoration: none;
+    transition: background .2s;
+  }
+  .nav-cta:hover { background: var(--purple); }
+
+  @media (max-width: 500px) { nav { padding: 0 20px; } }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 120px 60px 80px;
+    max-width: 1100px;
+    margin: 0 auto;
+    position: relative;
+  }
+
+  .hero-deco {
+    position: absolute;
+    right: 60px; top: 50%;
+    transform: translateY(-50%);
+    width: 18px; height: 260px;
+    border-radius: 4px;
+    background: linear-gradient(to bottom,
+      var(--purple) 0% 25%, var(--red) 25% 50%,
+      var(--orange) 50% 75%, var(--yellow) 75% 100%);
+    opacity: .15;
+  }
+
+  @media (max-width: 768px) {
+    .hero { padding: 100px 24px 60px; align-items: center; text-align: center; }
+    .hero-deco { display: none; }
+  }
+
+  .badge-top {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 6px 16px;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 36px;
+    animation: fadeUp .7s ease both;
+  }
+
+  .badge-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--orange);
+    animation: pulse 2s ease infinite;
+  }
+
+  @keyframes pulse {
+    0%,100% { opacity:1; transform:scale(1); }
+    50%      { opacity:.4; transform:scale(1.4); }
+  }
+
+  .hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(52px, 8.5vw, 96px);
+    font-weight: 900;
+    line-height: .93;
+    letter-spacing: -.03em;
+    margin-bottom: 32px;
+    animation: fadeUp .7s .12s ease both;
+    max-width: 700px;
+  }
+
+  .hero h1 .accent {
+    background: linear-gradient(90deg, var(--purple), var(--red), var(--orange));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero-sub {
+    font-size: clamp(16px, 2vw, 20px);
+    font-weight: 300;
+    color: var(--muted);
+    max-width: 500px;
+    line-height: 1.65;
+    margin-bottom: 44px;
+    animation: fadeUp .7s .24s ease both;
+  }
+
+  .hero-ctas {
+    display: flex; gap: 12px; flex-wrap: wrap;
+    animation: fadeUp .7s .36s ease both;
+  }
+
+  .btn-primary {
+    background: var(--black); color: #fff;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px; font-weight: 500;
+    padding: 16px 36px; border-radius: 100px; border: none;
+    cursor: pointer; text-decoration: none; display: inline-block;
+    transition: background .2s, transform .15s;
+  }
+  .btn-primary:hover { background: var(--purple); transform: translateY(-1px); }
+
+  .btn-ghost {
+    background: transparent; color: var(--black);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px; font-weight: 400;
+    padding: 16px 36px; border-radius: 100px;
+    border: 1.5px solid var(--border);
+    cursor: pointer; text-decoration: none; display: inline-block;
+    transition: border-color .2s;
+  }
+  .btn-ghost:hover { border-color: var(--black); }
+
+  .hero-stats {
+    display: flex; gap: 48px; margin-top: 72px;
+    flex-wrap: wrap;
+    animation: fadeUp .7s .48s ease both;
+  }
+
+  @media (max-width: 768px) { .hero-stats { justify-content: center; gap: 32px; } }
+
+  .stat-number {
+    font-family: 'Playfair Display', serif;
+    font-size: 42px; font-weight: 700; line-height: 1;
+    letter-spacing: -.02em;
+  }
+
+  .stat-label {
+    font-size: 12px; color: var(--muted);
+    text-transform: uppercase; letter-spacing: .08em; margin-top: 6px;
+  }
+
+  /* ── STRIP ── */
+  .logo-strip {
+    background: var(--black);
+    padding: 36px 60px;
+    display: flex; align-items: center;
+    justify-content: center; gap: 40px; flex-wrap: wrap;
+  }
+
+  .strip-logo { display: flex; align-items: center; gap: 10px; }
+
+  .strip-mark {
+    width: 8px; height: 28px; border-radius: 2px;
+    background: linear-gradient(to bottom,
+      var(--purple) 0% 25%, var(--red) 25% 50%,
+      var(--orange) 50% 75%, var(--yellow) 75% 100%);
+  }
+
+  .strip-text { font-size: 15px; font-weight: 500; color: #fff; letter-spacing: .02em; }
+  .strip-divider { width: 1px; height: 24px; background: rgba(255,255,255,.15); }
+  .strip-sub { font-size: 12px; color: rgba(255,255,255,.4); letter-spacing: .08em; text-transform: uppercase; }
+
+  /* ── SECTIONS ── */
+  .section {
+    padding: 100px 60px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  @media (max-width: 768px) { .section { padding: 70px 24px; } }
+
+  .section-eyebrow {
+    font-size: 11px; font-weight: 500;
+    letter-spacing: .16em; text-transform: uppercase;
+    color: var(--orange); margin-bottom: 14px;
+  }
+
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(30px, 4vw, 48px);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -.02em;
+    margin-bottom: 56px;
+    max-width: 560px;
+  }
+  .divider { height: 1px; background: var(--border); margin: 0 60px; }
+  @media (max-width: 768px) { .divider { margin: 0 24px; } }
+
+  /* ── BENEFITS ── */
+  .benefits-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px; background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 20px; overflow: hidden;
+  }
+
+  @media (max-width: 820px) { .benefits-grid { grid-template-columns: repeat(2,1fr); } }
+  @media (max-width: 520px)  { .benefits-grid { grid-template-columns: 1fr; } }
+
+  .benefit-card {
+    background: var(--bg);
+    padding: 36px 32px;
+    transition: background .25s;
+    position: relative; overflow: hidden;
+  }
+
+  .benefit-card::after {
+    content: ''; position: absolute;
+    bottom: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, var(--purple), var(--red), var(--orange), var(--yellow));
+    transform: scaleX(0); transform-origin: left;
+    transition: transform .3s;
+  }
+
+  .benefit-card:hover { background: var(--surface); }
+  .benefit-card:hover::after { transform: scaleX(1); }
+
+  .benefit-icon { font-size: 28px; margin-bottom: 18px; display: block; }
+  .benefit-title { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700; margin-bottom: 10px; letter-spacing: -.01em; }
+  .benefit-desc { font-size: 14px; color: var(--muted); line-height: 1.7; }
+
+  /* ── PROFILES ── */
+  .profiles-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 640px) { .profiles-wrap { grid-template-columns: 1fr; } }
+
+  .profile-card {
+    border: 1.5px solid var(--border);
+    border-radius: 20px; padding: 40px 36px;
+    background: var(--bg);
+    transition: border-color .2s, box-shadow .2s;
+  }
+
+  .profile-card:hover {
+    border-color: var(--black);
+    box-shadow: 0 8px 40px rgba(0,0,0,.06);
+  }
+
+  .profile-card.featured {
+    background: var(--black); border-color: var(--black); color: #fff;
+  }
+
+  .profile-card.featured .profile-desc { color: rgba(255,255,255,.5); }
+  .profile-card.featured .profile-list li { color: rgba(255,255,255,.55); }
+
+  .profile-tag {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 11px; font-weight: 500; letter-spacing: .1em;
+    text-transform: uppercase; padding: 5px 12px;
+    border-radius: 100px; margin-bottom: 20px;
+  }
+
+  .tag-new { background: rgba(232,146,10,.1); color: var(--orange); border: 1px solid rgba(232,146,10,.2); }
+  .tag-exp { background: rgba(107,63,160,.08); color: var(--purple); border: 1px solid rgba(107,63,160,.18); }
+
+  .profile-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 26px; font-weight: 700;
+    margin-bottom: 14px; line-height: 1.2;
+    letter-spacing: -.02em;
+  }
+
+  .profile-desc { font-size: 15px; color: var(--muted); line-height: 1.65; margin-bottom: 24px; }
+
+  .profile-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+
+  .profile-list li {
+    font-size: 14px; color: var(--muted);
+    display: flex; align-items: flex-start; gap: 10px;
+  }
+
+  .profile-list li::before { content: '→'; color: var(--orange); flex-shrink: 0; }
+  .profile-card.featured .profile-list li::before { color: var(--yellow); }
+
+  /* ── FORM ── */
+  .form-section {
+    padding: 100px 24px 120px;
+    max-width: 740px; margin: 0 auto;
+  }
+
+  .form-header { text-align: center; margin-bottom: 52px; }
+  .form-header .section-title { max-width: 100%; margin-bottom: 14px; }
+  .form-header p { font-size: 17px; color: var(--muted); line-height: 1.6; }
+
+  .form-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 24px; padding: 52px 48px;
+  }
+
+  @media (max-width: 580px) { .form-card { padding: 32px 24px; } }
+
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  @media (max-width: 540px) { .form-grid { grid-template-columns: 1fr; } }
+
+  .form-group { display: flex; flex-direction: column; gap: 7px; }
+  .form-group.full { grid-column: 1 / -1; }
+
+  label {
+    font-size: 11px; font-weight: 500;
+    letter-spacing: .1em; text-transform: uppercase; color: var(--muted);
+  }
+
+  input, select, textarea {
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: 12px; padding: 13px 16px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px; font-weight: 300; color: var(--black);
+    outline: none; transition: border-color .2s;
+    width: 100%; -webkit-appearance: none;
+  }
+
+  input::placeholder, textarea::placeholder { color: #C8C4BE; }
+  input:focus, select:focus, textarea:focus { border-color: var(--black); }
+  textarea { resize: vertical; min-height: 108px; line-height: 1.6; }
+
+  .radio-group { display: flex; gap: 10px; flex-wrap: wrap; }
+  .radio-option { flex: 1; min-width: 130px; }
+  .radio-option input[type="radio"] { display: none; }
+
+  .radio-option label {
+    display: block; text-align: center;
+    padding: 12px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 12px; cursor: pointer;
+    font-size: 13px; font-weight: 400;
+    letter-spacing: .02em; text-transform: none;
+    color: var(--muted); background: var(--bg);
+    transition: all .2s;
+  }
+
+  .radio-option input[type="radio"]:checked + label {
+    border-color: var(--black); color: var(--black);
+    font-weight: 500;
+  }
+
+  .radio-option label:hover { border-color: #aaa; color: var(--black); }
+
+  .form-divider { height: 1px; background: var(--border); grid-column: 1 / -1; margin: 10px 0; }
+
+  .submit-row {
+    grid-column: 1 / -1;
+    display: flex; flex-direction: column;
+    align-items: center; gap: 14px; margin-top: 8px;
+  }
+
+  .btn-submit {
+    width: 100%; background: var(--black); color: #fff;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px; font-weight: 500;
+    padding: 18px; border-radius: 100px; border: none;
+    cursor: pointer; transition: background .2s, transform .15s;
+    letter-spacing: .02em;
+  }
+
+  .btn-submit:hover { background: var(--purple); transform: translateY(-1px); }
+  .btn-submit:active { transform: translateY(0); }
+
+  .privacy-note { font-size: 12px; color: var(--muted); text-align: center; line-height: 1.6; }
+
+  /* ── SUCCESS ── */
+  .success-msg {
+    display: none; flex-direction: column;
+    align-items: center; text-align: center;
+    gap: 18px; padding: 20px 0;
+  }
+
+  .success-icon {
+    width: 68px; height: 68px; border-radius: 50%;
+    background: var(--surface); border: 1.5px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 30px;
+  }
+
+  .success-msg h3 { font-family: 'Playfair Display', serif; font-size: 26px; font-weight: 700; letter-spacing: -.02em; }
+  .success-msg p { font-size: 15px; color: var(--muted); max-width: 380px; line-height: 1.65; }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--black); padding: 48px 60px;
+    display: flex; align-items: center;
+    justify-content: space-between; flex-wrap: wrap; gap: 24px;
+  }
+
+  @media (max-width: 600px) { footer { padding: 40px 24px; } }
+
+  .footer-logo { display: flex; align-items: center; gap: 10px; }
+
+  .footer-mark {
+    width: 8px; height: 30px; border-radius: 2px;
+    background: linear-gradient(to bottom,
+      var(--purple) 0% 25%, var(--red) 25% 50%,
+      var(--orange) 50% 75%, var(--yellow) 75% 100%);
+  }
+
+  .footer-brand { font-size: 15px; font-weight: 500; color: #fff; }
+
+  .footer-right {
+    font-size: 13px; color: rgba(255,255,255,.35);
+    text-align: right; line-height: 1.6;
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(22px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .fade-in {
+    opacity: 0; transform: translateY(28px);
+    transition: opacity .65s ease, transform .65s ease;
+  }
+
+  .fade-in.visible { opacity: 1; transform: translateY(0); }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">
+    <div class="logo-mark"></div>
+    <div class="logo-text">TEAM SUNRISE <span>| REMAX Central</span></div>
+  </div>
+  <a href="#aplicar" class="nav-cta">Aplicar ahora</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-deco"></div>
+  <div class="badge-top">
+    <span class="badge-dot"></span>
+    REMAX Central · GAM · Costa Rica
+  </div>
+  <h1>Tu carrera<br>en <span class="accent">bienes<br>raíces</span><br>empieza aquí.</h1>
+  <p class="hero-sub">
+    Únete a <strong style="font-weight:500;color:var(--black)">TEAM SUNRISE | REMAX Central</strong> — team especializado en el este de San José en la oficina más grande y con más experiencia del GAM. Con o sin experiencia, te damos todo lo que necesitás para triunfar.
+  </p>
+  <div class="hero-ctas">
+    <a href="#aplicar" class="btn-primary">Quiero unirme</a>
+    <a href="#beneficios" class="btn-ghost">Conocé más</a>
+  </div>
+  <div class="hero-stats">
+    <div class="stat">
+      <div class="stat-number">+30</div>
+      <div class="stat-label">Agentes activos</div>
+    </div>
+    <div class="stat">
+      <div class="stat-number">#1</div>
+      <div class="stat-label">Oficina en el GAM</div>
+    </div>
+    <div class="stat">
+      <div class="stat-number">100%</div>
+      <div class="stat-label">Apoyo y entrenamiento</div>
+    </div>
+  </div>
+</section>
+
+<!-- STRIP -->
+<div class="logo-strip">
+  <div class="strip-logo">
+    <div class="strip-mark"></div>
+    <div class="strip-text">TEAM SUNRISE | REMAX Central</div>
+  </div>
+  <div class="strip-divider"></div>
+  <div class="strip-sub">Este de San José</div>
+  <div class="strip-divider"></div>
+  <div class="strip-sub">Gran Área Metropolitana</div>
+  <div class="strip-divider"></div>
+  <div class="strip-sub">+30 agentes activos</div>
+</div>
+
+<!-- BENEFICIOS -->
+<section class="section" id="beneficios">
+  <p class="section-eyebrow fade-in">Por qué TEAM SUNRISE | REMAX Central</p>
+  <h2 class="section-title fade-in">Todo el respaldo que necesitás para vender y crecer.</h2>
+  <div class="benefits-grid fade-in">
+    <div class="benefit-card">
+      <span class="benefit-icon">👑</span>
+      <div class="benefit-title">Apoyo del Team Leader</div>
+      <p class="benefit-desc">Contás con acompañamiento directo del Team Leader en cada etapa: desde tu primera propiedad hasta cerrar ventas complejas. No estás solo.</p>
+    </div>
+    <div class="benefit-card">
+      <span class="benefit-icon">🏢</span>
+      <div class="benefit-title">Respaldo del Broker</div>
+      <p class="benefit-desc">El Broker de REMAX Central — con años de experiencia en el mercado — está disponible para guiarte, orientarte y darte el respaldo de la oficina.</p>
+    </div>
+    <div class="benefit-card">
+      <span class="benefit-icon">📍</span>
+      <div class="benefit-title">Especializados en el este de San José</div>
+      <p class="benefit-desc">Conocemos a fondo el mercado del este: Curridabat, La Unión, Cartago, San Pedro, Tres Ríos y zonas aledañas. Ventaja real frente a la competencia.</p>
+    </div>
+    <div class="benefit-card">
+      <span class="benefit-icon">🎓</span>
+      <div class="benefit-title">Entrenamiento completo</div>
+      <p class="benefit-desc">Desde cero hasta tu primera venta. Técnicas de negociación, manejo de clientes y todas las herramientas REMAX.</p>
+    </div>
+    <div class="benefit-card">
+      <span class="benefit-icon">💰</span>
+      <div class="benefit-title">Ingresos sin techo</div>
+      <p class="benefit-desc">Comisiones sin límite. El mercado del este de San José está activo todo el año. Vos decidís cuánto querés ganar.</p>
+    </div>
+    <div class="benefit-card">
+      <span class="benefit-icon">🌍</span>
+      <div class="benefit-title">Marca mundial REMAX</div>
+      <p class="benefit-desc">Credibilidad y sistema de captación de clientes desde el primer día con el respaldo de la red internacional REMAX.</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- PERFILES -->
+<section class="section" id="perfiles">
+  <p class="section-eyebrow fade-in">¿Para quién es esto?</p>
+  <h2 class="section-title fade-in">Buscamos agentes del este de San José y zonas aledañas.</h2>
+  <div class="profiles-wrap fade-in">
+    <div class="profile-card featured">
+      <span class="profile-tag tag-new">Sin experiencia</span>
+      <h3 class="profile-title">Nuevo en bienes raíces</h3>
+      <p class="profile-desc">No necesitás saber nada del sector. Con el apoyo del Team Leader y el Broker, te enseñamos todo desde el principio.</p>
+      <ul class="profile-list">
+        <li>Personas del este de SJ que quieren cambiar de carrera</li>
+        <li>Profesionales que buscan independencia económica</li>
+        <li>Estudiantes o recién graduados con ambición</li>
+        <li>Emprendedores que buscan nuevas fuentes de ingresos</li>
+      </ul>
+    </div>
+    <div class="profile-card">
+      <span class="profile-tag tag-exp">Con experiencia</span>
+      <h3 class="profile-title">Agente inmobiliario activo</h3>
+      <p class="profile-desc">Ya trabajás en el sector y querés el respaldo de un team líder especializado en tu misma zona.</p>
+      <ul class="profile-list">
+        <li>Agentes del este de San José y zonas aledañas</li>
+        <li>Independientes que quieren crecer con equipo y oficina</li>
+        <li>Agentes de otras franquicias que buscan más resultados</li>
+        <li>Profesionales con cartera de clientes propia</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- FORMULARIO -->
+<section class="form-section" id="aplicar">
+  <div class="form-header fade-in">
+    <p class="section-eyebrow">Aplicá ahora</p>
+    <h2 class="section-title">Da el primer paso hoy.</h2>
+    <p>Llenás el formulario, el Team Leader te contacta personalmente y conversamos sin ningún compromiso.</p>
+  </div>
+
+  <div class="form-card fade-in">
+    <form id="applicationForm">
+      <div class="form-grid">
+
+        <div class="form-group">
+          <label for="nombre">Nombre</label>
+          <input type="text" id="nombre" placeholder="Tu nombre" required>
+        </div>
+
+        <div class="form-group">
+          <label for="apellido">Apellido</label>
+          <input type="text" id="apellido" placeholder="Tu apellido" required>
+        </div>
+
+        <div class="form-group">
+          <label for="telefono">WhatsApp / Teléfono</label>
+          <input type="tel" id="telefono" placeholder="+506 8888 8888" required>
+        </div>
+
+        <div class="form-group">
+          <label for="email">Correo electrónico</label>
+          <input type="email" id="email" placeholder="tu@correo.com" required>
+        </div>
+
+        <div class="form-group full">
+          <label for="zona">Zona donde vivís</label>
+          <select id="zona" required>
+            <option value="" disabled selected>Seleccioná tu zona</option>
+            <optgroup label="Este de San José (zona principal)">
+              <option>Montes de Oca / San Pedro</option>
+              <option>Goicoechea / Guadalupe</option>
+              <option>Moravia</option>
+              <option>Tibás</option>
+              <option>Curridabat</option>
+              <option>Tres Ríos / La Unión</option>
+              <option>Desamparados</option>
+              <option>Cartago centro</option>
+              <option>El Guarco / Tejar</option>
+              <option>Paraíso / Oreamuno</option>
+              <option>San Diego / San Juan</option>
+              <option>Otra zona del este</option>
+            </optgroup>
+            <optgroup label="Otras zonas del GAM">
+              <option>San José centro</option>
+              <option>Escazú / Santa Ana</option>
+              <option>La Uruca / Pavas</option>
+              <option>Heredia</option>
+              <option>Alajuela</option>
+              <option>Otra zona</option>
+            </optgroup>
+          </select>
+        </div>
+
+        <div class="form-group full">
+          <label>¿Cuál es tu perfil?</label>
+          <div class="radio-group">
+            <div class="radio-option">
+              <input type="radio" name="perfil" id="p1" value="nuevo" required>
+              <label for="p1">Nuevo en bienes raíces</label>
+            </div>
+            <div class="radio-option">
+              <input type="radio" name="perfil" id="p2" value="experiencia">
+              <label for="p2">Agente con experiencia</label>
+            </div>
+            <div class="radio-option">
+              <input type="radio" name="perfil" id="p3" value="otro">
+              <label for="p3">Explorando opciones</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group full">
+          <label for="ocupacion">¿A qué te dedicás actualmente?</label>
+          <input type="text" id="ocupacion" placeholder="Ej: vendedor, administrador, estudiante...">
+        </div>
+
+        <div class="form-group full">
+          <label for="motivacion">¿Por qué te interesa el mundo inmobiliario?</label>
+          <textarea id="motivacion" placeholder="Contanos un poco sobre tus motivaciones..."></textarea>
+        </div>
+
+        <div class="form-group full">
+          <label for="cv-file">Adjuntar CV <span style="font-weight:300;text-transform:none;font-size:11px;color:var(--muted)">(opcional · PDF, DOC o DOCX · máx. 5MB)</span></label>
+          <input type="file" id="cv-file" accept=".pdf,.doc,.docx" style="padding:10px 16px;cursor:pointer;">
+        </div>
+
+        <div class="form-group full">
+          <label for="cv-link">O pegá el link de tu CV <span style="font-weight:300;text-transform:none;font-size:11px;color:var(--muted)">(opcional · Google Drive, Dropbox, etc.)</span></label>
+          <input type="url" id="cv-link" placeholder="https://drive.google.com/...">
+        </div>
+
+        <div class="form-group full">
+          <label for="linkedin">Perfil de LinkedIn <span style="font-weight:300;text-transform:none;font-size:11px;color:var(--muted)">(opcional)</span></label>
+          <input type="url" id="linkedin" placeholder="https://linkedin.com/in/tu-perfil">
+        </div>
+
+        <div class="form-divider"></div>
+
+        <div class="submit-row">
+          <button type="submit" class="btn-submit">Enviar mi aplicación →</button>
+          <p class="privacy-note">Tu información es confidencial. Te contactaremos pronto.</p>
+        </div>
+
+      </div>
+    </form>
+
+    <div class="success-msg" id="successMsg">
+      <div class="success-icon">🌅</div>
+      <h3>¡Aplicación recibida!</h3>
+      <p>Gracias por tu interés en TEAM SUNRISE. Un miembro del equipo te contactará en las próximas 24 horas por WhatsApp.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">
+    <div class="footer-mark"></div>
+    <div class="footer-brand">TEAM SUNRISE | REMAX Central</div>
+  </div>
+  <div class="footer-right">
+    Especializados en el este de San José · GAM, Costa Rica<br>
+    La oficina con más experiencia en el GAM · +30 agentes activos
+  </div>
+</footer>
+
+<script>
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); }
+    });
+  }, { threshold: 0.08 });
+
+  document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+  document.getElementById('applicationForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const btn = this.querySelector('.btn-submit');
+    btn.textContent = 'Enviando...';
+    btn.disabled = true;
+    console.log('Formulario enviado, preparando payload...');
+
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwh3W1l9lKAFS4dJpdTXyEkWlW1yWXm4Gk-u4nQ2yJux0xb9ta9_KW51QBlKpr-SSG9eQ/exec';
+
+    const payload = {
+      nombre:     document.getElementById('nombre').value,
+      apellido:   document.getElementById('apellido').value,
+      telefono:   document.getElementById('telefono').value,
+      email:      document.getElementById('email').value,
+      zona:       document.getElementById('zona').value,
+      perfil:     document.querySelector('input[name="perfil"]:checked')?.value || '',
+      ocupacion:  document.getElementById('ocupacion').value,
+      motivacion: document.getElementById('motivacion').value,
+      cv_link:    document.getElementById('cv-link').value,
+      linkedin:   document.getElementById('linkedin').value,
+    };
+
+    const fileInput = document.getElementById('cv-file');
+    if (fileInput.files.length > 0) {
+      const file = fileInput.files[0];
+      const reader = new FileReader();
+      reader.onload = async function(ev) {
+        payload.cv_file     = ev.target.result.split(',')[1];
+        payload.cv_filename = `CV_${payload.nombre}_${payload.apellido}.${file.name.split('.').pop()}`;
+        payload.cv_mimetype = file.type;
+        await sendData(SCRIPT_URL, payload);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      await sendData(SCRIPT_URL, payload);
+    }
+
+    async function sendData(url, data) {
+      console.log('Enviando datos:', data);
+      try {
+        await fetch(url, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'text/plain' },
+          body: JSON.stringify(data)
+        });
+      } catch(err) {
+      } finally {
+        document.getElementById('applicationForm').style.display = 'none';
+        document.getElementById('successMsg').style.display = 'flex';
+      }
+    }
+  });
+</script>
+</body>
+</html>
