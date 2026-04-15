@@ -1320,50 +1320,7 @@
         </div>
       </div>
 
-    <!-- ═══════════════════════════════════════════════
-         PANEL: MATERIALES
-    ══════════════════════════════════════════════════ -->
-    <div id="panel-materiales" class="admin-panel">
 
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:28px;">
-        <div class="stat-card">
-          <div class="stat-number" id="mat-count-tarjetas">—</div>
-          <div class="stat-label">Tarjetas</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-number" id="mat-count-rotulos">—</div>
-          <div class="stat-label">Rótulos</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-number" id="mat-count-total">—</div>
-          <div class="stat-label">Total materiales</div>
-        </div>
-      </div>
-
-      <div style="display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:24px;">
-        <button id="mat-tab-tarjetas" onclick="switchMatTab('tarjetas')"
-          style="padding:10px 20px;border:none;background:none;font-family:inherit;font-size:13px;font-weight:600;color:var(--blue);border-bottom:2px solid var(--blue);cursor:pointer;transition:all .15s;">
-          Tarjetas
-        </button>
-        <button id="mat-tab-rotulos" onclick="switchMatTab('rotulos')"
-          style="padding:10px 20px;border:none;background:none;font-family:inherit;font-size:13px;font-weight:500;color:var(--ink-mid);border-bottom:2px solid transparent;cursor:pointer;transition:all .15s;">
-          Rótulos
-        </button>
-      </div>
-
-      <div id="mat-panel-tarjetas">
-        <div id="mat-tarjetas-loading" style="text-align:center;padding:48px;color:var(--ink-mid);font-size:14px;">Cargando tarjetas…</div>
-        <div id="mat-tarjetas-empty"   style="display:none;text-align:center;padding:48px;color:var(--ink-mid);font-size:14px;">No hay tarjetas guardadas aún.</div>
-        <div id="mat-tarjetas-grid"    style="display:none;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;"></div>
-      </div>
-
-      <div id="mat-panel-rotulos" style="display:none;">
-        <div id="mat-rotulos-loading" style="text-align:center;padding:48px;color:var(--ink-mid);font-size:14px;">Cargando rótulos…</div>
-        <div id="mat-rotulos-empty"   style="display:none;text-align:center;padding:48px;color:var(--ink-mid);font-size:14px;">No hay rótulos guardados aún.</div>
-        <div id="mat-rotulos-grid"    style="display:none;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;"></div>
-      </div>
-
-    </div>
 
       <!-- Calendarios list + semana grid lado a lado -->
       <div style="display:grid;grid-template-columns:260px 1fr;gap:20px;align-items:start;">
@@ -1419,6 +1376,51 @@
       </div>
 
         </div><!-- end panel-calendario -->
+
+    <!-- ═══════════════════════════════════════════════
+         PANEL: MATERIALES
+    ══════════════════════════════════════════════════ -->
+    <div id="panel-materiales" class="admin-panel">
+
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:28px;">
+        <div class="stat-card">
+          <div class="stat-number" id="mat-count-tarjetas">—</div>
+          <div class="stat-label">Tarjetas</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="mat-count-rotulos">—</div>
+          <div class="stat-label">Rótulos</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="mat-count-total">—</div>
+          <div class="stat-label">Total materiales</div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:24px;">
+        <button id="mat-tab-tarjetas" onclick="switchMatTab('tarjetas')"
+          style="padding:10px 20px;border:none;background:none;font-family:inherit;font-size:13px;font-weight:600;color:var(--blue);border-bottom:2px solid var(--blue);cursor:pointer;transition:all .15s;">
+          Tarjetas
+        </button>
+        <button id="mat-tab-rotulos" onclick="switchMatTab('rotulos')"
+          style="padding:10px 20px;border:none;background:none;font-family:inherit;font-size:13px;font-weight:500;color:var(--ink-mid);border-bottom:2px solid transparent;cursor:pointer;transition:all .15s;">
+          Rótulos
+        </button>
+      </div>
+
+      <div id="mat-panel-tarjetas">
+        <div id="mat-tarjetas-loading" style="text-align:center;padding:48px;color:var(--ink-mid);font-size:14px;">Cargando tarjetas…</div>
+        <div id="mat-tarjetas-empty"   style="display:none;text-align:center;padding:48px;color:var(--ink-mid);font-size:14px;">No hay tarjetas guardadas aún.</div>
+        <div id="mat-tarjetas-grid"    style="display:none;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;"></div>
+      </div>
+
+      <div id="mat-panel-rotulos" style="display:none;">
+        <div id="mat-rotulos-loading" style="text-align:center;padding:48px;color:var(--ink-mid);font-size:14px;">Cargando rótulos…</div>
+        <div id="mat-rotulos-empty"   style="display:none;text-align:center;padding:48px;color:var(--ink-mid);font-size:14px;">No hay rótulos guardados aún.</div>
+        <div id="mat-rotulos-grid"    style="display:none;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;"></div>
+      </div>
+
+    </div>
 
 
 <!-- Modales calendario admin (fuera del panel) -->
