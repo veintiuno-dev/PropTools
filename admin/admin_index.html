@@ -1323,7 +1323,7 @@
     <!-- ═══════════════════════════════════════════════
          PANEL: MATERIALES
     ══════════════════════════════════════════════════ -->
-    <div id="panel-materiales" class="admin-panel" style="display:none">
+    <div id="panel-materiales" class="admin-panel">
 
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:28px;">
         <div class="stat-card">
@@ -2461,7 +2461,7 @@ function toISODate(d) {
 
 // ── ADMIN TABS ──────────────────────────────────────────────
 function switchAdminTab(tab) {
-  ['agentes','equipos','calendario'].forEach(t => {
+  ['agentes','equipos','calendario','materiales'].forEach(t => {
     document.getElementById('tab-' + t).classList.toggle('active', t === tab);
     document.getElementById('panel-' + t).classList.toggle('active', t === tab);
   });
@@ -2471,8 +2471,10 @@ function switchAdminTab(tab) {
   }
   if (tab === 'calendario' && window._calLoaded !== true) {
     calAdminInit();
-    if (tab === 'materiales') { loadMateriales(); }
     window._calLoaded = true;
+  }
+  if (tab === 'materiales' && window._matLoaded !== true) {
+    loadMateriales();
   }
 }
 
