@@ -2679,18 +2679,33 @@ boot();
     const rows = items.map(item => {
       const modulo     = item._tipo === 'tarjeta' ? 'tarjetas' : 'rotulos';
       const urlPDF     = `/${modulo}/?id=${item.id}&download=pdf`;
-      const badgeStyle = item._tipo === 'tarjeta' ? 'background:#EFF6FF;color:var(--blue);' : 'background:#FFF1F0;color:#E03131;';
-      const badgeText  = item._tipo === 'tarjeta' ? (item.template ?? 'tarjeta') : (item.orientacion ?? 'rótulo');
-      const label      = item.save_name || (item._tipo === 'tarjeta' ? 'Tarjeta sin nombre' : 'Rótulo sin nombre');
-      const sub        = item._tipo === 'rotulo' && item.texto_rojo ? item.texto_rojo : '';
-      const fecha      = new Date(item.created_at).toLocaleDateString('es-CR', { day:'2-digit', month:'short', year:'numeric' });
+      const label = item.save_name || (item._tipo === 'tarjeta' ? 'Tarjeta sin nombre' : 'Rótulo sin nombre');
+      const sub   = item._tipo === 'rotulo' && item.texto_rojo ? item.texto_rojo : '';
+      const fecha = new Date(item.created_at).toLocaleDateString('es-CR', { day:'2-digit', month:'short', year:'numeric' });
+
+      // Pills: Tipo · Template · Orientación
+      const pill = (text, bg, color) =>
+        `<span style="background:${bg};color:${color};font-size:10px;font-weight:600;padding:2px 8px;border-radius:99px;font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.5px;flex-shrink:0;">${text}</span>`;
+
+      const pillTipo = item._tipo === 'tarjeta'
+        ? pill('Tarjeta', '#EFF6FF', 'var(--blue)')
+        : pill('Rótulo',  '#FFF1F0', '#E03131');
+
+      const tplRaw = (item.template ?? '').toLowerCase();
+      const tplLabel = tplRaw.includes('sunrise') ? 'Sunrise'
+                     : tplRaw.includes('remax')   ? 'RE/MAX'
+                     : tplRaw ? tplRaw : null;
+      const pillTpl = tplLabel ? pill(tplLabel, 'var(--surface2)', 'var(--ink-mid)') : '';
+
+      const oriLabel = item._tipo === 'rotulo' ? (item.orientacion ?? '') : '';
+      const pillOri  = oriLabel ? pill(oriLabel, 'var(--surface2)', 'var(--ink-mid)') : '';
 
       return `<div style="display:flex;align-items:center;gap:12px;padding:10px 16px;border-top:1px solid var(--border);">
         <div style="flex:1;min-width:0;">
           <div style="font-size:13px;font-weight:500;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${label}</div>
           ${sub ? `<div style="font-size:11px;color:var(--ink-mid);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${sub}</div>` : ''}
         </div>
-        <span style="${badgeStyle}font-size:10px;font-weight:600;padding:2px 8px;border-radius:99px;font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.5px;flex-shrink:0;">${badgeText}</span>
+        <div style="display:flex;gap:4px;flex-shrink:0;">${pillTipo}${pillTpl}${pillOri}</div>
         <span style="font-size:11px;color:var(--ink-mid);font-family:'DM Mono',monospace;flex-shrink:0;">${fecha}</span>
         <a href="${urlPDF}" target="_blank" style="flex-shrink:0;display:flex;align-items:center;gap:5px;padding:6px 12px;background:var(--blue);color:white;border-radius:6px;font-size:12px;font-weight:600;text-decoration:none;">
           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
