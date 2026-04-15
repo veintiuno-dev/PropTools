@@ -1382,43 +1382,17 @@
     ══════════════════════════════════════════════════ -->
     <div id="panel-materiales" class="admin-panel">
 
+      <!-- Stats -->
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:28px;">
-        <div class="stat-card">
-          <div class="stat-number" id="mat-count-tarjetas">—</div>
-          <div class="stat-label">Tarjetas</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-number" id="mat-count-rotulos">—</div>
-          <div class="stat-label">Rótulos</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-number" id="mat-count-total">—</div>
-          <div class="stat-label">Total materiales</div>
-        </div>
+        <div class="stat-card"><div class="stat-number" id="mat-count-tarjetas">—</div><div class="stat-label">Tarjetas</div></div>
+        <div class="stat-card"><div class="stat-number" id="mat-count-rotulos">—</div><div class="stat-label">Rótulos</div></div>
+        <div class="stat-card"><div class="stat-number" id="mat-count-total">—</div><div class="stat-label">Total materiales</div></div>
       </div>
 
-      <div style="display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:24px;">
-        <button id="mat-tab-tarjetas" onclick="switchMatTab('tarjetas')"
-          style="padding:10px 20px;border:none;background:none;font-family:inherit;font-size:13px;font-weight:600;color:var(--blue);border-bottom:2px solid var(--blue);cursor:pointer;transition:all .15s;">
-          Tarjetas
-        </button>
-        <button id="mat-tab-rotulos" onclick="switchMatTab('rotulos')"
-          style="padding:10px 20px;border:none;background:none;font-family:inherit;font-size:13px;font-weight:500;color:var(--ink-mid);border-bottom:2px solid transparent;cursor:pointer;transition:all .15s;">
-          Rótulos
-        </button>
-      </div>
-
-      <div id="mat-panel-tarjetas">
-        <div id="mat-tarjetas-loading" style="text-align:center;padding:48px;color:var(--ink-mid);font-size:14px;">Cargando tarjetas…</div>
-        <div id="mat-tarjetas-empty"   style="display:none;text-align:center;padding:48px;color:var(--ink-mid);font-size:14px;">No hay tarjetas guardadas aún.</div>
-        <div id="mat-tarjetas-grid"    style="display:none;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;"></div>
-      </div>
-
-      <div id="mat-panel-rotulos" style="display:none;">
-        <div id="mat-rotulos-loading" style="text-align:center;padding:48px;color:var(--ink-mid);font-size:14px;">Cargando rótulos…</div>
-        <div id="mat-rotulos-empty"   style="display:none;text-align:center;padding:48px;color:var(--ink-mid);font-size:14px;">No hay rótulos guardados aún.</div>
-        <div id="mat-rotulos-grid"    style="display:none;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;"></div>
-      </div>
+      <!-- Content -->
+      <div id="mat-loading" style="text-align:center;padding:48px;color:var(--ink-mid);font-size:14px;">Cargando materiales…</div>
+      <div id="mat-empty"   style="display:none;text-align:center;padding:48px;color:var(--ink-mid);font-size:14px;">No hay materiales guardados aún.</div>
+      <div id="mat-content" style="display:none;"></div>
 
     </div>
 
@@ -2627,26 +2601,13 @@ boot();
 
   // ─── MATERIALES ────────────────────────────────────────────────────────────
 
-  function switchMatTab(tab) {
-    ['tarjetas','rotulos'].forEach(t => {
-      document.getElementById('mat-panel-' + t).style.display = t === tab ? '' : 'none';
-      const btn = document.getElementById('mat-tab-' + t);
-      btn.style.color        = t === tab ? 'var(--blue)' : 'var(--ink-mid)';
-      btn.style.fontWeight   = t === tab ? '600' : '500';
-      btn.style.borderBottom = t === tab ? '2px solid var(--blue)' : '2px solid transparent';
-    });
-  }
-
   async function loadMateriales() {
     if (window._matLoaded) return;
     window._matLoaded = true;
 
-    ['tarjetas','rotulos'].forEach(t => {
-      document.getElementById('mat-' + t + '-loading').style.display = '';
-      document.getElementById('mat-' + t + '-empty').style.display   = 'none';
-      const g = document.getElementById('mat-' + t + '-grid');
-      g.style.display = 'none'; g.innerHTML = '';
-    });
+    const loading = document.getElementById('mat-loading');
+    const empty   = document.getElementById('mat-empty');
+    const content = document.getElementById('mat-content');
 
     const { data: tenantUsers } = await sb
       .from('users')
@@ -2654,116 +2615,104 @@ boot();
       .eq('tenant_id', currentProfile.tenant_id);
 
     if (!tenantUsers || tenantUsers.length === 0) {
-      ['tarjetas','rotulos'].forEach(t => {
-        document.getElementById('mat-' + t + '-loading').style.display = 'none';
-        document.getElementById('mat-' + t + '-empty').style.display   = '';
-      });
+      loading.style.display = 'none';
+      empty.style.display = '';
       document.getElementById('mat-count-tarjetas').textContent = 0;
       document.getElementById('mat-count-rotulos').textContent  = 0;
       document.getElementById('mat-count-total').textContent    = 0;
       return;
     }
 
-    const authIds  = tenantUsers.map(u => u.auth_id);
+    const authIds    = tenantUsers.map(u => u.auth_id);
     const profileIds = tenantUsers.map(u => u.id).filter(Boolean);
-    const allIds   = [...new Set([...authIds, ...profileIds])];
-    // userMap indexado por auth_id Y por profile id (algunos registros usan profile.id)
-    const userMap  = {
+    const allIds     = [...new Set([...authIds, ...profileIds])];
+    const userMap    = {
       ...Object.fromEntries(tenantUsers.map(u => [u.auth_id, u])),
       ...Object.fromEntries(tenantUsers.filter(u => u.id).map(u => [u.id, u])),
     };
 
-    const { data: tarjetas } = await sb
-      .from('tarjetas')
-      .select('*')
-      .in('user_id', allIds)
-      .order('created_at', { ascending: false });
+    const [{ data: tarjetas }, { data: rotulos }] = await Promise.all([
+      sb.from('tarjetas').select('*').in('user_id', allIds).order('created_at', { ascending: false }),
+      sb.from('rotulos').select('*').in('user_id', allIds).order('created_at', { ascending: false }),
+    ]);
 
-    document.getElementById('mat-tarjetas-loading').style.display = 'none';
-    document.getElementById('mat-count-tarjetas').textContent = tarjetas?.length ?? 0;
-    if (!tarjetas || tarjetas.length === 0) {
-      document.getElementById('mat-tarjetas-empty').style.display = '';
-    } else {
-      const g = document.getElementById('mat-tarjetas-grid');
-      g.style.display = 'grid';
-      g.innerHTML = tarjetas.map(t => renderMatCard(t, 'tarjeta', userMap)).join('');
-    }
+    const nT = tarjetas?.length ?? 0;
+    const nR = rotulos?.length  ?? 0;
+    document.getElementById('mat-count-tarjetas').textContent = nT;
+    document.getElementById('mat-count-rotulos').textContent  = nR;
+    document.getElementById('mat-count-total').textContent    = nT + nR;
 
-    const { data: rotulos } = await sb
-      .from('rotulos')
-      .select('*')
-      .in('user_id', allIds)
-      .order('created_at', { ascending: false });
+    loading.style.display = 'none';
 
-    document.getElementById('mat-rotulos-loading').style.display = 'none';
-    document.getElementById('mat-count-rotulos').textContent  = rotulos?.length ?? 0;
-    document.getElementById('mat-count-total').textContent    = (tarjetas?.length ?? 0) + (rotulos?.length ?? 0);
-    if (!rotulos || rotulos.length === 0) {
-      document.getElementById('mat-rotulos-empty').style.display = '';
-    } else {
-      const g = document.getElementById('mat-rotulos-grid');
-      g.style.display = 'grid';
-      g.innerHTML = rotulos.map(r => renderMatCard(r, 'rotulo', userMap)).join('');
-    }
+    if (nT + nR === 0) { empty.style.display = ''; return; }
 
-    // Activar el sub-tab por defecto (tarjetas si hay, si no rótulos)
-    switchMatTab(tarjetas && tarjetas.length > 0 ? 'tarjetas' : 'rotulos');
+    // Group all materials by user_id
+    const byUser = {};
+    (tarjetas || []).forEach(t => { (byUser[t.user_id] = byUser[t.user_id] || []).push({ ...t, _tipo: 'tarjeta' }); });
+    (rotulos  || []).forEach(r => { (byUser[r.user_id] = byUser[r.user_id] || []).push({ ...r, _tipo: 'rotulo'  }); });
+
+    // Sort users: those with materials first, alphabetically
+    const usersWithMat = [...new Set([
+      ...Object.keys(byUser).map(uid => userMap[uid]).filter(Boolean)
+    ])].sort((a, b) => (a.name ?? '').localeCompare(b.name ?? ''));
+
+    content.innerHTML = usersWithMat.map(u => {
+      const uid  = u.auth_id;
+      const uid2 = u.id;
+      const items = [...(byUser[uid] || []), ...(byUser[uid2] || [])];
+      // dedupe by item id
+      const seen = new Set();
+      const uniq = items.filter(it => { if (seen.has(it.id)) return false; seen.add(it.id); return true; });
+      if (!uniq.length) return '';
+      return renderAgentGroup(u, uniq);
+    }).join('');
+
+    content.style.display = '';
   }
 
-  function renderMatCard(item, tipo, userMap) {
-    const u        = userMap[item.user_id] ?? {};
-    const userName = u.name ?? item.name ?? 'Agente';
-    const initials = userName.split(' ').map(p=>p[0]).join('').substring(0,2).toUpperCase();
-    const photoSrc = u.photo_url || (tipo === 'tarjeta' ? item.photo_url : null);
-    const avatar   = photoSrc
-      ? `<img src="${photoSrc}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;flex-shrink:0;">`
-      : `<div style="width:28px;height:28px;border-radius:50%;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--ink-mid);flex-shrink:0;">${initials}</div>`;
-    const fecha    = new Date(item.created_at).toLocaleDateString('es-CR',{day:'2-digit',month:'short',year:'numeric'});
-    // Ninguna tabla tiene preview_url — mostramos placeholder visual con info útil
-    const preview  = tipo === 'tarjeta'
-      ? `<div style="width:100%;height:140px;background:linear-gradient(135deg,#f0f4ff,#e8f0fe);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;">${photoSrc ? `<img src="${photoSrc}" style="width:52px;height:52px;border-radius:50%;object-fit:cover;border:2px solid white;">` : `<div style="width:52px;height:52px;border-radius:50%;background:var(--blue);opacity:.15;"></div>`}<span style="font-size:10px;font-weight:600;color:var(--blue);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.5px;">${item.template ?? 'tarjeta'}</span></div>`
-      : `<div style="width:100%;height:140px;background:linear-gradient(135deg,#1a1a2e,#16213e);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;"><svg viewBox="0 0 24 24" fill="none" style="width:24px;opacity:.4"><rect x="3" y="2" width="18" height="20" rx="2" stroke="white" stroke-width="1.5"/><path d="M7 7h10M7 11h10M7 15h6" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg><span style="font-size:10px;font-weight:600;color:rgba(255,255,255,.6);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.5px;">${item.orientacion ?? 'rótulo'}</span>${item.texto_rojo ? `<span style="font-size:10px;color:rgba(255,255,255,.4);max-width:150px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${item.texto_rojo}</span>` : ''}</div>`;
-    const badgeStyle = tipo === 'tarjeta' ? 'background:#EFF6FF;color:var(--blue);' : 'background:#FFF1F0;color:#E03131;';
-    const badgeText  = tipo === 'tarjeta' ? (item.template ?? 'tarjeta') : (item.orientacion ?? 'rótulo');
-    const title      = item.save_name
-      ? `<div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${item.save_name}</div>`
-      : '';
-    const modulo = tipo === 'tarjeta' ? 'tarjetas' : 'rotulos';
-    const urlVer  = `/${modulo}/?id=${item.id}`;
-    const urlPNG  = `/${modulo}/?id=${item.id}&download=png`;
-    const urlPDF  = `/${modulo}/?id=${item.id}&download=pdf`;
-    return `<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;">
-      ${preview}
-      <div style="padding:12px 14px;">
-        ${title}
-        <div style="display:flex;align-items:center;gap:7px;margin-bottom:10px;">
-          ${avatar}
-          <div style="min-width:0;">
-            <div style="font-size:13px;color:var(--ink);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${userName}</div>
-            ${u.job_title ? `<div style="font-size:11px;color:var(--ink-mid);">${u.job_title}</div>` : ''}
-          </div>
+  function renderAgentGroup(u, items) {
+    const initials = (u.name ?? 'A').split(' ').map(p => p[0]).join('').substring(0,2).toUpperCase();
+    const avatar   = u.photo_url
+      ? `<img src="${u.photo_url}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0;">`
+      : `<div style="width:36px;height:36px;border-radius:50%;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--ink-mid);flex-shrink:0;">${initials}</div>`;
+
+    const rows = items.map(item => {
+      const modulo     = item._tipo === 'tarjeta' ? 'tarjetas' : 'rotulos';
+      const urlPDF     = `/${modulo}/?id=${item.id}&download=pdf`;
+      const badgeStyle = item._tipo === 'tarjeta' ? 'background:#EFF6FF;color:var(--blue);' : 'background:#FFF1F0;color:#E03131;';
+      const badgeText  = item._tipo === 'tarjeta' ? (item.template ?? 'tarjeta') : (item.orientacion ?? 'rótulo');
+      const label      = item.save_name || (item._tipo === 'tarjeta' ? 'Tarjeta sin nombre' : 'Rótulo sin nombre');
+      const sub        = item._tipo === 'rotulo' && item.texto_rojo ? item.texto_rojo : '';
+      const fecha      = new Date(item.created_at).toLocaleDateString('es-CR', { day:'2-digit', month:'short', year:'numeric' });
+
+      return `<div style="display:flex;align-items:center;gap:12px;padding:10px 16px;border-top:1px solid var(--border);">
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:13px;font-weight:500;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${label}</div>
+          ${sub ? `<div style="font-size:11px;color:var(--ink-mid);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${sub}</div>` : ''}
         </div>
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
-          <span style="${badgeStyle}font-size:10px;font-weight:600;padding:2px 8px;border-radius:99px;font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.5px;">${badgeText}</span>
-          <span style="font-size:11px;color:var(--ink-mid);font-family:'DM Mono',monospace;white-space:nowrap;">${fecha}</span>
+        <span style="${badgeStyle}font-size:10px;font-weight:600;padding:2px 8px;border-radius:99px;font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.5px;flex-shrink:0;">${badgeText}</span>
+        <span style="font-size:11px;color:var(--ink-mid);font-family:'DM Mono',monospace;flex-shrink:0;">${fecha}</span>
+        <a href="${urlPDF}" target="_blank" style="flex-shrink:0;display:flex;align-items:center;gap:5px;padding:6px 12px;background:var(--blue);color:white;border-radius:6px;font-size:12px;font-weight:600;text-decoration:none;">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          PDF
+        </a>
+      </div>`;
+    }).join('');
+
+    return `<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:12px;">
+      <div style="display:flex;align-items:center;gap:10px;padding:14px 16px;">
+        ${avatar}
+        <div>
+          <div style="font-size:14px;font-weight:600;color:var(--ink);">${u.name ?? 'Agente'}</div>
+          ${u.job_title ? `<div style="font-size:12px;color:var(--ink-mid);">${u.job_title}</div>` : ''}
         </div>
-        <div style="display:flex;gap:6px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);">
-          <a href="${urlVer}" target="_blank" style="flex:1;display:flex;align-items:center;justify-content:center;gap:5px;padding:6px 0;border:1px solid var(--border);border-radius:6px;font-size:12px;font-weight:500;color:var(--ink);text-decoration:none;background:var(--surface2);">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-            Ver
-          </a>
-          <a href="${urlPNG}" target="_blank" style="flex:1;display:flex;align-items:center;justify-content:center;gap:5px;padding:6px 0;border:1px solid var(--border);border-radius:6px;font-size:12px;font-weight:500;color:var(--ink);text-decoration:none;background:var(--surface2);">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            PNG
-          </a>
-          <a href="${urlPDF}" target="_blank" style="flex:1;display:flex;align-items:center;justify-content:center;gap:5px;padding:6px 0;border:1px solid var(--border);border-radius:6px;font-size:12px;font-weight:500;color:var(--ink);text-decoration:none;background:var(--surface2);">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            PDF
-          </a>
-        </div>
+        <div style="margin-left:auto;font-size:12px;color:var(--ink-mid);font-family:'DM Mono',monospace;">${items.length} material${items.length !== 1 ? 'es' : ''}</div>
       </div>
+      ${rows}
     </div>`;
-  }</script>
+  }
+
+</script>
   <footer id="pt-footer"></footer>
 </body>
 </html>
