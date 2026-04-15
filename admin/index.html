@@ -745,7 +745,7 @@
 
     .tipo-laptop    { background: #EDE9FE; color: #5B21B6; }
     .tipo-proyector { background: #DBEAFE; color: #1D4ED8; }
-    .tipo-camara    { background: #FCE7F3; color: #9D174D; }
+    .tipo-camara    { background: #F0FDF4; color: #16A34A; }
     .tipo-dron      { background: #FEF3C7; color: #92400E; }
     .tipo-audio     { background: #D1FAE5; color: #065F46; }
     .tipo-otro      { background: var(--surface2); color: var(--ink-mid); }
@@ -974,6 +974,10 @@
       <div class="admin-tab" id="tab-calendario" onclick="switchAdminTab('calendario')">
         <svg viewBox="0 0 16 16" fill="none"><rect x="1" y="2" width="14" height="13" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M1 6h14M5 1v2M11 1v2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
         Calendario
+      </div>
+      <div class="admin-tab" id="tab-materiales" onclick="switchAdminTab('materiales')">
+        <svg viewBox="0 0 16 16" fill="none"><rect x="1" y="1.5" width="6.5" height="8" rx="1.2" stroke="currentColor" stroke-width="1.3"/><rect x="8.5" y="1.5" width="6.5" height="8" rx="1.2" stroke="currentColor" stroke-width="1.3"/><rect x="1" y="11" width="6.5" height="3.5" rx="1.2" stroke="currentColor" stroke-width="1.3"/><rect x="8.5" y="11" width="6.5" height="3.5" rx="1.2" stroke="currentColor" stroke-width="1.3"/></svg>
+        Materiales
       </div>
     </div>
 
@@ -1316,6 +1320,8 @@
         </div>
       </div>
 
+
+
       <!-- Calendarios list + semana grid lado a lado -->
       <div style="display:grid;grid-template-columns:260px 1fr;gap:20px;align-items:start;">
 
@@ -1370,6 +1376,25 @@
       </div>
 
         </div><!-- end panel-calendario -->
+
+    <!-- ═══════════════════════════════════════════════
+         PANEL: MATERIALES
+    ══════════════════════════════════════════════════ -->
+    <div id="panel-materiales" class="admin-panel">
+
+      <!-- Stats -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:28px;">
+        <div class="stat-card"><div class="stat-number" id="mat-count-tarjetas">—</div><div class="stat-label">Tarjetas</div></div>
+        <div class="stat-card"><div class="stat-number" id="mat-count-rotulos">—</div><div class="stat-label">Rótulos</div></div>
+        <div class="stat-card"><div class="stat-number" id="mat-count-total">—</div><div class="stat-label">Total materiales</div></div>
+      </div>
+
+      <!-- Content -->
+      <div id="mat-loading" style="text-align:center;padding:48px;color:var(--ink-mid);font-size:14px;">Cargando materiales…</div>
+      <div id="mat-empty"   style="display:none;text-align:center;padding:48px;color:var(--ink-mid);font-size:14px;">No hay materiales guardados aún.</div>
+      <div id="mat-content" style="display:none;"></div>
+
+    </div>
 
 
 <!-- Modales calendario admin (fuera del panel) -->
@@ -2412,7 +2437,7 @@ function toISODate(d) {
 
 // ── ADMIN TABS ──────────────────────────────────────────────
 function switchAdminTab(tab) {
-  ['agentes','equipos','calendario'].forEach(t => {
+  ['agentes','equipos','calendario','materiales'].forEach(t => {
     document.getElementById('tab-' + t).classList.toggle('active', t === tab);
     document.getElementById('panel-' + t).classList.toggle('active', t === tab);
   });
@@ -2423,6 +2448,9 @@ function switchAdminTab(tab) {
   if (tab === 'calendario' && window._calLoaded !== true) {
     calAdminInit();
     window._calLoaded = true;
+  }
+  if (tab === 'materiales' && window._matLoaded !== true) {
+    loadMateriales();
   }
 }
 
@@ -2569,6 +2597,136 @@ async function boot() {
 }
 
 boot();
+
+
+  // ─── MATERIALES ────────────────────────────────────────────────────────────
+
+  async function loadMateriales() {
+    if (window._matLoaded) return;
+    window._matLoaded = true;
+
+    const loading = document.getElementById('mat-loading');
+    const empty   = document.getElementById('mat-empty');
+    const content = document.getElementById('mat-content');
+
+    const { data: tenantUsers } = await sb
+      .from('users')
+      .select('id, auth_id, name, photo_url, job_title')
+      .eq('tenant_id', currentProfile.tenant_id);
+
+    if (!tenantUsers || tenantUsers.length === 0) {
+      loading.style.display = 'none';
+      empty.style.display = '';
+      document.getElementById('mat-count-tarjetas').textContent = 0;
+      document.getElementById('mat-count-rotulos').textContent  = 0;
+      document.getElementById('mat-count-total').textContent    = 0;
+      return;
+    }
+
+    const authIds    = tenantUsers.map(u => u.auth_id);
+    const profileIds = tenantUsers.map(u => u.id).filter(Boolean);
+    const allIds     = [...new Set([...authIds, ...profileIds])];
+    const userMap    = {
+      ...Object.fromEntries(tenantUsers.map(u => [u.auth_id, u])),
+      ...Object.fromEntries(tenantUsers.filter(u => u.id).map(u => [u.id, u])),
+    };
+
+    const [{ data: tarjetas }, { data: rotulos }] = await Promise.all([
+      sb.from('tarjetas').select('*').in('user_id', allIds).order('created_at', { ascending: false }),
+      sb.from('rotulos').select('*').in('user_id', allIds).order('created_at', { ascending: false }),
+    ]);
+
+    const nT = tarjetas?.length ?? 0;
+    const nR = rotulos?.length  ?? 0;
+    document.getElementById('mat-count-tarjetas').textContent = nT;
+    document.getElementById('mat-count-rotulos').textContent  = nR;
+    document.getElementById('mat-count-total').textContent    = nT + nR;
+
+    loading.style.display = 'none';
+
+    if (nT + nR === 0) { empty.style.display = ''; return; }
+
+    // Group all materials by user_id
+    const byUser = {};
+    (tarjetas || []).forEach(t => { (byUser[t.user_id] = byUser[t.user_id] || []).push({ ...t, _tipo: 'tarjeta' }); });
+    (rotulos  || []).forEach(r => { (byUser[r.user_id] = byUser[r.user_id] || []).push({ ...r, _tipo: 'rotulo'  }); });
+
+    // Sort users: those with materials first, alphabetically
+    const usersWithMat = [...new Set([
+      ...Object.keys(byUser).map(uid => userMap[uid]).filter(Boolean)
+    ])].sort((a, b) => (a.name ?? '').localeCompare(b.name ?? ''));
+
+    content.innerHTML = usersWithMat.map(u => {
+      const uid  = u.auth_id;
+      const uid2 = u.id;
+      const items = [...(byUser[uid] || []), ...(byUser[uid2] || [])];
+      // dedupe by item id
+      const seen = new Set();
+      const uniq = items.filter(it => { if (seen.has(it.id)) return false; seen.add(it.id); return true; });
+      if (!uniq.length) return '';
+      return renderAgentGroup(u, uniq);
+    }).join('');
+
+    content.style.display = '';
+  }
+
+  function renderAgentGroup(u, items) {
+    const initials = (u.name ?? 'A').split(' ').map(p => p[0]).join('').substring(0,2).toUpperCase();
+    const avatar   = u.photo_url
+      ? `<img src="${u.photo_url}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0;">`
+      : `<div style="width:36px;height:36px;border-radius:50%;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--ink-mid);flex-shrink:0;">${initials}</div>`;
+
+    const rows = items.map(item => {
+      const modulo     = item._tipo === 'tarjeta' ? 'tarjetas' : 'rotulos';
+      const urlPDF     = `/${modulo}/?id=${item.id}&download=pdf`;
+      const label = item.save_name || (item._tipo === 'tarjeta' ? 'Tarjeta sin nombre' : 'Rótulo sin nombre');
+      const sub   = item._tipo === 'rotulo' && item.texto_rojo ? item.texto_rojo : '';
+      const fecha = new Date(item.created_at).toLocaleDateString('es-CR', { day:'2-digit', month:'short', year:'numeric' });
+
+      // Pills: Tipo · Template · Orientación
+      const pill = (text, bg, color) =>
+        `<span style="background:${bg};color:${color};font-size:10px;font-weight:600;padding:2px 8px;border-radius:99px;font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.5px;flex-shrink:0;">${text}</span>`;
+
+      const pillTipo = item._tipo === 'tarjeta'
+        ? pill('Tarjeta', '#EFF6FF', 'var(--blue)')
+        : pill('Rótulo',  '#FFF1F0', '#E03131');
+
+      const tplRaw = (item.template ?? '').toLowerCase();
+      const tplLabel = tplRaw.includes('sunrise') ? 'Sunrise'
+                     : tplRaw.includes('remax')   ? 'RE/MAX'
+                     : tplRaw ? tplRaw : null;
+      const pillTpl = tplLabel ? pill(tplLabel, 'var(--surface2)', 'var(--ink-mid)') : '';
+
+      const oriLabel = item._tipo === 'rotulo' ? (item.orientacion ?? '') : '';
+      const pillOri  = oriLabel ? pill(oriLabel, '#F0FDF4', '#16A34A') : '';
+
+      return `<div style="display:flex;align-items:center;gap:12px;padding:10px 16px;border-top:1px solid var(--border);">
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:13px;font-weight:500;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${label}</div>
+          ${sub ? `<div style="font-size:11px;color:var(--ink-mid);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${sub}</div>` : ''}
+        </div>
+        <div style="display:flex;gap:4px;flex-shrink:0;">${pillTipo}${pillTpl}${pillOri}</div>
+        <span style="font-size:11px;color:var(--ink-mid);font-family:'DM Mono',monospace;flex-shrink:0;">${fecha}</span>
+        <a href="${urlPDF}" target="_blank" style="flex-shrink:0;display:flex;align-items:center;gap:5px;padding:6px 12px;background:var(--blue);color:white;border-radius:6px;font-size:12px;font-weight:600;text-decoration:none;">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          PDF
+        </a>
+      </div>`;
+    }).join('');
+
+    return `<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:12px;">
+      <div style="display:flex;align-items:center;gap:10px;padding:14px 16px;">
+        ${avatar}
+        <div>
+          <div style="font-size:14px;font-weight:600;color:var(--ink);">${u.name ?? 'Agente'}</div>
+          ${u.job_title ? `<div style="font-size:12px;color:var(--ink-mid);">${u.job_title}</div>` : ''}
+        </div>
+        <div style="margin-left:auto;font-size:12px;color:var(--ink-mid);font-family:'DM Mono',monospace;">${items.length} material${items.length !== 1 ? 'es' : ''}</div>
+      </div>
+      ${rows}
+    </div>`;
+  }
+
 </script>
   <footer id="pt-footer"></footer>
 </body>
