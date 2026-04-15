@@ -2648,7 +2648,7 @@ boot();
 
     const { data: tenantUsers } = await sb
       .from('users')
-      .select('auth_id, name, photo_url, job_title')
+      .select('id, auth_id, name, photo_url, job_title')
       .eq('tenant_id', currentProfile.tenant_id);
 
     if (!tenantUsers || tenantUsers.length === 0) {
@@ -2662,13 +2662,19 @@ boot();
       return;
     }
 
-    const authIds = tenantUsers.map(u => u.auth_id);
-    const userMap = Object.fromEntries(tenantUsers.map(u => [u.auth_id, u]));
+    const authIds  = tenantUsers.map(u => u.auth_id);
+    const profileIds = tenantUsers.map(u => u.id).filter(Boolean);
+    const allIds   = [...new Set([...authIds, ...profileIds])];
+    // userMap indexado por auth_id Y por profile id (algunos registros usan profile.id)
+    const userMap  = {
+      ...Object.fromEntries(tenantUsers.map(u => [u.auth_id, u])),
+      ...Object.fromEntries(tenantUsers.filter(u => u.id).map(u => [u.id, u])),
+    };
 
     const { data: tarjetas } = await sb
       .from('tarjetas')
       .select('*')
-      .in('user_id', authIds)
+      .in('user_id', allIds)
       .order('created_at', { ascending: false });
 
     document.getElementById('mat-tarjetas-loading').style.display = 'none';
@@ -2684,7 +2690,7 @@ boot();
     const { data: rotulos } = await sb
       .from('rotulos')
       .select('*')
-      .in('user_id', authIds)
+      .in('user_id', allIds)
       .order('created_at', { ascending: false });
 
     document.getElementById('mat-rotulos-loading').style.display = 'none';
