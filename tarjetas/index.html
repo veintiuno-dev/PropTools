@@ -1014,6 +1014,15 @@ el('guidelines-toggle').addEventListener('click',()=>{
     currentUser = (await sb.auth.getSession()).data.session.user;
     await loadContext();
     document.getElementById('splash').classList.add('hidden');
+    // Soporte para ?id=ID (carga desde admin) y ?download=png|pdf
+    const _urlParams = new URLSearchParams(window.location.search);
+    const _loadId    = _urlParams.get('id');
+    const _download  = _urlParams.get('download'); // 'png' | 'pdf'
+    if (_loadId) {
+      await loadCard(_loadId);
+      if (_download === 'png')  { await downloadPNG();  window.close(); }
+      if (_download === 'pdf')  { await downloadPDF();  window.close(); }
+    }
   }
 }
 </script>
