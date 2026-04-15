@@ -2697,6 +2697,9 @@ boot();
       g.style.display = 'grid';
       g.innerHTML = rotulos.map(r => renderMatCard(r, 'rotulo', userMap)).join('');
     }
+
+    // Activar el sub-tab por defecto (tarjetas si hay, si no rótulos)
+    switchMatTab(tarjetas && tarjetas.length > 0 ? 'tarjetas' : 'rotulos');
   }
 
   function renderMatCard(item, tipo, userMap) {
