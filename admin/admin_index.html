@@ -2728,6 +2728,10 @@ boot();
     const title      = item.save_name
       ? `<div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${item.save_name}</div>`
       : '';
+    const modulo = tipo === 'tarjeta' ? 'tarjetas' : 'rotulos';
+    const urlVer  = `/${modulo}/?id=${item.id}`;
+    const urlPNG  = `/${modulo}/?id=${item.id}&download=png`;
+    const urlPDF  = `/${modulo}/?id=${item.id}&download=pdf`;
     return `<div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;">
       ${preview}
       <div style="padding:12px 14px;">
@@ -2742,6 +2746,20 @@ boot();
         <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
           <span style="${badgeStyle}font-size:10px;font-weight:600;padding:2px 8px;border-radius:99px;font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.5px;">${badgeText}</span>
           <span style="font-size:11px;color:var(--ink-mid);font-family:'DM Mono',monospace;white-space:nowrap;">${fecha}</span>
+        </div>
+        <div style="display:flex;gap:6px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);">
+          <a href="${urlVer}" target="_blank" style="flex:1;display:flex;align-items:center;justify-content:center;gap:5px;padding:6px 0;border:1px solid var(--border);border-radius:6px;font-size:12px;font-weight:500;color:var(--ink);text-decoration:none;background:var(--surface2);">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            Ver
+          </a>
+          <a href="${urlPNG}" target="_blank" style="flex:1;display:flex;align-items:center;justify-content:center;gap:5px;padding:6px 0;border:1px solid var(--border);border-radius:6px;font-size:12px;font-weight:500;color:var(--ink);text-decoration:none;background:var(--surface2);">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            PNG
+          </a>
+          <a href="${urlPDF}" target="_blank" style="flex:1;display:flex;align-items:center;justify-content:center;gap:5px;padding:6px 0;border:1px solid var(--border);border-radius:6px;font-size:12px;font-weight:500;color:var(--ink);text-decoration:none;background:var(--surface2);">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            PDF
+          </a>
         </div>
       </div>
     </div>`;
