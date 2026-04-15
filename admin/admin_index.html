@@ -2698,7 +2698,7 @@ boot();
       const pillTpl = tplLabel ? pill(tplLabel, 'var(--surface2)', 'var(--ink-mid)') : '';
 
       const oriLabel = item._tipo === 'rotulo' ? (item.orientacion ?? '') : '';
-      const pillOri  = oriLabel ? pill(oriLabel, 'var(--surface2)', 'var(--ink-mid)') : '';
+      const pillOri  = oriLabel ? pill(oriLabel, '#F0FDF4', '#16A34A') : '';
 
       return `<div style="display:flex;align-items:center;gap:12px;padding:10px 16px;border-top:1px solid var(--border);">
         <div style="flex:1;min-width:0;">
