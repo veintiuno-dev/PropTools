@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CRM — PropTools</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;700&family=DM+Mono&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<style>
+/* ── TOKENS ─────────────────────────────── */
+:root {
+  --blue:    #1B6EF3;
+  --ink:     #0D0F12;
+  --ink-mid: #5A6070;
+  --surface: #fff;
+  --surface2:#F4F5F7;
+  --border:  #E2E5EA;
+  --muted:   #9CA3AF;
+  --green:   #16A34A;
+  --red:     #DC2626;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: var(--surface2); color: var(--ink); }
+
+/* ── LAYOUT ─────────────────────────────── */
+#pt-header { height: 88px; background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 24px; gap: 16px; position: sticky; top: 0; z-index: 100; }
+.page-body { height: calc(100vh - 88px); display: flex; flex-direction: column; overflow: hidden; }
+.page-content { flex: 1; overflow-y: auto; padding: 24px; }
+
+/* ── TABS ────────────────────────────────── */
+.crm-tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--border); background: var(--surface); padding: 0 24px; }
+.crm-tab { padding: 14px 18px; font-size: 14px; font-weight: 700; color: var(--ink-mid); border: none; background: none; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: color .15s, border-color .15s; }
+.crm-tab.active { color: var(--blue); border-bottom-color: var(--blue); }
+.crm-tab:hover:not(.active) { color: var(--ink); }
+
+/* ── TOOLBAR ─────────────────────────────── */
+.toolbar { display: flex; gap: 10px; align-items: center; margin-bottom: 20px; }
+.search-wrap { position: relative; flex: 1; max-width: 380px; }
+.search-wrap input { width: 100%; height: 38px; padding: 0 12px 0 36px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; background: var(--surface); color: var(--ink); font-family: 'DM Sans', sans-serif; }
+.search-wrap input:focus { outline: none; border-color: var(--blue); }
+.search-icon { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
+select.filter { height: 38px; padding: 0 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; background: var(--surface); color: var(--ink); font-family: 'DM Sans', sans-serif; cursor: pointer; }
+select.filter:focus { outline: none; border-color: var(--blue); }
+.btn-primary { height: 38px; padding: 0 18px; background: var(--blue); color: #fff; border: none; border-radius: 8px; font-size: 14px; font-weight: 700; font-family: 'DM Sans', sans-serif; cursor: pointer; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+.btn-primary:hover { background: #1558d4; }
+.btn-ghost { height: 38px; padding: 0 14px; background: var(--surface); color: var(--ink); border: 1px solid var(--border); border-radius: 8px; font-size: 14px; font-family: 'DM Sans', sans-serif; cursor: pointer; }
+.btn-ghost:hover { background: var(--surface2); }
+
+/* ── CONTACTS LIST ───────────────────────── */
+.contacts-grid { display: flex; flex-direction: column; gap: 8px; }
+.contact-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; display: flex; align-items: center; gap: 14px; cursor: pointer; transition: border-color .15s, box-shadow .15s; }
+.contact-card:hover { border-color: var(--blue); box-shadow: 0 2px 8px rgba(27,110,243,.08); }
+.avatar { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; flex-shrink: 0; }
+.contact-main { flex: 1; min-width: 0; }
+.contact-name { font-size: 15px; font-weight: 700; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.contact-meta { font-size: 12px; color: var(--ink-mid); margin-top: 2px; display: flex; gap: 12px; flex-wrap: wrap; }
+.contact-meta span { display: flex; align-items: center; gap: 4px; }
+.type-badge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; white-space: nowrap; }
+.contact-actions { display: flex; gap: 6px; opacity: 0; transition: opacity .15s; }
+.contact-card:hover .contact-actions { opacity: 1; }
+.action-btn { width: 30px; height: 30px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--ink-mid); font-size: 14px; }
+.action-btn:hover { background: var(--surface2); color: var(--ink); }
+.action-btn.danger:hover { background: #FEF2F2; color: var(--red); border-color: #FECACA; }
+
+/* ── EMPTY / LOADING ─────────────────────── */
+.state-empty, .state-loading { text-align: center; padding: 64px 24px; color: var(--muted); }
+.state-empty h3 { font-size: 16px; font-weight: 700; color: var(--ink-mid); margin-bottom: 8px; }
+.state-empty p { font-size: 14px; }
+.spinner { width: 28px; height: 28px; border: 3px solid var(--border); border-top-color: var(--blue); border-radius: 50%; animation: spin .7s linear infinite; margin: 0 auto 12px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── MODAL ───────────────────────────────── */
+.modal-overlay { position: fixed; inset: 0; background: rgba(13,15,18,.45); z-index: 200; display: flex; align-items: flex-start; justify-content: flex-end; opacity: 0; pointer-events: none; transition: opacity .2s; }
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal-panel { width: 560px; max-width: 100vw; height: 100vh; background: var(--surface); display: flex; flex-direction: column; box-shadow: -4px 0 24px rgba(0,0,0,.12); transform: translateX(40px); transition: transform .2s; overflow: hidden; }
+.modal-overlay.open .modal-panel { transform: translateX(0); }
+.modal-header { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.modal-title { font-size: 17px; font-weight: 700; }
+.modal-close { width: 32px; height: 32px; border: none; background: none; cursor: pointer; font-size: 18px; color: var(--ink-mid); border-radius: 6px; display: flex; align-items: center; justify-content: center; }
+.modal-close:hover { background: var(--surface2); color: var(--ink); }
+.modal-body { flex: 1; overflow-y: auto; padding: 24px; }
+.modal-footer { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; gap: 10px; justify-content: flex-end; flex-shrink: 0; }
+
+/* ── FORM ────────────────────────────────── */
+.form-section { margin-bottom: 24px; }
+.form-section-label { font-size: 11px; font-weight: 700; color: var(--muted); letter-spacing: .06em; text-transform: uppercase; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+.field-grid { display: grid; gap: 12px; }
+.field-grid.cols2 { grid-template-columns: 1fr 1fr; }
+.field { display: flex; flex-direction: column; gap: 5px; }
+.field label { font-size: 12px; font-weight: 700; color: var(--ink-mid); }
+.field input, .field select, .field textarea {
+  height: 38px; padding: 0 12px;
+  border: 1px solid var(--border); border-radius: 8px;
+  font-size: 14px; font-family: 'DM Sans', sans-serif;
+  background: var(--surface); color: var(--ink);
+  width: 100%;
+}
+.field input:focus, .field select:focus, .field textarea:focus { outline: none; border-color: var(--blue); }
+.field textarea { height: 80px; padding: 10px 12px; resize: none; }
+.field .hint { font-size: 11px; color: var(--muted); }
+
+.cedula-row { display: flex; gap: 8px; }
+.cedula-row input { flex: 1; }
+.lookup-btn { height: 38px; padding: 0 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; font-weight: 700; font-family: 'DM Sans', sans-serif; background: var(--surface2); color: var(--ink); cursor: pointer; white-space: nowrap; transition: background .15s; }
+.lookup-btn:hover { background: var(--border); }
+.lookup-btn:disabled { opacity: .5; pointer-events: none; }
+.lookup-result { display: none; font-size: 12px; padding: 6px 10px; border-radius: 6px; margin-top: 4px; }
+.lookup-result.ok  { display: block; background: #F0FDF4; border: 1px solid #BBF7D0; color: #15803D; }
+.lookup-result.err { display: block; background: #FEF2F2; border: 1px solid #FECACA; color: #B91C1C; }
+
+.social-row { display: flex; align-items: center; gap: 8px; }
+.social-icon { font-size: 16px; width: 24px; text-align: center; flex-shrink: 0; }
+.social-row input { flex: 1; }
+.social-search { height: 38px; padding: 0 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 12px; font-weight: 700; font-family: 'DM Sans', sans-serif; background: var(--surface2); color: var(--ink-mid); cursor: pointer; white-space: nowrap; }
+.social-search:hover { color: var(--ink); background: var(--border); }
+
+.toast { position: fixed; bottom: 24px; right: 24px; padding: 12px 20px; border-radius: 8px; font-size: 14px; font-weight: 700; z-index: 999; transform: translateY(60px); opacity: 0; transition: transform .25s, opacity .25s; pointer-events: none; }
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast.success { background: #15803D; color: #fff; }
+.toast.error   { background: var(--red); color: #fff; }
+
+.count-chip { font-size: 12px; font-family: 'DM Mono', monospace; color: var(--muted); margin-left: auto; }
+</style>
+</head>
+<body>
+
+<header id="pt-header"><!-- components.js --></header>
+
+<div class="crm-tabs">
+  <button class="crm-tab active" onclick="setTab('contacts')">Clientes</button>
+  <button class="crm-tab" onclick="setTab('deals')">Negocios</button>
+  <button class="crm-tab" onclick="setTab('properties')">Propiedades</button>
+</div>
+
+<div class="page-body">
+  <div class="page-content">
+
+    <!-- TOOLBAR -->
+    <div class="toolbar">
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="search-input" placeholder="Buscar por nombre, cédula, email…" oninput="debounceSearch()">
+      </div>
+      <select class="filter" id="type-filter" onchange="loadContacts()">
+        <option value="">Todos los tipos</option>
+      </select>
+      <select class="filter" id="source-filter" onchange="loadContacts()">
+        <option value="">Todas las fuentes</option>
+      </select>
+      <span class="count-chip" id="count-chip"></span>
+      <button class="btn-primary" onclick="openModal()">
+        <span>+</span> Nuevo cliente
+      </button>
+    </div>
+
+    <!-- LIST -->
+    <div id="contacts-list">
+      <div class="state-loading">
+        <div class="spinner"></div>
+        <p>Cargando clientes…</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── MODAL SLIDE-IN ───────────────────── -->
+<div class="modal-overlay" id="modal-overlay" onclick="handleOverlayClick(event)">
+  <div class="modal-panel">
+    <div class="modal-header">
+      <span class="modal-title" id="modal-title">Nuevo cliente</span>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <!-- IDENTIFICACIÓN -->
+      <div class="form-section">
+        <div class="form-section-label">Identificación</div>
+        <div class="field-grid">
+          <div class="field">
+            <label>Cédula / DIMEX / Pasaporte</label>
+            <div class="cedula-row">
+              <input type="text" id="f-cedula" placeholder="1-2345-6789" oninput="formatCedula(this)" maxlength="15">
+              <button class="lookup-btn" id="lookup-btn" onclick="lookupCedula()">Consultar →</button>
+            </div>
+            <div class="lookup-result" id="lookup-result"></div>
+            <span class="hint">Consulta Hacienda CR — autocompleta nombre si está registrado</span>
+          </div>
+          <div class="field">
+            <label>Tipo de identificación</label>
+            <select id="f-cedula-tipo">
+              <option value="fisica">Cédula física</option>
+              <option value="juridica">Cédula jurídica</option>
+              <option value="dimex">DIMEX</option>
+              <option value="pasaporte">Pasaporte</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- DATOS PERSONALES -->
+      <div class="form-section">
+        <div class="form-section-label">Datos personales</div>
+        <div class="field-grid cols2">
+          <div class="field">
+            <label>Nombre *</label>
+            <input type="text" id="f-name" placeholder="María">
+          </div>
+          <div class="field">
+            <label>Apellidos</label>
+            <input type="text" id="f-last-name" placeholder="Rodríguez Mora">
+          </div>
+          <div class="field">
+            <label>Fecha de nacimiento</label>
+            <input type="date" id="f-birth-date">
+          </div>
+          <div class="field">
+            <label>Tipo de contacto</label>
+            <select id="f-type"></select>
+          </div>
+          <div class="field">
+            <label>Fuente / Canal</label>
+            <select id="f-source"></select>
+          </div>
+        </div>
+      </div>
+
+      <!-- CONTACTO -->
+      <div class="form-section">
+        <div class="form-section-label">Contacto</div>
+        <div class="field-grid cols2">
+          <div class="field">
+            <label>Email</label>
+            <input type="email" id="f-email" placeholder="correo@ejemplo.com">
+          </div>
+          <div class="field">
+            <label>Teléfono / WhatsApp</label>
+            <input type="tel" id="f-phone" placeholder="8888-1234" oninput="formatPhone(this)">
+          </div>
+          <div class="field">
+            <label>Teléfono alternativo</label>
+            <input type="tel" id="f-phone-alt" placeholder="2222-0000" oninput="formatPhone(this)">
+          </div>
+        </div>
+      </div>
+
+      <!-- EMPRESA -->
+      <div class="form-section">
+        <div class="form-section-label">Empresa</div>
+        <div class="field-grid cols2">
+          <div class="field">
+            <label>Nombre de empresa</label>
+            <input type="text" id="f-company-name" placeholder="Inversiones XYZ S.A." oninput="filterCompanies(this.value)">
+            <div id="company-suggestions" style="display:none;position:relative">
+              <div id="company-list" style="position:absolute;top:2px;left:0;right:0;background:var(--surface);border:1px solid var(--border);border-radius:8px;z-index:50;max-height:160px;overflow-y:auto;box-shadow:0 4px 12px rgba(0,0,0,.1)"></div>
+            </div>
+          </div>
+          <div class="field">
+            <label>Cédula jurídica</label>
+            <div class="cedula-row">
+              <input type="text" id="f-company-cedula" placeholder="3-101-123456">
+              <button class="lookup-btn" onclick="lookupEmpresa()">Consultar →</button>
+            </div>
+            <div class="lookup-result" id="empresa-result"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- REDES SOCIALES -->
+      <div class="form-section">
+        <div class="form-section-label">Redes sociales</div>
+        <div class="field-grid" style="gap:8px">
+          <div class="social-row">
+            <span class="social-icon">📸</span>
+            <input type="text" id="f-instagram" placeholder="@usuario o URL completa">
+            <button class="social-search" onclick="searchSocial('instagram')">Buscar ↗</button>
+          </div>
+          <div class="social-row">
+            <span class="social-icon">💼</span>
+            <input type="text" id="f-linkedin" placeholder="URL de LinkedIn">
+            <button class="social-search" onclick="searchSocial('linkedin')">Buscar ↗</button>
+          </div>
+          <div class="social-row">
+            <span class="social-icon">📘</span>
+            <input type="text" id="f-facebook" placeholder="@usuario o URL">
+            <button class="social-search" onclick="searchSocial('facebook')">Buscar ↗</button>
+          </div>
+          <div class="social-row">
+            <span class="social-icon">🎵</span>
+            <input type="text" id="f-tiktok" placeholder="@usuario">
+            <button class="social-search" onclick="searchSocial('tiktok')">Buscar ↗</button>
+          </div>
+        </div>
+        <p style="font-size:11px;color:var(--muted);margin-top:8px">
+          "Buscar ↗" abre Google con el nombre del contacto + la red social para localizar el perfil correcto.
+        </p>
+      </div>
+
+      <!-- COMENTARIOS -->
+      <div class="form-section">
+        <div class="form-section-label">Comentarios</div>
+        <div class="field">
+          <textarea id="f-notes" placeholder="Notas internas, preferencias, contexto del cliente…"></textarea>
+        </div>
+      </div>
+
+    </div><!-- /modal-body -->
+
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeModal()">Cancelar</button>
+      <button class="btn-primary" id="save-btn" onclick="saveContact()">Guardar cliente</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script type="module">
+// ── SUPABASE ─────────────────────────────────────────────
+const SUPABASE_URL  = 'https://ttfkznarmavpfmvdwale.supabase.co';  // STAGING
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR0Zmt6bmFybWF2cGZtdmR3YWxlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYwOTQ0OTYsImV4cCI6MjA5MTY3MDQ5Nn0.Xw_JJBb1v6lXX-ImiRqf2dp0-EJ1MUvJwKNPViyVT0c';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+// ── STATE ─────────────────────────────────────────────────
+let currentUser   = null;
+let currentProfile= null;
+let allContacts   = [];
+let contactTypes  = [];
+let contactSources= [];
+let allCompanies  = [];
+let editingId     = null;
+let searchTimer   = null;
+
+// ── INIT ──────────────────────────────────────────────────
+const { data: { session } } = await sb.auth.getSession();
+if (!session) { window.location.href = '/dev/perfil/'; }
+currentUser = session.user;
+
+const { data: profile } = await sb.from('users').select('*, tenants(*)').eq('auth_id', currentUser.id).single();
+currentProfile = profile;
+
+// Cargar components.js (header/footer)
+window.sb = sb;
+const s = document.createElement('script');
+s.type = 'module';
+s.src = '/dev/components.js';
+document.head.appendChild(s);
+s.onload = () => { if (window.initComponents) initComponents({ active: 'crm' }); };
+
+await Promise.all([loadTypes(), loadSources(), loadCompanies()]);
+await loadContacts();
+
+// ── TIPOS & FUENTES ───────────────────────────────────────
+async function loadTypes() {
+  const { data } = await sb.from('contact_types')
+    .select('*').eq('tenant_id', currentProfile.tenant_id).order('position');
+  contactTypes = data || [];
+  const sel1 = document.getElementById('f-type');
+  const sel2 = document.getElementById('type-filter');
+  sel1.innerHTML = '<option value="">Sin tipo</option>' +
+    contactTypes.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
+  sel2.innerHTML = '<option value="">Todos los tipos</option>' +
+    contactTypes.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
+}
+
+async function loadSources() {
+  const { data } = await sb.from('contact_sources')
+    .select('*').eq('tenant_id', currentProfile.tenant_id).order('position');
+  contactSources = data || [];
+  const sel1 = document.getElementById('f-source');
+  const sel2 = document.getElementById('source-filter');
+  sel1.innerHTML = '<option value="">Sin fuente</option>' +
+    contactSources.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+  sel2.innerHTML = '<option value="">Todas las fuentes</option>' +
+    contactSources.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+}
+
+async function loadCompanies() {
+  const { data } = await sb.from('crm_companies')
+    .select('id, name, cedula_juridica').eq('tenant_id', currentProfile.tenant_id).order('name');
+  allCompanies = data || [];
+}
+
+// ── CONTACTS LOAD ─────────────────────────────────────────
+window.loadContacts = async function() {
+  const list = document.getElementById('contacts-list');
+  list.innerHTML = '<div class="state-loading"><div class="spinner"></div><p>Cargando…</p></div>';
+
+  let query = sb.from('contacts')
+    .select('*, contact_types(name, color), contact_sources(name), crm_companies(name)')
+    .eq('tenant_id', currentProfile.tenant_id)
+    .eq('active', true)
+    .order('name');
+
+  const typeFilter   = document.getElementById('type-filter').value;
+  const sourceFilter = document.getElementById('source-filter').value;
+  const search       = document.getElementById('search-input').value.trim();
+
+  if (typeFilter)   query = query.eq('type_id', typeFilter);
+  if (sourceFilter) query = query.eq('source_id', sourceFilter);
+  if (search)       query = query.or(`name.ilike.%${search}%,last_name.ilike.%${search}%,cedula.ilike.%${search}%,email.ilike.%${search}%`);
+
+  const { data, error } = await query;
+  if (error) { list.innerHTML = `<div class="state-empty"><h3>Error al cargar</h3><p>${error.message}</p></div>`; return; }
+  allContacts = data || [];
+  renderContacts(allContacts);
+};
+
+function renderContacts(contacts) {
+  const list = document.getElementById('contacts-list');
+  document.getElementById('count-chip').textContent = contacts.length + ' cliente' + (contacts.length !== 1 ? 's' : '');
+  if (!contacts.length) {
+    list.innerHTML = '<div class="state-empty"><h3>Sin resultados</h3><p>Prueba otra búsqueda o agrega el primer cliente.</p></div>';
+    return;
+  }
+  list.innerHTML = '<div class="contacts-grid">' + contacts.map(renderCard).join('') + '</div>';
+}
+
+function renderCard(c) {
+  const initials = ((c.name?.[0] || '') + (c.last_name?.[0] || '')).toUpperCase() || '?';
+  const typeColor = c.contact_types?.color || '#1B6EF3';
+  const typeName  = c.contact_types?.name  || '';
+  const phone     = c.phone ? `<span>📱 ${c.phone}</span>` : '';
+  const email     = c.email ? `<span>✉ ${c.email}</span>` : '';
+  const company   = c.crm_companies?.name ? `<span>🏢 ${c.crm_companies.name}</span>` : '';
+  const bgLight   = typeColor + '18';
+  return `
+  <div class="contact-card" onclick="openModal('${c.id}')">
+    <div class="avatar" style="background:${bgLight};color:${typeColor}">${initials}</div>
+    <div class="contact-main">
+      <div class="contact-name">${c.name || ''}${c.last_name ? ' ' + c.last_name : ''}</div>
+      <div class="contact-meta">${phone}${email}${company}</div>
+    </div>
+    ${typeName ? `<span class="type-badge" style="background:${bgLight};color:${typeColor}">${typeName}</span>` : ''}
+    <div class="contact-actions" onclick="event.stopPropagation()">
+      <button class="action-btn" title="WhatsApp" onclick="openWhatsapp('${c.phone}')">💬</button>
+      <button class="action-btn danger" title="Eliminar" onclick="deleteContact('${c.id}')">🗑</button>
+    </div>
+  </div>`;
+}
+
+// ── MODAL ─────────────────────────────────────────────────
+window.openModal = async function(id = null) {
+  editingId = id;
+  document.getElementById('modal-title').textContent = id ? 'Editar cliente' : 'Nuevo cliente';
+  clearForm();
+  if (id) {
+    const { data } = await sb.from('contacts').select('*').eq('id', id).single();
+    if (data) fillForm(data);
+  }
+  document.getElementById('modal-overlay').classList.add('open');
+  document.getElementById('f-name').focus();
+};
+
+window.closeModal = function() {
+  document.getElementById('modal-overlay').classList.remove('open');
+  editingId = null;
+};
+
+window.handleOverlayClick = function(e) {
+  if (e.target === document.getElementById('modal-overlay')) closeModal();
+};
+
+function clearForm() {
+  ['f-cedula','f-name','f-last-name','f-email','f-phone','f-phone-alt',
+   'f-instagram','f-linkedin','f-facebook','f-tiktok','f-notes',
+   'f-company-name','f-company-cedula','f-birth-date'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  document.getElementById('f-cedula-tipo').value = 'fisica';
+  document.getElementById('f-type').value   = '';
+  document.getElementById('f-source').value = '';
+  document.getElementById('lookup-result').className   = 'lookup-result';
+  document.getElementById('empresa-result').className  = 'lookup-result';
+  document.getElementById('modal-save-company-id')?.remove();
+}
+
+function fillForm(d) {
+  const set = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
+  set('f-cedula',       d.cedula);
+  set('f-name',         d.name);
+  set('f-last-name',    d.last_name);
+  set('f-birth-date',   d.birth_date);
+  set('f-email',        d.email);
+  set('f-phone',        d.phone);
+  set('f-phone-alt',    d.phone_alt);
+  set('f-instagram',    d.instagram);
+  set('f-linkedin',     d.linkedin);
+  set('f-facebook',     d.facebook);
+  set('f-tiktok',       d.tiktok);
+  set('f-notes',        d.notes);
+  document.getElementById('f-cedula-tipo').value = d.cedula_tipo || 'fisica';
+  document.getElementById('f-type').value        = d.type_id    || '';
+  document.getElementById('f-source').value      = d.source_id  || '';
+  if (d.company_id) {
+    const co = allCompanies.find(c => c.id === d.company_id);
+    if (co) document.getElementById('f-company-name').value = co.name;
+    // guardar referencia silenciosa
+    let hidden = document.getElementById('modal-save-company-id');
+    if (!hidden) { hidden = document.createElement('input'); hidden.type='hidden'; hidden.id='modal-save-company-id'; document.querySelector('.modal-body').appendChild(hidden); }
+    hidden.value = d.company_id;
+  }
+}
+
+// ── SAVE ──────────────────────────────────────────────────
+window.saveContact = async function() {
+  const name = document.getElementById('f-name').value.trim();
+  if (!name) { showToast('El nombre es obligatorio', 'error'); return; }
+
+  const btn = document.getElementById('save-btn');
+  btn.disabled = true; btn.textContent = 'Guardando…';
+
+  // Gestión de empresa
+  let companyId = document.getElementById('modal-save-company-id')?.value || null;
+  const companyName   = document.getElementById('f-company-name').value.trim();
+  const companyCedula = document.getElementById('f-company-cedula').value.trim();
+
+  if (companyName && !companyId) {
+    // Intentar encontrar empresa existente o crear nueva
+    const existing = allCompanies.find(c => c.name.toLowerCase() === companyName.toLowerCase());
+    if (existing) {
+      companyId = existing.id;
+    } else {
+      const { data: newCo } = await sb.from('crm_companies').insert({
+        tenant_id: currentProfile.tenant_id,
+        name: companyName,
+        cedula_juridica: companyCedula || null,
+        created_by: currentUser.id,
+      }).select().single();
+      if (newCo) { companyId = newCo.id; allCompanies.push(newCo); }
+    }
+  }
+
+  const payload = {
+    tenant_id:    currentProfile.tenant_id,
+    created_by:   currentUser.id,
+    cedula:       document.getElementById('f-cedula').value.trim()     || null,
+    cedula_tipo:  document.getElementById('f-cedula-tipo').value,
+    name,
+    last_name:    document.getElementById('f-last-name').value.trim()  || null,
+    birth_date:   document.getElementById('f-birth-date').value        || null,
+    type_id:      document.getElementById('f-type').value              || null,
+    source_id:    document.getElementById('f-source').value            || null,
+    email:        document.getElementById('f-email').value.trim()      || null,
+    phone:        document.getElementById('f-phone').value.trim()      || null,
+    phone_alt:    document.getElementById('f-phone-alt').value.trim()  || null,
+    company_id:   companyId,
+    instagram:    document.getElementById('f-instagram').value.trim()  || null,
+    linkedin:     document.getElementById('f-linkedin').value.trim()   || null,
+    facebook:     document.getElementById('f-facebook').value.trim()   || null,
+    tiktok:       document.getElementById('f-tiktok').value.trim()     || null,
+    notes:        document.getElementById('f-notes').value.trim()      || null,
+  };
+
+  let error;
+  if (editingId) {
+    delete payload.created_by; delete payload.tenant_id;
+    ({ error } = await sb.from('contacts').update(payload).eq('id', editingId));
+  } else {
+    ({ error } = await sb.from('contacts').insert(payload));
+  }
+
+  btn.disabled = false; btn.textContent = 'Guardar cliente';
+  if (error) { showToast('Error: ' + error.message, 'error'); return; }
+  showToast(editingId ? 'Cliente actualizado ✓' : 'Cliente creado ✓', 'success');
+  closeModal();
+  await loadContacts();
+};
+
+// ── DELETE ────────────────────────────────────────────────
+window.deleteContact = async function(id) {
+  if (!confirm('¿Eliminar este cliente? Esta acción no se puede deshacer.')) return;
+  const { error } = await sb.from('contacts').update({ active: false }).eq('id', id);
+  if (error) { showToast('Error al eliminar', 'error'); return; }
+  showToast('Cliente eliminado', 'success');
+  await loadContacts();
+};
+
+// ── HACIENDA LOOKUP ───────────────────────────────────────
+window.lookupCedula = async function() {
+  const raw = document.getElementById('f-cedula').value.replace(/[^0-9]/g, '');
+  if (raw.length < 9) { showLookup('lookup-result', 'err', 'Ingresa una cédula válida (mínimo 9 dígitos)'); return; }
+  const btn = document.getElementById('lookup-btn');
+  btn.disabled = true; btn.textContent = 'Consultando…';
+  try {
+    const r = await fetch(`https://api.hacienda.go.cr/fe/ae?identificacion=${raw}`);
+    if (!r.ok) throw new Error('no encontrado');
+    const d = await r.json();
+    if (d.nombre) {
+      const parts = d.nombre.trim().split(' ');
+      // Hacienda devuelve: PRIMER_APELLIDO SEGUNDO_APELLIDO NOMBRE(S)
+      // Para cédula física: intentar separar apellidos de nombre
+      const tipo = document.getElementById('f-cedula-tipo').value;
+      if (tipo === 'fisica' && parts.length >= 3) {
+        document.getElementById('f-name').value      = parts.slice(2).join(' ');
+        document.getElementById('f-last-name').value = parts.slice(0, 2).join(' ');
+      } else {
+        document.getElementById('f-name').value      = d.nombre;
+        document.getElementById('f-last-name').value = '';
+      }
+      const moroso = d.situacion?.moroso === 'SI' ? ' · ⚠ Moroso en Hacienda' : '';
+      showLookup('lookup-result', 'ok', `✓ ${d.nombre}${moroso}`);
+    } else {
+      showLookup('lookup-result', 'err', 'No encontrado en Hacienda — completa los datos manualmente');
+    }
+  } catch(e) {
+    showLookup('lookup-result', 'err', 'Sin resultado — completa los datos manualmente');
+  }
+  btn.disabled = false; btn.textContent = 'Consultar →';
+};
+
+window.lookupEmpresa = async function() {
+  const raw = document.getElementById('f-company-cedula').value.replace(/[^0-9]/g, '');
+  if (!raw) return;
+  try {
+    const r = await fetch(`https://api.hacienda.go.cr/fe/ae?identificacion=${raw}`);
+    if (!r.ok) throw new Error();
+    const d = await r.json();
+    if (d.nombre) {
+      document.getElementById('f-company-name').value = d.nombre;
+      showLookup('empresa-result', 'ok', `✓ ${d.nombre}`);
+    } else throw new Error();
+  } catch(e) {
+    showLookup('empresa-result', 'err', 'No encontrada — ingresa el nombre manualmente');
+  }
+};
+
+function showLookup(id, type, msg) {
+  const el = document.getElementById(id);
+  el.className = 'lookup-result ' + type;
+  el.textContent = msg;
+}
+
+// ── COMPANY AUTOCOMPLETE ──────────────────────────────────
+window.filterCompanies = function(q) {
+  const sug = document.getElementById('company-suggestions');
+  const lst = document.getElementById('company-list');
+  if (!q || q.length < 2) { sug.style.display = 'none'; return; }
+  const matches = allCompanies.filter(c => c.name.toLowerCase().includes(q.toLowerCase())).slice(0, 6);
+  if (!matches.length) { sug.style.display = 'none'; return; }
+  lst.innerHTML = matches.map(c => `
+    <div onclick="selectCompany('${c.id}','${c.name.replace(/'/g,"\\'")}','${c.cedula_juridica||''}')"
+         style="padding:8px 12px;cursor:pointer;font-size:14px;border-bottom:1px solid var(--border)"
+         onmouseover="this.style.background='var(--surface2)'" onmouseout="this.style.background=''">
+      <strong>${c.name}</strong>
+      ${c.cedula_juridica ? `<span style="font-size:11px;color:var(--muted);margin-left:6px">${c.cedula_juridica}</span>` : ''}
+    </div>`).join('');
+  sug.style.display = 'block';
+};
+
+window.selectCompany = function(id, name, cedula) {
+  document.getElementById('f-company-name').value   = name;
+  document.getElementById('f-company-cedula').value = cedula;
+  document.getElementById('company-suggestions').style.display = 'none';
+  let hidden = document.getElementById('modal-save-company-id');
+  if (!hidden) { hidden = document.createElement('input'); hidden.type='hidden'; hidden.id='modal-save-company-id'; document.querySelector('.modal-body').appendChild(hidden); }
+  hidden.value = id;
+};
+
+// ── SOCIAL SEARCH ─────────────────────────────────────────
+window.searchSocial = function(red) {
+  const nombre = (
+    document.getElementById('f-name').value + ' ' +
+    document.getElementById('f-last-name').value
+  ).trim();
+  const q = nombre ? `${nombre} site:${red}.com` : `site:${red}.com`;
+  window.open(`https://www.google.com/search?q=${encodeURIComponent(q)}`, '_blank');
+};
+
+// ── WHATSAPP ──────────────────────────────────────────────
+window.openWhatsapp = function(phone) {
+  if (!phone) return;
+  const num = phone.replace(/[^0-9]/g,'');
+  const cr  = num.length <= 8 ? '506' + num : num;
+  window.open(`https://wa.me/${cr}`, '_blank');
+};
+
+// ── HELPERS ───────────────────────────────────────────────
+window.formatCedula = function(el) {
+  let v = el.value.replace(/[^0-9]/g, '');
+  if (v.length > 1 && v.length <= 5)  v = v[0] + '-' + v.slice(1);
+  if (v.replace(/-/g,'').length > 5) {
+    const d = v.replace(/-/g,'');
+    v = d[0] + '-' + d.slice(1, 5) + '-' + d.slice(5);
+  }
+  el.value = v;
+};
+
+window.formatPhone = function(el) {
+  let v = el.value.replace(/[^0-9]/g,'');
+  if (v.length > 4) v = v.slice(0,4) + '-' + v.slice(4,8);
+  el.value = v;
+};
+
+window.debounceSearch = function() {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(loadContacts, 300);
+};
+
+window.setTab = function(tab) {
+  document.querySelectorAll('.crm-tab').forEach((t,i) => {
+    t.classList.toggle('active', ['contacts','deals','properties'][i] === tab);
+  });
+  if (tab === 'deals')      window.location.href = '/dev/crm/deals/';
+  if (tab === 'properties') window.location.href = '/dev/crm/properties/';
+};
+
+function showToast(msg, type = 'success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast ${type} show`;
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ── KEYBOARD ──────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModal();
+  if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+    e.preventDefault();
+    document.getElementById('search-input').focus();
+  }
+});
+</script>
+
+</body>
+</html>
