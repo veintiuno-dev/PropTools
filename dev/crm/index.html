@@ -502,11 +502,16 @@ async function lookupCedula() {
     if (!r.ok) throw 0;
     const d = await r.json();
     if (!d.nombre) throw 0;
-    const parts = d.nombre.trim().split(' ');
+    // Hacienda devuelve: NOMBRE(S) APELLIDO1 APELLIDO2
+    // Las últimas 2 palabras son siempre los apellidos; el resto es el nombre
+    const cap = s => s.toLowerCase().replace(/\b\w/g, l => l.toUpperCase());
+    const parts = d.nombre.trim().split(/\s+/);
     if ($('f-cedula-tipo').value === 'fisica' && parts.length >= 3) {
-      $('f-name').value      = parts.slice(2).join(' ');
-      $('f-last-name').value = parts.slice(0,2).join(' ');
-    } else { $('f-name').value = d.nombre; }
+      $('f-name').value      = cap(parts.slice(0, -2).join(' '));
+      $('f-last-name').value = cap(parts.slice(-2).join(' '));
+    } else {
+      $('f-name').value = cap(d.nombre);
+    }
     const extra = d.situacion?.moroso==='SI' ? ' · ⚠ Moroso en Hacienda' : '';
     showLookup('result-cedula','ok',`✓ ${d.nombre}${extra}`);
   } catch { showLookup('result-cedula','err','No encontrado — completa los datos manualmente'); }
