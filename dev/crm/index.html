@@ -168,7 +168,6 @@ select.filter:focus { outline: none; border-color: var(--blue); }
             <label>Tipo de ID</label>
             <select id="f-cedula-tipo">
               <option value="fisica">Cédula física</option>
-              <option value="juridica">Cédula jurídica</option>
               <option value="dimex">DIMEX</option>
               <option value="pasaporte">Pasaporte</option>
             </select>
@@ -535,8 +534,8 @@ async function deleteContact(id) {
 // ── HACIENDA ────────────────────────────────────────────────
 async function lookupCedula() {
   const tipo = $('f-cedula-tipo').value;
-  if (tipo === 'juridica' || tipo === 'pasaporte') {
-    showLookup('result-cedula','err','Solo se puede consultar cédula física o DIMEX');
+  if (tipo === 'pasaporte') {
+    showLookup('result-cedula','err','No se puede consultar pasaporte en Hacienda');
     return;
   }
   // Validar formato antes de consultar
@@ -553,7 +552,9 @@ async function lookupCedula() {
     // Las últimas 2 palabras son siempre los apellidos; el resto es el nombre
     const cap = s => s.toLowerCase().replace(/\b\w/g, l => l.toUpperCase());
     const parts = d.nombre.trim().split(/\s+/);
-    if ($('f-cedula-tipo').value === 'fisica' && parts.length >= 3) {
+    // física y dimex tienen mismo formato: NOMBRE(S) APELLIDO1 APELLIDO2
+    const tipo = $('f-cedula-tipo').value;
+    if ((tipo === 'fisica' || tipo === 'dimex') && parts.length >= 3) {
       $('f-name').value      = cap(parts.slice(0, -2).join(' '));
       $('f-last-name').value = cap(parts.slice(-2).join(' '));
     } else {
@@ -626,9 +627,12 @@ $('btn-lookup-cedula').addEventListener('click', lookupCedula);
 $('btn-lookup-empresa').addEventListener('click', lookupEmpresa);
 $('f-cedula').addEventListener('input', () => fmtCedula($('f-cedula')));
 $('f-cedula-tipo').addEventListener('change', () => {
-  // Al cambiar tipo limpiar cédula y resultado para evitar confusión
   $('f-cedula').value = '';
   $('result-cedula').className = 'lookup-result';
+  // Deshabilitar botón consultar cuando es pasaporte
+  const esPasaporte = $('f-cedula-tipo').value === 'pasaporte';
+  $('btn-lookup-cedula').disabled = esPasaporte;
+  $('btn-lookup-cedula').title = esPasaporte ? 'No disponible para pasaporte' : 'Consultar en Hacienda CR';
 });
 $('f-phone').addEventListener('input', () => fmtPhone($('f-phone')));
 $('f-phone-alt').addEventListener('input', () => fmtPhone($('f-phone-alt')));
