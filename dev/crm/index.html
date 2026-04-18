@@ -473,7 +473,54 @@ async function saveContact() {
     return;
   }
 
-  const btn = $('btn-save'); btn.disabled = true; btn.textContent = 'Guardando…';
+  const btn = $('btn-save'); btn.disabled = true; btn.textContent = 'Verificando…';
+
+  // ── Validar duplicados en el tenant ──────────────────────
+  const cedula = $('f-cedula').value.trim();
+  const dupeChecks = [];
+
+  if (cedula) dupeChecks.push(
+    sb.from('contacts')
+      .select('id, name, last_name')
+      .eq('tenant_id', profile.tenant_id)
+      .eq('active', true)
+      .eq('cedula', cedula)
+      .neq('id', editingId || '00000000-0000-0000-0000-000000000000')
+      .maybeSingle()
+      .then(r => r.data ? `El número de identificación ya existe: ${r.data.name}${r.data.last_name ? ' '+r.data.last_name : ''}` : null)
+  );
+
+  if (email) dupeChecks.push(
+    sb.from('contacts')
+      .select('id, name, last_name')
+      .eq('tenant_id', profile.tenant_id)
+      .eq('active', true)
+      .eq('email', email)
+      .neq('id', editingId || '00000000-0000-0000-0000-000000000000')
+      .maybeSingle()
+      .then(r => r.data ? `El email ya está registrado: ${r.data.name}${r.data.last_name ? ' '+r.data.last_name : ''}` : null)
+  );
+
+  if (phone) dupeChecks.push(
+    sb.from('contacts')
+      .select('id, name, last_name')
+      .eq('tenant_id', profile.tenant_id)
+      .eq('active', true)
+      .eq('phone', phone)
+      .neq('id', editingId || '00000000-0000-0000-0000-000000000000')
+      .maybeSingle()
+      .then(r => r.data ? `El teléfono ya está registrado: ${r.data.name}${r.data.last_name ? ' '+r.data.last_name : ''}` : null)
+  );
+
+  const dupeResults = await Promise.all(dupeChecks);
+  const dupeError = dupeResults.find(r => r !== null);
+  if (dupeError) {
+    btn.disabled = false; btn.textContent = 'Guardar cliente';
+    showToast(dupeError, 'error');
+    return;
+  }
+
+  btn.textContent = 'Guardando…';
 
   // Empresa
   let companyId = $('f-company-id').value || null;
