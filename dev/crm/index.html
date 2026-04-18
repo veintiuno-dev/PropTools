@@ -291,10 +291,34 @@ function fmtPhone(el) {
 }
 
 function fmtCedula(el) {
-  let v = el.value.replace(/\D/g,'');
-  if (v.length > 5)      v = v[0]+'-'+v.slice(1,5)+'-'+v.slice(5,9);
-  else if (v.length > 1) v = v[0]+'-'+v.slice(1);
-  el.value = v;
+  const tipo = $('f-cedula-tipo').value;
+  if (tipo === 'fisica') {
+    let v = el.value.replace(/\D/g,'').slice(0,9);
+    if (v.length > 5)      v = v[0]+'-'+v.slice(1,5)+'-'+v.slice(5);
+    else if (v.length > 1) v = v[0]+'-'+v.slice(1);
+    el.value = v;
+  } else if (tipo === 'dimex') {
+    // XXX-XXXXXXXXX (3 + hasta 9 dígitos = 12 total)
+    let v = el.value.replace(/\D/g,'').slice(0,12);
+    if (v.length > 3) v = v.slice(0,3)+'-'+v.slice(3);
+    el.value = v;
+  }
+  // pasaporte: sin formateo, acepta alfanumérico libre
+}
+
+function validateCedula() {
+  const tipo = $('f-cedula-tipo').value;
+  const val  = $('f-cedula').value.trim();
+  if (!val) return { ok: true };
+  if (tipo === 'fisica') {
+    if (!/^\d-\d{4}-\d{4}$/.test(val))
+      return { ok: false, msg: 'Cédula física inválida — debe ser X-XXXX-XXXX (9 dígitos)' };
+  } else if (tipo === 'dimex') {
+    if (!/^\d{3}-\d{6,9}$/.test(val))
+      return { ok: false, msg: 'DIMEX inválido — debe ser XXX-XXXXXX (mínimo 9, máximo 12 dígitos)' };
+  }
+  // pasaporte: cualquier valor no vacío es válido
+  return { ok: true };
 }
 
 // ── CATÁLOGOS ──────────────────────────────────────────────
@@ -368,7 +392,8 @@ async function loadContacts() {
       </div>
       ${typ?`<span class="type-badge" style="background:${bg};color:${col}">${esc(typ)}</span>`:''}
       <div class="contact-actions">
-        <button class="action-btn btn-wa" data-phone="${esc(c.phone||'')}" title="WhatsApp">💬</button>
+        ${c.phone?`<button class="action-btn btn-wa" data-phone="${esc(c.phone)}" title="Contactar por WhatsApp">💬</button>`:''}
+        ${c.email?`<button class="action-btn btn-email" data-email="${esc(c.email)}" title="Enviar email">✉</button>`:''}
         <button class="action-btn danger btn-del" data-id="${c.id}" title="Eliminar">🗑</button>
       </div>
     </div>`;
@@ -378,6 +403,8 @@ async function loadContacts() {
     card.addEventListener('click', () => openModal(card.dataset.id)));
   list.querySelectorAll('.btn-wa').forEach(btn =>
     btn.addEventListener('click', e => { e.stopPropagation(); openWA(btn.dataset.phone); }));
+  list.querySelectorAll('.btn-email').forEach(btn =>
+    btn.addEventListener('click', e => { e.stopPropagation(); window.location.href = 'mailto:'+btn.dataset.email; }));
   list.querySelectorAll('.btn-del').forEach(btn =>
     btn.addEventListener('click', e => { e.stopPropagation(); deleteContact(btn.dataset.id); }));
 }
@@ -433,6 +460,19 @@ function fillForm(d) {
 async function saveContact() {
   const name = $('f-name').value.trim();
   if (!name) { showToast('El nombre es obligatorio', 'error'); return; }
+
+  // Validar cédula según tipo
+  const cedVal = validateCedula();
+  if (!cedVal.ok) { showLookup('result-cedula','err', cedVal.msg); $('f-cedula').focus(); return; }
+
+  // Al menos email o teléfono
+  const email = $('f-email').value.trim();
+  const phone = $('f-phone').value.trim();
+  if (!email && !phone) {
+    showToast('Ingresa al menos un email o teléfono/WhatsApp', 'error');
+    $('f-email').focus();
+    return;
+  }
 
   const btn = $('btn-save'); btn.disabled = true; btn.textContent = 'Guardando…';
 
@@ -494,8 +534,15 @@ async function deleteContact(id) {
 
 // ── HACIENDA ────────────────────────────────────────────────
 async function lookupCedula() {
+  const tipo = $('f-cedula-tipo').value;
+  if (tipo === 'juridica' || tipo === 'pasaporte') {
+    showLookup('result-cedula','err','Solo se puede consultar cédula física o DIMEX');
+    return;
+  }
+  // Validar formato antes de consultar
+  const cedVal = validateCedula();
+  if (!cedVal.ok) { showLookup('result-cedula','err', cedVal.msg); return; }
   const raw = $('f-cedula').value.replace(/\D/g,'');
-  if (raw.length < 9) { showLookup('result-cedula','err','Cédula inválida (mínimo 9 dígitos)'); return; }
   const btn = $('btn-lookup-cedula'); btn.disabled=true; btn.textContent='Consultando…';
   try {
     const r = await fetch(`https://api.hacienda.go.cr/fe/ae?identificacion=${raw}`);
@@ -578,6 +625,11 @@ $('btn-save').addEventListener('click', saveContact);
 $('btn-lookup-cedula').addEventListener('click', lookupCedula);
 $('btn-lookup-empresa').addEventListener('click', lookupEmpresa);
 $('f-cedula').addEventListener('input', () => fmtCedula($('f-cedula')));
+$('f-cedula-tipo').addEventListener('change', () => {
+  // Al cambiar tipo limpiar cédula y resultado para evitar confusión
+  $('f-cedula').value = '';
+  $('result-cedula').className = 'lookup-result';
+});
 $('f-phone').addEventListener('input', () => fmtPhone($('f-phone')));
 $('f-phone-alt').addEventListener('input', () => fmtPhone($('f-phone-alt')));
 $('f-company-name').addEventListener('input', e => { $('f-company-id').value=''; filterCompanies(e.target.value); });
