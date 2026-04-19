@@ -117,35 +117,68 @@ select.filter:focus { outline: none; border-color: var(--blue); }
 .action-btn.email { background: #EEF4FF; color: #1B6EF3; border-color: #BFCFFB; }
 .action-btn.email:hover { background: #1B6EF3; color: #fff; border-color: #1B6EF3; }
 .action-btn.edit  { background: var(--surface2); color: var(--ink-mid); border-color: var(--border); }
-.action-btn.edit:hover  { background: var(--ink); color: #fff; border-color: var(--ink); }
+.action-btn.edit:hover  { background: #FEF9EC; color: #92610A; border-color: #F5D98A; }
 .action-btn.danger { background: #FEF2F2; color: var(--red); border-color: #FECACA; }
 .action-btn.danger:hover { background: var(--red); color: #fff; border-color: var(--red); }
 
-/* ── vCard panel ── */
-.vcard-overlay { position: fixed; inset: 0; background: rgba(13,15,18,.45); z-index: 200; display: flex; align-items: flex-start; justify-content: flex-start; opacity: 0; pointer-events: none; transition: opacity .2s; }
+/* ── vCard modal centrado ── */
+.vcard-overlay {
+  position: fixed; inset: 0; background: rgba(13,15,18,.5); z-index: 200;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none; transition: opacity .2s;
+}
 .vcard-overlay.open { opacity: 1; pointer-events: all; }
-.vcard-panel { width: 360px; max-width: 100vw; height: 100vh; background: var(--surface); display: flex; flex-direction: column; box-shadow: 4px 0 24px rgba(0,0,0,.12); transform: translateX(-40px); transition: transform .2s; overflow: hidden; }
-.vcard-overlay.open .vcard-panel { transform: translateX(0); }
-.vcard-header { padding: 20px 20px 0; display: flex; justify-content: flex-end; flex-shrink: 0; }
-.vcard-close { width: 32px; height: 32px; border: none; background: none; cursor: pointer; font-size: 18px; color: var(--ink-mid); border-radius: 6px; }
-.vcard-close:hover { background: var(--surface2); }
-.vcard-body { flex: 1; overflow-y: auto; padding: 0 24px 32px; }
-.vcard-hero { display: flex; flex-direction: column; align-items: center; padding: 8px 0 24px; text-align: center; }
-.vcard-avatar { width: 88px; height: 88px; border-radius: 50%; object-fit: cover; border: 3px solid var(--border); margin-bottom: 14px; }
-.vcard-avatar-placeholder { width: 88px; height: 88px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 700; margin-bottom: 14px; flex-shrink: 0; }
-.vcard-name { font-size: 20px; font-weight: 700; color: var(--ink); margin-bottom: 4px; }
+.vcard-panel {
+  width: 420px; max-width: calc(100vw - 32px);
+  max-height: calc(100vh - 48px);
+  background: var(--surface); border-radius: 16px;
+  display: flex; flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0,0,0,.2);
+  transform: scale(.96) translateY(8px); transition: transform .2s;
+  overflow: hidden;
+}
+.vcard-overlay.open .vcard-panel { transform: scale(1) translateY(0); }
+.vcard-header {
+  padding: 16px 16px 0;
+  display: flex; justify-content: flex-end; flex-shrink: 0;
+}
+.vcard-close {
+  width: 30px; height: 30px; border: none; background: var(--surface2);
+  cursor: pointer; font-size: 16px; color: var(--ink-mid); border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+}
+.vcard-close:hover { background: var(--border); }
+.vcard-body { flex: 1; overflow-y: auto; padding: 0 28px 28px; }
+.vcard-hero {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 4px 0 20px; text-align: center;
+}
+.vcard-avatar {
+  width: 120px; height: 120px; border-radius: 50%;
+  object-fit: cover; border: 3px solid var(--border); margin-bottom: 16px;
+}
+.vcard-avatar-placeholder {
+  width: 120px; height: 120px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 44px; font-weight: 700; margin-bottom: 16px; flex-shrink: 0;
+}
+.vcard-name { font-size: 20px; font-weight: 700; color: var(--ink); margin-bottom: 6px; line-height: 1.2; }
 .vcard-type { font-size: 12px; font-weight: 700; padding: 3px 12px; border-radius: 20px; display: inline-block; margin-bottom: 6px; }
-.vcard-company { font-size: 13px; color: var(--ink-mid); }
-.vcard-actions { display: flex; gap: 10px; margin-top: 18px; }
-.vcard-action-btn { flex: 1; height: 40px; border-radius: 8px; border: none; cursor: pointer; font-size: 13px; font-weight: 700; font-family: "DM Sans", sans-serif; display: flex; align-items: center; justify-content: center; gap: 6px; }
+.vcard-company { font-size: 13px; color: var(--ink-mid); line-height: 1.5; }
+.vcard-company small { display: block; font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; }
+.vcard-actions { display: flex; gap: 8px; margin-top: 16px; width: 100%; }
+.vcard-action-btn {
+  flex: 1; height: 38px; border-radius: 8px; border: none; cursor: pointer;
+  font-size: 12px; font-weight: 700; font-family: "DM Sans", sans-serif;
+  display: flex; align-items: center; justify-content: center; gap: 5px;
+  white-space: nowrap; overflow: hidden;
+}
 .vcard-action-btn.wa    { background: #128C48; color: #fff; }
 .vcard-action-btn.wa:hover { background: #0e6e38; }
 .vcard-action-btn.email { background: #1B6EF3; color: #fff; }
 .vcard-action-btn.email:hover { background: #1558d4; }
-.vcard-action-btn.edit  { background: var(--surface2); color: var(--ink); border: 1px solid var(--border); }
-.vcard-action-btn.edit:hover { background: var(--border); }
-.vcard-divider { height: 1px; background: var(--border); margin: 20px 0; }
-.vcard-section { margin-bottom: 20px; }
+.vcard-divider { height: 1px; background: var(--border); margin: 16px 0; }
+.vcard-section { margin-bottom: 16px; }
 .vcard-section-label { font-size: 11px; font-weight: 700; color: var(--muted); letter-spacing: .06em; text-transform: uppercase; margin-bottom: 10px; }
 .vcard-row { display: flex; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--surface2); }
 .vcard-row:last-child { border-bottom: none; }
@@ -155,7 +188,7 @@ select.filter:focus { outline: none; border-color: var(--blue); }
 .vcard-row-value { font-size: 14px; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .vcard-row-value a { color: var(--blue); text-decoration: none; }
 .vcard-row-value a:hover { text-decoration: underline; }
-.vcard-social { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 4px; }
+.vcard-social { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
 .vcard-social a { width: 36px; height: 36px; border-radius: 8px; border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 18px; text-decoration: none; transition: background .15s; }
 .vcard-social a:hover { background: var(--surface2); }
 
@@ -618,16 +651,18 @@ async function openVCard(id) {
   const init = ((c.name?.[0]||'')+(c.last_name?.[0]||'')).toUpperCase()||'?';
   const typ  = c.contact_types?.name || '';
   const src  = c.contact_sources?.name || '';
-  const co   = c.crm_companies?.name || '';
+  const coName = c.crm_companies?.name || '';
+  const coData = c.company_id ? allCompanies.find(x => x.id === c.company_id) : null;
+  const coCedula = coData?.cedula_juridica || '';
+  const co = coName;
 
   const avatarHtml = c.photo_url
     ? `<img class="vcard-avatar" src="${esc(c.photo_url)}" onerror="this.style.display='none'">`
     : `<div class="vcard-avatar-placeholder" style="background:${bg};color:${col}">${init}</div>`;
 
   const phoneDisplay = formatPhoneDisplay(c.phone);
-  const phoneWA      = c.phone ? `<button class="vcard-action-btn wa" onclick="openWA('${esc(c.phone)}')">💬 WhatsApp</button>` : '';
-  const emailBtn     = c.email ? `<button class="vcard-action-btn email" onclick="window.location.href='mailto:${esc(c.email)}'">✉ Email</button>` : '';
-  const editBtn      = `<button class="vcard-action-btn edit" onclick="closeVCard();openModal('${c.id}')">✏ Editar</button>`;
+  const phoneWA  = c.phone ? `<button class="vcard-action-btn wa" onclick="openWA('${esc(c.phone)}')">💬 WhatsApp</button>` : '';
+  const emailBtn = c.email ? `<button class="vcard-action-btn email" onclick="window.location.href='mailto:${esc(c.email)}'">✉ Email</button>` : '';
 
   const rowIcon = (emoji, bg2) => `<div class="vcard-row-icon" style="background:${bg2}">${emoji}</div>`;
 
@@ -637,7 +672,7 @@ async function openVCard(id) {
   if (c.phone) rows.push(`<div class="vcard-row">${rowIcon('📱','#E7F7EE')}<div class="vcard-row-content"><div class="vcard-row-label">Teléfono / WhatsApp</div><div class="vcard-row-value">${esc(phoneDisplay)}</div></div></div>`);
   if (c.phone_alt) rows.push(`<div class="vcard-row">${rowIcon('📞','#F0FDF4')}<div class="vcard-row-content"><div class="vcard-row-label">Teléfono alternativo</div><div class="vcard-row-value">${esc(formatPhoneDisplay(c.phone_alt))}</div></div></div>`);
   if (c.email) rows.push(`<div class="vcard-row">${rowIcon('✉','#EEF4FF')}<div class="vcard-row-content"><div class="vcard-row-label">Email</div><div class="vcard-row-value"><a href="mailto:${esc(c.email)}">${esc(c.email)}</a></div></div></div>`);
-  if (co) rows.push(`<div class="vcard-row">${rowIcon('🏢','#F5F5F0')}<div class="vcard-row-content"><div class="vcard-row-label">Empresa</div><div class="vcard-row-value">${esc(co)}</div></div></div>`);
+  if (co) rows.push(`<div class="vcard-row">${rowIcon('🏢','#F5F5F0')}<div class="vcard-row-content"><div class="vcard-row-label">Empresa</div><div class="vcard-row-value">${esc(co)}${coCedula?`<small style="display:block;font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;margin-top:1px">${esc(coCedula)}</small>`:''}</div></div></div>`);
   if (src) rows.push(`<div class="vcard-row">${rowIcon('📡','#FFF7ED')}<div class="vcard-row-content"><div class="vcard-row-label">Fuente</div><div class="vcard-row-value">${esc(src)}</div></div></div>`);
 
   const socials = [];
@@ -653,9 +688,9 @@ async function openVCard(id) {
       ${avatarHtml}
       <div class="vcard-name">${esc(c.name)}${c.last_name?' '+esc(c.last_name):''}</div>
       ${typ?`<span class="vcard-type" style="background:${bg};color:${col}">${esc(typ)}</span>`:''}
-      ${co?`<div class="vcard-company">🏢 ${esc(co)}</div>`:''}
+      ${co?`<div class="vcard-company">🏢 ${esc(co)}${coCedula?`<small>${esc(coCedula)}</small>`:''}</div>`:''}
       <div class="vcard-actions">
-        ${phoneWA}${emailBtn}${editBtn}
+        ${phoneWA}${emailBtn}
       </div>
       ${socials.length?`<div class="vcard-social">${socials.join('')}</div>`:''}
     </div>
