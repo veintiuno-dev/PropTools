@@ -154,14 +154,30 @@ select.filter:focus { outline: none; border-color: var(--blue); }
   padding: 4px 0 20px; text-align: center;
 }
 .vcard-avatar {
-  width: 160px; height: 160px; border-radius: 50%;
+  width: 200px; height: 200px; border-radius: 50%;
   object-fit: cover; border: 3px solid var(--border); margin-bottom: 16px;
 }
 .vcard-avatar-placeholder {
-  width: 160px; height: 160px; border-radius: 50%;
+  width: 200px; height: 200px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  font-size: 56px; font-weight: 700; margin-bottom: 16px; flex-shrink: 0;
+  font-size: 72px; font-weight: 700; margin-bottom: 16px; flex-shrink: 0;
 }
+/* ── Social icons en formulario ── */
+.social-icon-svg { width: 28px; height: 28px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+.social-icon-svg svg { width: 24px; height: 24px; border-radius: 5px; }
+/* ── Documentos de identificación ── */
+.doc-upload-area { border: 2px dashed var(--border); border-radius: 10px; padding: 20px; text-align: center; cursor: pointer; transition: border-color .15s, background .15s; }
+.doc-upload-area:hover { border-color: var(--blue); background: #F0F5FF; }
+.doc-upload-area p { font-size: 13px; color: var(--ink-mid); margin-top: 6px; }
+.doc-upload-area .doc-icon { font-size: 28px; }
+.doc-list { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
+.doc-item { display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: var(--surface2); border-radius: 8px; border: 1px solid var(--border); }
+.doc-item-icon { font-size: 20px; flex-shrink: 0; }
+.doc-item-name { flex: 1; font-size: 13px; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.doc-item-size { font-size: 11px; color: var(--muted); font-family: "DM Mono", monospace; flex-shrink: 0; }
+.doc-item-del { width: 24px; height: 24px; border: none; background: none; cursor: pointer; color: var(--muted); font-size: 14px; border-radius: 4px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+.doc-item-del:hover { background: #FEF2F2; color: var(--red); }
+.doc-uploading { opacity: .5; pointer-events: none; }
 .vcard-name { font-size: 20px; font-weight: 700; color: var(--ink); margin-bottom: 6px; line-height: 1.2; }
 .vcard-type { font-size: 12px; font-weight: 700; padding: 3px 12px; border-radius: 20px; display: inline-block; margin-bottom: 6px; }
 .vcard-company { font-size: 13px; color: var(--ink-mid); line-height: 1.5; }
@@ -414,10 +430,12 @@ input[type=file]#f-photo { display: none; }
       <div class="form-section">
         <div class="form-section-label">Redes sociales</div>
         <div style="display:flex;flex-direction:column;gap:8px">
-          <div class="social-row"><span class="social-icon">📸</span><input type="text" id="f-instagram" placeholder="@usuario o URL"><button class="social-search" id="btn-ig">Buscar ↗</button></div>
-          <div class="social-row"><span class="social-icon">💼</span><input type="text" id="f-linkedin" placeholder="URL de LinkedIn"><button class="social-search" id="btn-li">Buscar ↗</button></div>
-          <div class="social-row"><span class="social-icon">📘</span><input type="text" id="f-facebook" placeholder="@usuario o URL"><button class="social-search" id="btn-fb">Buscar ↗</button></div>
-          <div class="social-row"><span class="social-icon">🎵</span><input type="text" id="f-tiktok" placeholder="@usuario"><button class="social-search" id="btn-tt">Buscar ↗</button></div>
+          <div class="social-row"><span class="social-icon-svg"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="ig-g2" cx="30%" cy="107%" r="150%"><stop offset="0%" stop-color="#fdf497"/><stop offset="5%" stop-color="#fdf497"/><stop offset="45%" stop-color="#fd5949"/><stop offset="60%" stop-color="#d6249f"/><stop offset="90%" stop-color="#285AEB"/></radialGradient></defs><rect width="24" height="24" rx="5" fill="url(#ig-g2)"/><rect x="6" y="6" width="12" height="12" rx="3.5" stroke="white" stroke-width="1.5"/><circle cx="12" cy="12" r="3" stroke="white" stroke-width="1.5"/><circle cx="16.5" cy="7.5" r="1" fill="white"/></svg></span><input type="text" id="f-instagram" placeholder="@usuario o URL completa"><button class="social-search" id="btn-ig">Buscar ↗</button></div>
+          <div class="social-row"><span class="social-icon-svg"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><rect width="24" height="24" rx="4" fill="#0A66C2"/><path d="M7 10h2v7H7v-7zm1-3a1.1 1.1 0 110 2.2A1.1 1.1 0 018 7zm4 3h1.9v1h.05c.27-.5.93-1.2 2.05-1.2 2.2 0 2.6 1.45 2.6 3.33V17h-2v-2.5c0-.94-.02-2.15-1.31-2.15-1.32 0-1.52 1.03-1.52 2.09V17H12v-7z" fill="white"/></svg></span><input type="text" id="f-linkedin" placeholder="URL de LinkedIn o @usuario"><button class="social-search" id="btn-li">Buscar ↗</button></div>
+          <div class="social-row"><span class="social-icon-svg"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><rect width="24" height="24" rx="4" fill="#1877F2"/><path d="M13.5 21v-7.5h2.25L16.25 11H13.5v-1.3c0-.76.37-1.2 1.5-1.2H16V6.1A17 17 0 0014 6c-2.4 0-4 1.5-4 4.2V11H8v2.5h2V21h3.5z" fill="white"/></svg></span><input type="text" id="f-facebook" placeholder="@usuario o URL"><button class="social-search" id="btn-fb">Buscar ↗</button></div>
+          <div class="social-row"><span class="social-icon-svg"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><rect width="24" height="24" rx="4" fill="#010101"/><path d="M16.6 8.2a4.1 4.1 0 01-2.4-.8v5.5a3.7 3.7 0 11-3.7-3.7h.4v2a1.7 1.7 0 101.7 1.7V4h2a4.1 4.1 0 002 3.4v.8z" fill="white"/></svg></span><input type="text" id="f-tiktok" placeholder="@usuario"><button class="social-search" id="btn-tt">Buscar ↗</button></div>
+          <div class="social-row"><span class="social-icon-svg"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><rect width="24" height="24" rx="4" fill="#FF0000"/><path d="M21.5 7.5s-.2-1.4-.8-2c-.8-.8-1.7-.8-2.1-.9C16 4.5 12 4.5 12 4.5s-4 0-6.6.1c-.4.1-1.3.1-2.1.9-.6.6-.8 2-.8 2S2.2 9 2.2 10.5v1.4c0 1.5.3 3 .3 3s.2 1.4.8 2c.8.8 1.8.8 2.3.9C7 18 12 18 12 18s4 0 6.6-.2c.4-.1 1.3-.1 2.1-.9.6-.6.8-2 .8-2s.3-1.5.3-3v-1.4C21.8 9 21.5 7.5 21.5 7.5zM10 14.5v-5l5.5 2.5-5.5 2.5z" fill="white"/></svg></span><input type="text" id="f-youtube" placeholder="@canal o URL"><button class="social-search" id="btn-yt">Buscar ↗</button></div>
+          <div class="social-row"><span class="social-icon-svg"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><rect width="24" height="24" rx="4" fill="#000"/><path d="M17.75 4h-2.3L12 8.5 8.8 4H4l5.25 7L4 20h2.3L10 15l3.5 5H18l-5.5-7.5L17.75 4z" fill="white"/></svg></span><input type="text" id="f-x" placeholder="@usuario"><button class="social-search" id="btn-x">Buscar ↗</button></div>
         </div>
         <p style="font-size:11px;color:var(--muted);margin-top:8px">Abre Google con el nombre del contacto + la red para localizar el perfil correcto.</p>
       </div>
@@ -425,6 +443,17 @@ input[type=file]#f-photo { display: none; }
       <div class="form-section">
         <div class="form-section-label">Comentarios</div>
         <div class="field"><textarea id="f-notes" placeholder="Notas internas, preferencias, contexto…"></textarea></div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-label">Documentos de identificación</div>
+        <input type="file" id="f-docs" accept=".pdf,.png,.jpg,.jpeg" multiple style="display:none">
+        <div class="doc-upload-area" id="doc-upload-area">
+          <div class="doc-icon">📎</div>
+          <p>Arrastrá o hacé click para subir PNG o PDF</p>
+          <p style="font-size:11px;color:var(--muted);margin-top:4px">Cédula, pasaporte, DIMEX — múltiples archivos permitidos</p>
+        </div>
+        <div class="doc-list" id="doc-list"></div>
       </div>
 
     </div>
@@ -473,6 +502,7 @@ let contactSources = [];
 let allCompanies   = [];
 let editingId      = null;
 let searchTimer    = null;
+let contactDocs    = []; // [{name, url, size, type}] — documentos subidos
 
 // ── UTIL ───────────────────────────────────────────────────
 const $ = id => document.getElementById(id);
@@ -659,7 +689,7 @@ async function openVCard(id) {
 
   const placeholderHtml = `<div class="vcard-avatar-placeholder" style="background:${bg};color:${col};margin-bottom:0">${init}</div>`;
   const avatarHtml = c.photo_url
-    ? `<div style="position:relative;width:160px;height:160px;margin-bottom:16px;border-radius:50%;flex-shrink:0">${placeholderHtml}<img src="${esc(c.photo_url)}" onerror="this.style.display='none'" style="position:absolute;inset:0;width:160px;height:160px;border-radius:50%;object-fit:cover;border:3px solid var(--border)"></div>`
+    ? `<div style="position:relative;width:200px;height:200px;margin-bottom:16px;border-radius:50%;flex-shrink:0">${placeholderHtml}<img src="${esc(c.photo_url)}" onerror="this.style.display='none'" style="position:absolute;inset:0;width:200px;height:200px;border-radius:50%;object-fit:cover;border:3px solid var(--border)"></div>`
     : placeholderHtml;
 
   const phoneDisplay = formatPhoneDisplay(c.phone);
@@ -681,11 +711,15 @@ async function openVCard(id) {
   const LI_SVG = `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><rect width="24" height="24" rx="4" fill="#0A66C2"/><path d="M7 10h2v7H7v-7zm1-3a1.1 1.1 0 110 2.2A1.1 1.1 0 018 7zm4 3h1.9v1h.05c.27-.5.93-1.2 2.05-1.2 2.2 0 2.6 1.45 2.6 3.33V17h-2v-2.5c0-.94-.02-2.15-1.31-2.15-1.32 0-1.52 1.03-1.52 2.09V17H12v-7z" fill="white"/></svg>`;
   const FB_SVG = `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><rect width="24" height="24" rx="4" fill="#1877F2"/><path d="M13.5 21v-7.5h2.25L16.25 11H13.5v-1.3c0-.76.37-1.2 1.5-1.2H16V6.1A17 17 0 0014 6c-2.4 0-4 1.5-4 4.2V11H8v2.5h2V21h3.5z" fill="white"/></svg>`;
   const TT_SVG = `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><rect width="24" height="24" rx="4" fill="#010101"/><path d="M16.6 8.2a4.1 4.1 0 01-2.4-.8v5.5a3.7 3.7 0 11-3.7-3.7h.4v2a1.7 1.7 0 101.7 1.7V4h2a4.1 4.1 0 002 3.4v.8z" fill="white"/></svg>`;
+  const YT_SVG = `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><rect width="24" height="24" rx="4" fill="#FF0000"/><path d="M21.5 7.5s-.2-1.4-.8-2c-.8-.8-1.7-.8-2.1-.9C16 4.5 12 4.5 12 4.5s-4 0-6.6.1c-.4.1-1.3.1-2.1.9-.6.6-.8 2-.8 2S2.2 9 2.2 10.5v1.4c0 1.5.3 3 .3 3s.2 1.4.8 2c.8.8 1.8.8 2.3.9C7 18 12 18 12 18s4 0 6.6-.2c.4-.1 1.3-.1 2.1-.9.6-.6.8-2 .8-2s.3-1.5.3-3v-1.4C21.8 9 21.5 7.5 21.5 7.5zM10 14.5v-5l5.5 2.5-5.5 2.5z" fill="white"/></svg>`;
+  const X_SVG  = `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><rect width="24" height="24" rx="4" fill="#000"/><path d="M17.75 4h-2.3L12 8.5 8.8 4H4l5.25 7L4 20h2.3L10 15l3.5 5H18l-5.5-7.5L17.75 4z" fill="white"/></svg>`;
   const socials = [];
   if (c.instagram) socials.push(`<a href="${esc(c.instagram)}" target="_blank" title="Instagram">${IG_SVG}</a>`);
   if (c.linkedin)  socials.push(`<a href="${esc(c.linkedin)}"  target="_blank" title="LinkedIn">${LI_SVG}</a>`);
   if (c.facebook)  socials.push(`<a href="${esc(c.facebook)}"  target="_blank" title="Facebook">${FB_SVG}</a>`);
   if (c.tiktok)    socials.push(`<a href="${esc(c.tiktok)}"    target="_blank" title="TikTok">${TT_SVG}</a>`);
+  if (c.youtube)   socials.push(`<a href="${esc(c.youtube)}"   target="_blank" title="YouTube">${YT_SVG}</a>`);
+  if (c.x)         socials.push(`<a href="${esc(c.x)}"         target="_blank" title="X">${X_SVG}</a>`);
 
   const notesHtml = c.notes ? `<div class="vcard-divider"></div><div class="vcard-section"><div class="vcard-section-label">Comentarios</div><p style="font-size:14px;color:var(--ink);line-height:1.6;white-space:pre-wrap">${esc(c.notes)}</p></div>` : '';
 
@@ -736,7 +770,7 @@ function closeModal() {
 
 function clearForm() {
   ['f-cedula','f-name','f-last-name','f-email','f-phone','f-phone-alt',
-   'f-instagram','f-linkedin','f-facebook','f-tiktok','f-notes',
+   'f-instagram','f-linkedin','f-facebook','f-tiktok','f-youtube','f-x','f-notes',
    'f-company-name','f-company-cedula','f-birth-date','f-company-id'].forEach(id => {
     const el = $(id); if (el) el.value = '';
   });
@@ -749,6 +783,8 @@ function clearForm() {
   $('co-suggestions').style.display = 'none';
   $('f-photo-url').value = '';
   setPhotoPreview(null);
+  contactDocs = [];
+  renderDocList();
 }
 
 function fillForm(d) {
@@ -764,6 +800,7 @@ function fillForm(d) {
   else             resetPhonePicker('phone-alt');
   set('f-instagram',   d.instagram);   set('f-linkedin',    d.linkedin);
   set('f-facebook',    d.facebook);    set('f-tiktok',      d.tiktok);
+  set('f-youtube',     d.youtube);     set('f-x',           d.x);
   set('f-notes',       d.notes);       set('f-company-id',  d.company_id);
   if (d.company_id) {
     const co = allCompanies.find(c => c.id === d.company_id);
@@ -771,6 +808,9 @@ function fillForm(d) {
   }
   // Cargar foto
   setPhotoPreview(d.photo_url || null);
+  // Cargar documentos
+  contactDocs = Array.isArray(d.doc_urls) ? d.doc_urls.map(u => ({ url: u, name: u.split('/').pop().split('?')[0], size: null })) : [];
+  renderDocList();
 }
 
 // ── SAVE ───────────────────────────────────────────────────
@@ -870,12 +910,15 @@ async function saveContact() {
     phone:       getPhoneE164('phone')             || null,
     phone_alt:   getPhoneE164('phone-alt')         || null,
     company_id:  companyId,
-    instagram:   $('f-instagram').value.trim()    || null,
-    linkedin:    $('f-linkedin').value.trim()     || null,
-    facebook:    $('f-facebook').value.trim()     || null,
-    tiktok:      $('f-tiktok').value.trim()       || null,
+    instagram:   normalizeUrl($('f-instagram').value.trim(), 'instagram') || null,
+    linkedin:    normalizeUrl($('f-linkedin').value.trim(),  'linkedin')  || null,
+    facebook:    normalizeUrl($('f-facebook').value.trim(),  'facebook')  || null,
+    tiktok:      normalizeUrl($('f-tiktok').value.trim(),    'tiktok')    || null,
+    youtube:     normalizeUrl($('f-youtube').value.trim(),   'youtube')   || null,
+    x:           normalizeUrl($('f-x').value.trim(),         'x')         || null,
     notes:       $('f-notes').value.trim()        || null,
     photo_url:   window._contactPhotoUrl           || null,
+    doc_urls:    contactDocs.map(d => d.url),
   };
 
   const { error } = editingId
@@ -968,9 +1011,28 @@ function filterCompanies(q) {
 }
 
 // ── SOCIAL ──────────────────────────────────────────────────
+// Normalizar @username → URL completa según la red
+function normalizeUrl(value, red) {
+  if (!value) return value;
+  const v = value.trim();
+  if (v.startsWith('http://') || v.startsWith('https://')) return v;
+  const user = v.startsWith('@') ? v.slice(1) : v;
+  const bases = {
+    instagram: `https://www.instagram.com/${user}`,
+    linkedin:  `https://www.linkedin.com/in/${user}`,
+    facebook:  `https://www.facebook.com/${user}`,
+    tiktok:    `https://www.tiktok.com/@${user}`,
+    youtube:   `https://www.youtube.com/@${user}`,
+    x:         `https://x.com/${user}`,
+  };
+  return bases[red] || v;
+}
+
 function searchSocial(red) {
   const nombre = ($('f-name').value+' '+$('f-last-name').value).trim();
-  window.open(`https://www.google.com/search?q=${encodeURIComponent((nombre?nombre+' ':'')+'site:'+red+'.com')}`, '_blank');
+  const siteMap = { x: 'x.com', youtube: 'youtube.com', instagram: 'instagram.com', linkedin: 'linkedin.com', facebook: 'facebook.com', tiktok: 'tiktok.com' };
+  const site = siteMap[red] || red+'.com';
+  window.open(`https://www.google.com/search?q=${encodeURIComponent((nombre?nombre+' ':'')+'site:'+site)}`, '_blank');
 }
 
 window.openWA = function(phone) {
@@ -979,6 +1041,50 @@ window.openWA = function(phone) {
   window.open(`https://wa.me/${n}`, '_blank');
 };
 function openWA(phone) { window.openWA(phone); }
+
+// ── DOCUMENTOS DE IDENTIFICACIÓN ────────────────────────────
+function renderDocList() {
+  const list = $('doc-list');
+  if (!list) return;
+  if (!contactDocs.length) { list.innerHTML = ''; return; }
+  list.innerHTML = contactDocs.map((doc, i) => {
+    const isPdf = doc.name?.toLowerCase().endsWith('.pdf');
+    const icon  = isPdf ? '📄' : '🖼';
+    const size  = doc.size ? ` · ${(doc.size/1024).toFixed(0)} KB` : '';
+    return `<div class="doc-item">
+      <span class="doc-item-icon">${icon}</span>
+      <a href="${esc(doc.url)}" target="_blank" class="doc-item-name" title="${esc(doc.name)}">${esc(doc.name)}</a>
+      <span class="doc-item-size">${size}</span>
+      <button class="doc-item-del" data-i="${i}" title="Quitar">✕</button>
+    </div>`;
+  }).join('');
+  list.querySelectorAll('.doc-item-del').forEach(btn => {
+    btn.addEventListener('click', () => {
+      contactDocs.splice(Number(btn.dataset.i), 1);
+      renderDocList();
+    });
+  });
+}
+
+async function uploadDocs(files) {
+  const area = $('doc-upload-area');
+  area.classList.add('doc-uploading');
+  for (const file of files) {
+    if (file.size > 10 * 1024 * 1024) { showToast(`${file.name} supera 10 MB`, 'error'); continue; }
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      fd.append('upload_preset', 'firmas');
+      const r = await fetch('https://api.cloudinary.com/v1_1/dlgrhr6lh/raw/upload', { method: 'POST', body: fd });
+      const d = await r.json();
+      if (d.secure_url) {
+        contactDocs.push({ url: d.secure_url, name: file.name, size: file.size });
+        renderDocList();
+      } else throw new Error(d.error?.message || 'Error al subir');
+    } catch(e) { showToast(`Error subiendo ${file.name}: ${e.message}`, 'error'); }
+  }
+  area.classList.remove('doc-uploading');
+}
 
 // ── FOTO DE PERFIL ──────────────────────────────────────────
 window._contactPhotoUrl = null;
@@ -1083,7 +1189,8 @@ async function tryGravatar(email) {
         // Nota: Gravatar usa "twitter" para X/Twitter, no Instagram
         // Mapeo correcto:
         const fieldMap = { instagram:'instagram', linkedin:'linkedin',
-                           facebook:'facebook', tiktok:'tiktok', twitter:null };
+                           facebook:'facebook', tiktok:'tiktok', twitter:null,
+                           youtube:null, x:null };
         (entry.accounts || []).forEach(acc => {
           if (!acc.is_hidden && fieldMap[acc.shortname] !== undefined && fieldMap[acc.shortname]) {
             result.accounts[fieldMap[acc.shortname]] = acc.url;
@@ -1421,7 +1528,7 @@ $('f-email').addEventListener('input', () => {
       found.push('foto');
     }
     // Redes — solo rellenar campos vacíos
-    const redes = ['instagram','linkedin','facebook','tiktok'];
+    const redes = ['instagram','linkedin','facebook','tiktok','youtube','x'];
     redes.forEach(red => {
       const el = $('f-'+red);
       if (result.accounts[red] && !el.value.trim()) {
@@ -1448,10 +1555,22 @@ document.addEventListener('click', e => {
   if (!e.target.closest('#f-company-name') && !e.target.closest('#co-suggestions'))
     $('co-suggestions').style.display = 'none';
 });
+// Documentos
+$('doc-upload-area').addEventListener('click', () => $('f-docs').click());
+$('doc-upload-area').addEventListener('dragover', e => { e.preventDefault(); $('doc-upload-area').style.borderColor = 'var(--blue)'; });
+$('doc-upload-area').addEventListener('dragleave', () => { $('doc-upload-area').style.borderColor = ''; });
+$('doc-upload-area').addEventListener('drop', e => {
+  e.preventDefault(); $('doc-upload-area').style.borderColor = '';
+  uploadDocs([...e.dataTransfer.files]);
+});
+$('f-docs').addEventListener('change', e => { if (e.target.files.length) uploadDocs([...e.target.files]); e.target.value=''; });
+
 $('btn-ig').addEventListener('click', () => searchSocial('instagram'));
 $('btn-li').addEventListener('click', () => searchSocial('linkedin'));
 $('btn-fb').addEventListener('click', () => searchSocial('facebook'));
 $('btn-tt').addEventListener('click', () => searchSocial('tiktok'));
+$('btn-yt').addEventListener('click', () => searchSocial('youtube'));
+$('btn-x').addEventListener('click',  () => searchSocial('x'));
 $('tab-deals').addEventListener('click', () => window.location.href = '/dev/crm/deals/');
 $('tab-properties').addEventListener('click', () => window.location.href = '/dev/crm/properties/');
 $('vcard-close').addEventListener('click', closeVCard);
