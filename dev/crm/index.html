@@ -154,13 +154,13 @@ select.filter:focus { outline: none; border-color: var(--blue); }
   padding: 4px 0 20px; text-align: center;
 }
 .vcard-avatar {
-  width: 120px; height: 120px; border-radius: 50%;
+  width: 160px; height: 160px; border-radius: 50%;
   object-fit: cover; border: 3px solid var(--border); margin-bottom: 16px;
 }
 .vcard-avatar-placeholder {
-  width: 120px; height: 120px; border-radius: 50%;
+  width: 160px; height: 160px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  font-size: 44px; font-weight: 700; margin-bottom: 16px; flex-shrink: 0;
+  font-size: 56px; font-weight: 700; margin-bottom: 16px; flex-shrink: 0;
 }
 .vcard-name { font-size: 20px; font-weight: 700; color: var(--ink); margin-bottom: 6px; line-height: 1.2; }
 .vcard-type { font-size: 12px; font-weight: 700; padding: 3px 12px; border-radius: 20px; display: inline-block; margin-bottom: 6px; }
@@ -189,8 +189,9 @@ select.filter:focus { outline: none; border-color: var(--blue); }
 .vcard-row-value a { color: var(--blue); text-decoration: none; }
 .vcard-row-value a:hover { text-decoration: underline; }
 .vcard-social { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
-.vcard-social a { width: 36px; height: 36px; border-radius: 8px; border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 18px; text-decoration: none; transition: background .15s; }
-.vcard-social a:hover { background: var(--surface2); }
+.vcard-social a { width: 40px; height: 40px; border-radius: 10px; border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; text-decoration: none; transition: background .15s, border-color .15s; overflow: hidden; }
+.vcard-social a:hover { background: var(--surface2); border-color: var(--border); }
+.vcard-social a svg { width: 22px; height: 22px; flex-shrink: 0; }
 
 /* ── Phone picker ── */
 .phone-field { display: flex; gap: 6px; align-items: flex-start; }
@@ -657,7 +658,7 @@ async function openVCard(id) {
   const co = coName;
 
   const avatarHtml = c.photo_url
-    ? `<img class="vcard-avatar" src="${esc(c.photo_url)}" onerror="this.style.display='none'">`
+    ? `<img class="vcard-avatar" src="${esc(c.photo_url)}" onerror="this.outerHTML='<div class=\"vcard-avatar-placeholder\" style=\"background:${bg};color:${col}\">${init}</div>'">`
     : `<div class="vcard-avatar-placeholder" style="background:${bg};color:${col}">${init}</div>`;
 
   const phoneDisplay = formatPhoneDisplay(c.phone);
@@ -675,11 +676,15 @@ async function openVCard(id) {
   if (co) rows.push(`<div class="vcard-row">${rowIcon('🏢','#F5F5F0')}<div class="vcard-row-content"><div class="vcard-row-label">Empresa</div><div class="vcard-row-value">${esc(co)}${coCedula?`<small style="display:block;font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;margin-top:1px">${esc(coCedula)}</small>`:''}</div></div></div>`);
   if (src) rows.push(`<div class="vcard-row">${rowIcon('📡','#FFF7ED')}<div class="vcard-row-content"><div class="vcard-row-label">Fuente</div><div class="vcard-row-value">${esc(src)}</div></div></div>`);
 
+  const IG_SVG = `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="ig-g" cx="30%" cy="107%" r="150%"><stop offset="0%" stop-color="#fdf497"/><stop offset="5%" stop-color="#fdf497"/><stop offset="45%" stop-color="#fd5949"/><stop offset="60%" stop-color="#d6249f"/><stop offset="90%" stop-color="#285AEB"/></radialGradient></defs><rect width="24" height="24" rx="5" fill="url(#ig-g)"/><rect x="6" y="6" width="12" height="12" rx="3.5" stroke="white" stroke-width="1.5"/><circle cx="12" cy="12" r="3" stroke="white" stroke-width="1.5"/><circle cx="16.5" cy="7.5" r="1" fill="white"/></svg>`;
+  const LI_SVG = `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><rect width="24" height="24" rx="4" fill="#0A66C2"/><path d="M7 10h2v7H7v-7zm1-3a1.1 1.1 0 110 2.2A1.1 1.1 0 018 7zm4 3h1.9v1h.05c.27-.5.93-1.2 2.05-1.2 2.2 0 2.6 1.45 2.6 3.33V17h-2v-2.5c0-.94-.02-2.15-1.31-2.15-1.32 0-1.52 1.03-1.52 2.09V17H12v-7z" fill="white"/></svg>`;
+  const FB_SVG = `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><rect width="24" height="24" rx="4" fill="#1877F2"/><path d="M13.5 21v-7.5h2.25L16.25 11H13.5v-1.3c0-.76.37-1.2 1.5-1.2H16V6.1A17 17 0 0014 6c-2.4 0-4 1.5-4 4.2V11H8v2.5h2V21h3.5z" fill="white"/></svg>`;
+  const TT_SVG = `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><rect width="24" height="24" rx="4" fill="#010101"/><path d="M16.6 8.2a4.1 4.1 0 01-2.4-.8v5.5a3.7 3.7 0 11-3.7-3.7h.4v2a1.7 1.7 0 101.7 1.7V4h2a4.1 4.1 0 002 3.4v.8z" fill="white"/></svg>`;
   const socials = [];
-  if (c.instagram) socials.push(`<a href="${esc(c.instagram)}" target="_blank" title="Instagram">📸</a>`);
-  if (c.linkedin)  socials.push(`<a href="${esc(c.linkedin)}"  target="_blank" title="LinkedIn">💼</a>`);
-  if (c.facebook)  socials.push(`<a href="${esc(c.facebook)}"  target="_blank" title="Facebook">📘</a>`);
-  if (c.tiktok)    socials.push(`<a href="${esc(c.tiktok)}"    target="_blank" title="TikTok">🎵</a>`);
+  if (c.instagram) socials.push(`<a href="${esc(c.instagram)}" target="_blank" title="Instagram">${IG_SVG}</a>`);
+  if (c.linkedin)  socials.push(`<a href="${esc(c.linkedin)}"  target="_blank" title="LinkedIn">${LI_SVG}</a>`);
+  if (c.facebook)  socials.push(`<a href="${esc(c.facebook)}"  target="_blank" title="Facebook">${FB_SVG}</a>`);
+  if (c.tiktok)    socials.push(`<a href="${esc(c.tiktok)}"    target="_blank" title="TikTok">${TT_SVG}</a>`);
 
   const notesHtml = c.notes ? `<div class="vcard-divider"></div><div class="vcard-section"><div class="vcard-section-label">Comentarios</div><p style="font-size:14px;color:var(--ink);line-height:1.6;white-space:pre-wrap">${esc(c.notes)}</p></div>` : '';
 
@@ -705,9 +710,10 @@ async function openVCard(id) {
   $('vcard-overlay').classList.add('open');
 }
 
-function closeVCard() {
+window.closeVCard = function() {
   $('vcard-overlay').classList.remove('open');
-}
+};
+function closeVCard() { window.closeVCard(); }
 
 // ── MODAL ──────────────────────────────────────────────────
 async function openModal(id = null) {
@@ -966,12 +972,12 @@ function searchSocial(red) {
   window.open(`https://www.google.com/search?q=${encodeURIComponent((nombre?nombre+' ':'')+'site:'+red+'.com')}`, '_blank');
 }
 
-function openWA(phone) {
+window.openWA = function(phone) {
   if (!phone) return;
-  // phone ya está en E.164 (+50688881234) — solo quitar el +
   const n = phone.replace(/\D/g,'');
   window.open(`https://wa.me/${n}`, '_blank');
-}
+};
+function openWA(phone) { window.openWA(phone); }
 
 // ── FOTO DE PERFIL ──────────────────────────────────────────
 window._contactPhotoUrl = null;
