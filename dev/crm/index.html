@@ -457,6 +457,28 @@ async function loadCompanies() {
 }
 
 // ── CONTACTS ───────────────────────────────────────────────
+// Formatea un número para mostrar en el listado
+// Soporta E.164 (+50688881234) y formato legacy (8888-1234)
+function formatPhoneDisplay(phone) {
+  if (!phone) return null;
+  const lp = window.libphonenumber;
+  if (!lp) return phone;
+  try {
+    // Si empieza con + es E.164
+    if (phone.startsWith('+')) {
+      const parsed = lp.parsePhoneNumber(phone);
+      if (parsed.isValid()) return parsed.formatInternational(); // +506 8888 1234
+    }
+    // Legacy — intentar parsear como CR por defecto
+    const raw = phone.replace(/\D/g,'');
+    if (raw.length === 8) {
+      // CR: 8 dígitos sin código de país
+      return '+506 ' + raw.slice(0,4) + ' ' + raw.slice(4);
+    }
+    // Devolver como está si no podemos parsear
+    return phone;
+  } catch { return phone; }
+}
 async function loadContacts() {
   const list = $('contacts-list');
   list.innerHTML = '<div class="state-loading"><div class="spinner"></div><p>Cargando…</p></div>';
@@ -496,7 +518,7 @@ async function loadContacts() {
       <div class="contact-main">
         <div class="contact-name">${esc(c.name)}${c.last_name?' '+esc(c.last_name):''}</div>
         <div class="contact-meta">
-          ${c.phone?`<span>📱 ${esc(c.phone)}</span>`:''}
+          ${c.phone?`<span>📱 ${esc(formatPhoneDisplay(c.phone))}</span>`:''}
           ${c.email?`<span>✉ ${esc(c.email)}</span>`:''}
           ${c.crm_companies?.name?`<span>🏢 ${esc(c.crm_companies.name)}</span>`:''}
         </div>
