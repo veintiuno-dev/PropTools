@@ -657,9 +657,10 @@ async function openVCard(id) {
   const coCedula = coData?.cedula_juridica || '';
   const co = coName;
 
+  const placeholderHtml = `<div class="vcard-avatar-placeholder" style="background:${bg};color:${col};margin-bottom:0">${init}</div>`;
   const avatarHtml = c.photo_url
-    ? `<img class="vcard-avatar" src="${esc(c.photo_url)}" onerror="this.outerHTML='<div class=\"vcard-avatar-placeholder\" style=\"background:${bg};color:${col}\">${init}</div>'">`
-    : `<div class="vcard-avatar-placeholder" style="background:${bg};color:${col}">${init}</div>`;
+    ? `<div style="position:relative;width:160px;height:160px;margin-bottom:16px;border-radius:50%;flex-shrink:0">${placeholderHtml}<img src="${esc(c.photo_url)}" onerror="this.style.display='none'" style="position:absolute;inset:0;width:160px;height:160px;border-radius:50%;object-fit:cover;border:3px solid var(--border)"></div>`
+    : placeholderHtml;
 
   const phoneDisplay = formatPhoneDisplay(c.phone);
   const phoneWA  = c.phone ? `<button class="vcard-action-btn wa" onclick="openWA('${esc(c.phone)}')">💬 WhatsApp</button>` : '';
