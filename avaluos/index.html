@@ -363,7 +363,7 @@ function generarPDF(d, logoUrl) {
     row('% remodelacion', (d.pctR||0)*100 < 1.5 ? ((d.pctR||0)*100).toFixed(0)+'%' : ((d.pctR||0)*100).toFixed(0)+'%');
     row('Anos desde remodelacion', d.aniosR || 0);
     row('Vida util', (d.vidaUtil||90) + ' anos');
-    row('Coeficiente deprec. (Ross-Heidecke)', (d.coefPct||0).toFixed(2)+'%');
+    row('Coeficiente deprec. (Ross-Heidecke)', ((d.coefRH!=null?d.coefRH:d.coefPct)||0).toFixed(2)+'%');
     row('Edad efectiva', (d.edadEf||0).toFixed(2) + ' anos');
     sep();
 
@@ -777,7 +777,7 @@ function generarPDF(d, logoUrl) {
     row('% remodelacion', ((d.pctR||0)*100).toFixed(0)+'%');
     row('Anos desde remodelacion', d.aniosR||0);
     row('Vida util', (d.vidaUtil||90)+' anos');
-    row('Estado de conservacion - Coef.', (d.coefPct||0).toFixed(2)+'%');
+    row('Coef. deprec. Ross-Heidecke', ((d.coefRH!=null?d.coefRH:d.coefPct)||0).toFixed(2)+'%');
     row('Edad efectiva', (d.edadEf||0).toFixed(2)+' anos');
     sep();
 
@@ -1052,10 +1052,18 @@ window.calcular = function() {
   const valMt2   = parseFloat(document.getElementById('f_valMt2').value) || 0;
   const anioMapa = document.getElementById('f_anioMapa').value;
 
-  const edadEf = aniosC - (pctR * aniosR);
+  const vidaUtil = parseFloat(document.getElementById('f_vidaUtil').value) || 90;
+  const edadEf = Math.max(0, aniosC - (pctR * aniosR));
+
+  // Fórmula de Ross-Heidecke:
+  // D = (e/V)² × 100 + estadoConserv × (1 − (e/V)²)
+  // donde e = edad efectiva, V = vida útil, estadoConserv = coef. de conservación %
+  const ratio = Math.min(edadEf / vidaUtil, 1);
+  const coefRH = ratio * ratio * 100 + coefPct * (1 - ratio * ratio);
+
   document.getElementById('f_edadEf').value = edadEf.toFixed(2);
   document.getElementById('r_edad').textContent = edadEf.toFixed(2) + ' años';
-  document.getElementById('r_coef').textContent = coefPct.toFixed(2) + '%';
+  document.getElementById('r_coef').textContent = coefRH.toFixed(2) + '%';
 
   const tP = getTip(document.getElementById('f_tipoPrinc').value);
   const tipSeg = document.getElementById('f_tipoSeg').value;
@@ -1066,7 +1074,7 @@ window.calcular = function() {
     const pu = tS ? (tP[1] + tS[1]) / 2 : tP[1];
     constBaseC = pu * areaC * inflAcum(2020);
   }
-  const constDeprC = constBaseC * (1 - coefPct / 100);
+  const constDeprC = constBaseC * (1 - coefRH / 100);
   const terrenoC   = areaL * valMt2 * inflAcum(anioMapa);
 
   let complC = 0;
@@ -1089,7 +1097,7 @@ window.calcular = function() {
   document.getElementById('r_total_usd').textContent = fmt$(totalC / tc);
   document.getElementById('r_total_col').textContent = fmtC(totalC);
 
-  lastCalc = { tc, aniosC, pctR, aniosR, coefPct, areaC, areaL, valMt2, anioMapa,
+  lastCalc = { tc, aniosC, pctR, aniosR, coefPct, coefRH, vidaUtil, areaC, areaL, valMt2, anioMapa,
     edadEf, constBaseC, constDeprC, terrenoC, complC, totalC };
 };
 
@@ -1291,7 +1299,13 @@ window.exportarPDFId = async function(id) {
     coefPct: data.estado_conservacion, areaC: data.area_construccion,
     areaL: data.area_lote, valMt2: data.val_mt2_lote,
     anioMapa: data.anio_mapa, tc: data.tipo_cambio,
-    edadEf: data.anios_construccion - (data.pct_remodelacion * data.anios_remodelacion),
+    edadEf: Math.max(0, data.anios_construccion - (data.pct_remodelacion * data.anios_remodelacion)),
+    coefRH: (function(){
+      var e = Math.max(0, data.anios_construccion-(data.pct_remodelacion*data.anios_remodelacion));
+      var V = data.vida_util || 90;
+      var r = Math.min(e/V,1);
+      return r*r*100 + (data.estado_conservacion||0)*(1-r*r);
+    })(),
     constBaseC: data.resultado_const_base_col, constDeprC: data.resultado_const_depr_col,
     terrenoC: data.resultado_terreno_col, complC: data.resultado_compl_col,
     totalC: data.resultado_total_col,
