@@ -204,7 +204,7 @@ input[readonly], select[disabled] { background: var(--surface2); color: var(--in
           <div class="field"><label>Edad efectiva (calc.)</label><input type="text" id="f_edadEf" readonly></div>
         </div>
         <div class="grid3" style="margin-top:10px">
-          <div class="field"><label>Tipología principal</label><select id="f_tipoPrinc" onchange="calcular();markDirty()"></select></div>
+          <div class="field"><label>Tipología principal</label><select id="f_tipoPrinc" onchange="syncVidaUtil();calcular();markDirty()"></select></div>
           <div class="field"><label>Segunda tipología (opcional)</label><select id="f_tipoSeg" onchange="calcular();markDirty()"><option value="">— ninguna —</option></select></div>
           <div class="field"><label>Área construcción (m²)</label><input type="number" id="f_areaConst" min="0" value="0" oninput="calcular();markDirty()"></div>
         </div>
@@ -275,6 +275,136 @@ input[readonly], select[disabled] { background: var(--surface2); color: var(--in
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+// ── TIPOLOGÍA → VIDA ÚTIL ────────────────────────────────────
+// Called from onchange on tipología selects — updates f_vidaUtil automatically
+function syncVidaUtil() {
+  const TIPS_VU = {"AP01":65,"AP02":80,"AP03":95,"AP04":105,"AP05":115,"AP06":120,"AT01":20,"AT02":20,"AT03":20,"AT04":20,"BB01":40,"BO01":50,"BO02":50,"BO03":60,"CA01":10,"CA02":10,"CA03":10,"CA04":10,"CA05":10,"CB01":50,"CB02":50,"CB03":60,"CB04":60,"CC01":80,"CC02":100,"CC03":110,"CC04":115,"CC05":120,"CC06":120,"CE01":10,"CE02":20,"CE03":20,"CE04":20,"CE05":14,"CE06":20,"CE07":20,"CE08":20,"CE09":20,"CG01":10,"CG02":10,"CI01":60,"CL01":50,"CL02":60,"CS01":30,"CS02":60,"CP01":60,"DP01":40,"EA01":80,"EA02":90,"EA03":95,"EA04":105,"EA05":110,"EA06":110,"EA07":115,"EA08":120,"EB01":40,"EB02":50,"EC01":80,"EC02":100,"EC03":120,"EL01":70,"EO01":80,"EO02":100,"EO03":105,"EO04":115,"EO05":115,"EO06":120,"EO07":120,"EP01":60,"EP02":60,"ER01":50,"ER02":60,"ER03":60,"EU01":60,"FG01":20,"GA01":40,"GD01":40,"GD02":40,"GD03":40,"GK01":20,"GM01":50,"GM02":50,"GM03":60,"HP01":50,"HP02":60,"HP03":70,"HT01":50,"HT02":60,"HT03":60,"HT04":70,"HT05":70,"IA01":15,"IA02":15,"IB01":20,"IB02":15,"IF01":10,"IF02":10,"IF03":40,"IH01":40,"IQ01":40,"IQ02":40,"IQ03":50,"IS01":30,"IT01":20,"IT02":15,"LC01":45,"LC02":75,"LC03":90,"LC04":95,"LC05":105,"LC06":120,"LI01":20,"LO01":20,"LO02":20,"LO03":20,"LT01":50,"MR00":40,"MR01":40,"MR02":40,"MR03":40,"MR04":40,"MR05":40,"MR06":40,"MT01":50,"MT02":50,"MT03":50,"MT04":50,"NC01":50,"NC02":60,"NC03":70,"NI01":60,"NI02":60,"NI03":60,"NI04":70,"NI05":70,"OE01":10,"OE02":10,"OE03":10,"OV01":10,"OV02":15,"OV03":15,"OV04":15,"OV05":15,"PC01":30,"PC02":40,"PC03":50,"PE01":10,"PE02":10,"PI01":40,"PI02":40,"PI03":40,"PI04":40,"PI05":40,"PI06":20,"PI07":20,"PI08":20,"PI09":20,"PI10":20,"PI11":20,"PI12":20,"PI13":20,"PI14":20,"PO01":50,"PO02":50,"PT01":50,"PT02":50,"PU01":40,"PU02":40,"PU03":40,"PU04":40,"RA01":40,"RE01":50,"RE02":50,"RE03":60,"RE04":70,"SB01":5,"SE01":5,"SR01":3,"SR02":5,"TE01":50,"TE02":60,"TP01":30,"TP02":30,"TP03":30,"TP04":30,"TP05":30,"TP06":30,"TR01":30,"TR02":30,"TR03":30,"TS01":40,"TS02":40,"TS03":40,"TS04":40,"TS05":40,"TS06":40,"TS07":40,"TS08":30,"TS09":30,"TS10":30,"TS11":30,"TS12":30,"TS13":30,"TS14":30,"TS15":30,"TS16":30,"TS17":30,"VA01":115,"VB01":40,"VC01":50,"VC02":55,"VC03":65,"VC04":70,"VC05":90,"VC06":105,"VC07":120,"VC08":120,"VC09":120,"VC10":120,"VJ01":30,"VJ02":30,"VJ03":40,"VJ04":40,"VJ05":40,"VH01":115,"VM01":80,"VM02":100,"VM03":105,"VM04":120,"VL01":115,"VP01":110,"VR01":40,"VR02":50,"VS01":40,"VS02":60,"VV01":120};
+  const cod = document.getElementById('f_tipoPrinc')?.value;
+  if (cod && TIPS_VU[cod]) {
+    document.getElementById('f_vidaUtil').value = TIPS_VU[cod];
+    if (typeof calcular === 'function') calcular();
+    if (typeof markDirty === 'function') markDirty();
+  }
+}
+
+// ── PDF ───────────────────────────────────────────────────────
+function generarPDF(d, logoUrl) {
+  if (typeof jspdf === 'undefined') { alert('jsPDF no disponible, reintentá en un momento.'); return; }
+  var jp = jspdf.jsPDF;
+  function fmt$(v){ return '$'+Math.round(v).toLocaleString('es-CR'); }
+  function fmtC(v){ return '\u20a1'+Math.round(v).toLocaleString('es-CR'); }
+
+  function buildDoc(logoDataUrl) {
+    var doc = new jp({ unit:'mm', format:'a4' });
+    var W=210, M=18, LW=W-M*2, y=M;
+
+    function line(lbl,val,blue) {
+      if(y>270){doc.addPage();y=M;}
+      doc.setFontSize(9);doc.setTextColor(120,120,120);doc.text(lbl,M,y);
+      doc.setFontSize(10);doc.setTextColor(blue?[24,95,165]:[30,30,30]);
+      doc.text(String(val),M+LW,y,{align:'right'});
+      y+=6;
+    }
+    function sep(){doc.setDrawColor(220,220,220);doc.line(M,y,M+LW,y);y+=4;}
+    function head(txt){
+      if(y>260){doc.addPage();y=M;}
+      doc.setFillColor(240,245,251);doc.rect(M,y-4,LW,7,'F');
+      doc.setFontSize(9);doc.setFont(undefined,'bold');doc.setTextColor(24,95,165);
+      doc.text(txt.toUpperCase(),M+2,y);
+      doc.setFont(undefined,'normal');y+=7;
+    }
+
+    var HEADER_H = logoDataUrl ? 22 : 14;
+    doc.setFillColor(24,95,165);doc.rect(0,0,210,HEADER_H,'F');
+
+    if(logoDataUrl){
+      var logoH=14, logoW=45;
+      try{ doc.addImage(logoDataUrl,'PNG',W-M-logoW,(HEADER_H-logoH)/2,logoW,logoH,undefined,'FAST'); }
+      catch(e){ try{ doc.addImage(logoDataUrl,W-M-logoW,(HEADER_H-logoH)/2,logoW,logoH); }catch(_){} }
+    }
+    doc.setFontSize(12);doc.setTextColor(255,255,255);doc.setFont(undefined,'bold');
+    doc.text('Avalu\u00f3 de Propiedad \u2014 F\u00f3rmula de Ross-Heidecke',M,logoDataUrl?HEADER_H/2-1:9);
+    if(logoDataUrl){
+      doc.setFontSize(8);doc.setFont(undefined,'normal');doc.setTextColor(200,220,255);
+      doc.text('Tipolog\u00eda ONT / Ministerio de Hacienda CR',M,HEADER_H/2+4);
+    }
+    doc.setFont(undefined,'normal');y=HEADER_H+6;
+
+    head('Datos generales');
+    line('Referencia',d.ref||'\u2014');
+    line('Obra valorada',d.obra||'\u2014');
+    line('Fecha del avalu\u00f3',d.fecha||'\u2014');
+    line('Ubicaci\u00f3n',d.ubicacion||'\u2014');
+    if(d.notas)line('Notas',d.notas);
+    sep();
+
+    head('Construcci\u00f3n');
+    line('Tipolog\u00eda principal',d.tipoPrincipal||'\u2014');
+    if(d.tipoSegunda)line('Segunda tipolog\u00eda',d.tipoSegunda);
+    line('\u00c1rea de construcci\u00f3n',(d.areaC||0)+' m\u00b2');
+    line('A\u00f1os de construcci\u00f3n',d.aniosC||0);
+    line('% remodelaci\u00f3n',((d.pctR||0)*100).toFixed(0)+'%');
+    line('A\u00f1os desde remodelaci\u00f3n',d.aniosR||0);
+    line('Vida \u00fatil',(d.vidaUtil||90)+' a\u00f1os');
+    line('Estado de conservaci\u00f3n \u2014 Coef.',(d.coefPct||0).toFixed(2)+'%');
+    line('Edad efectiva',(d.edadEf||0).toFixed(2)+' a\u00f1os');
+    sep();
+
+    head('Terreno');
+    line('\u00c1rea del lote',(d.areaL||0)+' m\u00b2');
+    line('Valor tributario m\u00b2 lote',fmtC(d.valMt2||0));
+    line('A\u00f1o mapa homog\u00e9neo',d.anioMapa||'\u2014');
+    line('Tipo de cambio d\u00f3lar','\u20a1'+(d.tc||530));
+    sep();
+
+    if(d.complList&&d.complList.length){
+      head('Obras complementarias');
+      d.complList.forEach(function(c){
+        if(c.tipologia)line(c.tipologia+(c.descripcion?' \u2014 '+c.descripcion:''),'\u00d7 '+(c.cantidad||1));
+      });
+      sep();
+    }
+
+    head('Resumen de valores');
+    line('Valor del terreno',   fmt$((d.terrenoC||0)/d.tc)+'   '+fmtC(d.terrenoC||0));
+    line('Construcci\u00f3n base',fmt$((d.constBaseC||0)/d.tc)+'   '+fmtC(d.constBaseC||0));
+    line('Construcci\u00f3n depreciada',fmt$((d.constDeprC||0)/d.tc)+'   '+fmtC(d.constDeprC||0));
+    line('Obras complementarias',fmt$((d.complC||0)/d.tc)+'   '+fmtC(d.complC||0));
+    sep();
+
+    doc.setFillColor(232,242,252);doc.rect(M,y-2,LW,11,'F');
+    doc.setFontSize(11);doc.setFont(undefined,'bold');doc.setTextColor(24,95,165);
+    doc.text('Total valor estimado',M+2,y+5);
+    doc.text(fmt$((d.totalC||0)/d.tc)+'   '+fmtC(d.totalC||0),M+LW,y+5,{align:'right'});
+    doc.setFont(undefined,'normal');y+=16;
+
+    var pg=doc.getNumberOfPages();
+    for(var i=1;i<=pg;i++){
+      doc.setPage(i);doc.setFontSize(8);doc.setTextColor(160,160,160);
+      doc.text('Fuente: Tipolog\u00eda ONT / Ministerio de Hacienda CR \u00b7 PropTools \u00b7 P\u00e1g. '+i+'/'+pg,M,290);
+    }
+    var fname='avaluo_'+((d.ref||d.obra||'propiedad').replace(/\s+/g,'_'))+'.pdf';
+    doc.save(fname);
+  }
+
+  if(logoUrl){
+    var img=new Image();
+    img.crossOrigin='anonymous';
+    img.onload=function(){
+      var cv=document.createElement('canvas');
+      cv.width=img.naturalWidth;cv.height=img.naturalHeight;
+      cv.getContext('2d').drawImage(img,0,0);
+      buildDoc(cv.toDataURL('image/png'));
+    };
+    img.onerror=function(){ buildDoc(null); };
+    img.src=logoUrl;
+  } else {
+    buildDoc(null);
+  }
+}
+</script>
+
 <script type="module">
 // ── CONFIG ──────────────────────────────────────────────────
 const SUPABASE_URL  = 'https://zsldwaiwcvziqfajcmph.supabase.co';
@@ -685,6 +815,7 @@ window.nuevoAvaluo = function() {
 };
 
 // ── EXPORT PDF ───────────────────────────────────────────────
+// generarPDF lives in a plain <script> above — accessible globally
 window.exportarPDF = function() {
   generarPDF(lastCalc, currentProfile?.tenants?.logo_url);
 };
@@ -710,129 +841,6 @@ window.exportarPDFId = async function(id) {
   generarPDF(d, currentProfile?.tenants?.logo_url);
 };
 
-window.generarPDF = function generarPDF(d, logoUrl) {
-  if (typeof jspdf === 'undefined') { alert('PDF no disponible, reintenta en un momento.'); return; }
-  const { jsPDF } = jspdf;
-
-  const buildDoc = (logoDataUrl) => {
-    const doc = new jsPDF({ unit: 'mm', format: 'a4' });
-    const W = 210, M = 18, LW = W - M * 2;
-    let y = M;
-
-    const line = (lbl, val, blue = false) => {
-      if (y > 270) { doc.addPage(); y = M; }
-      doc.setFontSize(9); doc.setTextColor(120, 120, 120); doc.text(lbl, M, y);
-      doc.setFontSize(10); doc.setTextColor(blue ? [24, 95, 165] : [30, 30, 30]);
-      doc.text(String(val), M + LW, y, { align: 'right' });
-      y += 6;
-    };
-    const sep = () => { doc.setDrawColor(220, 220, 220); doc.line(M, y, M + LW, y); y += 4; };
-    const head = (txt) => {
-      if (y > 260) { doc.addPage(); y = M; }
-      doc.setFillColor(240, 245, 251); doc.rect(M, y - 4, LW, 7, 'F');
-      doc.setFontSize(9); doc.setFont(undefined, 'bold'); doc.setTextColor(24, 95, 165);
-      doc.text(txt.toUpperCase(), M + 2, y);
-      doc.setFont(undefined, 'normal'); y += 7;
-    };
-
-    // Header azul
-    const HEADER_H = logoDataUrl ? 20 : 14;
-    doc.setFillColor(24, 95, 165); doc.rect(0, 0, 210, HEADER_H, 'F');
-
-    if (logoDataUrl) {
-      // Logo a la derecha, centrado verticalmente en el header
-      const logoH = 12, logoW = 40;
-      try {
-        doc.addImage(logoDataUrl, 'PNG', W - M - logoW, (HEADER_H - logoH) / 2, logoW, logoH, undefined, 'FAST');
-      } catch(e) {
-        // Si falla el formato, intenta sin especificar tipo
-        try { doc.addImage(logoDataUrl, W - M - logoW, (HEADER_H - logoH) / 2, logoW, logoH); } catch(_) {}
-      }
-      doc.setFontSize(12); doc.setTextColor(255, 255, 255); doc.setFont(undefined, 'bold');
-      doc.text('Avalúo de Propiedad — Fórmula de Ross-Heidecke', M, HEADER_H / 2 - 1);
-      doc.setFontSize(8); doc.setFont(undefined, 'normal'); doc.setTextColor(200, 220, 255);
-      doc.text('Tipología ONT / Ministerio de Hacienda CR', M, HEADER_H / 2 + 4);
-    } else {
-      doc.setFontSize(13); doc.setTextColor(255, 255, 255); doc.setFont(undefined, 'bold');
-      doc.text('Avalúo de Propiedad — Fórmula de Ross-Heidecke', M, 9);
-    }
-
-    doc.setFont(undefined, 'normal'); y = HEADER_H + 6;
-
-    head('Datos generales');
-    line('Referencia', d.ref || '—');
-    line('Obra valorada', d.obra || '—');
-    line('Fecha del avalúo', d.fecha || '—');
-    line('Ubicación', d.ubicacion || '—');
-    if (d.notas) line('Notas', d.notas);
-    sep();
-
-    head('Construcción');
-    line('Tipología principal', d.tipoPrincipal || '—');
-    if (d.tipoSegunda) line('Segunda tipología', d.tipoSegunda);
-    line('Área de construcción', `${d.areaC || 0} m²`);
-    line('Años de construcción', d.aniosC || 0);
-    line('% remodelación', ((d.pctR || 0) * 100).toFixed(0) + '%');
-    line('Años desde remodelación', d.aniosR || 0);
-    line('Vida útil', `${d.vidaUtil || 90} años`);
-    line('Estado de conservación — Coef.', (d.coefPct || 0).toFixed(2) + '%');
-    line('Edad efectiva', (d.edadEf || 0).toFixed(2) + ' años');
-    sep();
-
-    head('Terreno');
-    line('Área del lote', `${d.areaL || 0} m²`);
-    line('Valor tributario m² lote', fmtC(d.valMt2 || 0));
-    line('Año mapa homogéneo', d.anioMapa || '—');
-    line('Tipo de cambio dólar', `₡${d.tc || 530}`);
-    sep();
-
-    if (d.complList?.length) {
-      head('Obras complementarias');
-      d.complList.forEach(c => {
-        if (c.tipologia) line(`${c.tipologia}${c.descripcion ? ' — ' + c.descripcion : ''}`, `× ${c.cantidad || 1}`);
-      });
-      sep();
-    }
-
-    head('Resumen de valores');
-    line('Valor del terreno',       `${fmt$((d.terrenoC||0)/d.tc)}   ${fmtC(d.terrenoC||0)}`);
-    line('Construcción base',       `${fmt$((d.constBaseC||0)/d.tc)}   ${fmtC(d.constBaseC||0)}`);
-    line('Construcción depreciada', `${fmt$((d.constDeprC||0)/d.tc)}   ${fmtC(d.constDeprC||0)}`);
-    line('Obras complementarias',   `${fmt$((d.complC||0)/d.tc)}   ${fmtC(d.complC||0)}`);
-    sep();
-
-    doc.setFillColor(232, 242, 252); doc.rect(M, y - 2, LW, 11, 'F');
-    doc.setFontSize(11); doc.setFont(undefined, 'bold'); doc.setTextColor(24, 95, 165);
-    doc.text('Total valor estimado', M + 2, y + 5);
-    doc.text(`${fmt$((d.totalC||0)/d.tc)}   ${fmtC(d.totalC||0)}`, M + LW, y + 5, { align: 'right' });
-    doc.setFont(undefined, 'normal'); y += 16;
-
-    const pg = doc.getNumberOfPages();
-    for (let i = 1; i <= pg; i++) {
-      doc.setPage(i); doc.setFontSize(8); doc.setTextColor(160, 160, 160);
-      doc.text(`Fuente: Tipología ONT / Ministerio de Hacienda CR · PropTools · Pág. ${i}/${pg}`, M, 290);
-    }
-    const fname = `avaluo_${(d.ref || d.obra || 'propiedad').replace(/\s+/g, '_')}.pdf`;
-    doc.save(fname);
-  }; // end buildDoc
-
-  // Cargar logo como dataURL antes de generar el PDF
-  if (logoUrl) {
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      canvas.width = img.naturalWidth;
-      canvas.height = img.naturalHeight;
-      canvas.getContext('2d').drawImage(img, 0, 0);
-      buildDoc(canvas.toDataURL('image/png'));
-    };
-    img.onerror = () => buildDoc(null); // si falla, genera sin logo
-    img.src = logoUrl;
-  } else {
-    buildDoc(null);
-  }
-};
 
 // ── TIPO DE CAMBIO AUTOMÁTICO ────────────────────────────────
 window.fetchTipoCambio = async function() {
