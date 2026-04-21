@@ -186,7 +186,14 @@ input[readonly], select[disabled] { background: var(--surface2); color: var(--in
           </div>
         </div>
         <div class="grid2" style="margin-top:10px">
-          <div class="field"><label>Tipo de cambio dólar (¢)</label><input type="number" id="f_tc" min="1" value="530" oninput="calcular();markDirty()"></div>
+          <div class="field">
+            <label>Tipo de cambio dólar (¢)</label>
+            <div style="display:flex;gap:6px">
+              <input type="number" id="f_tc" min="1" value="530" oninput="calcular();markDirty()" style="flex:1">
+              <button class="btn btn-sm" id="btnTC" onclick="fetchTipoCambio()" title="Cargar tipo de cambio del día" style="flex-shrink:0;width:36px;font-size:16px;padding:0">↻</button>
+            </div>
+            <span id="tcMeta" style="font-size:11px;color:var(--muted);margin-top:2px;display:block"></span>
+          </div>
         </div>
       </div>
 
@@ -796,8 +803,51 @@ function generarPDF(d, logoUrl) {
   }
 }
 
+// ── TIPO DE CAMBIO AUTOMÁTICO ────────────────────────────────
+window.fetchTipoCambio = async function() {
+  const btn = document.getElementById('btnTC');
+  const meta = document.getElementById('tcMeta');
+  btn.disabled = true;
+  btn.textContent = '…';
+  meta.textContent = 'Consultando…';
+
+  try {
+    // Edge Function en PROD o STAGING según el entorno
+    const fnUrl = SUPABASE_URL.replace('supabase.co', 'supabase.co') + '/functions/v1/tipo-cambio';
+    const { data: { session } } = await sb.auth.getSession();
+    const res = await fetch(fnUrl, {
+      headers: { Authorization: `Bearer ${session?.access_token}` }
+    });
+
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const tc = await res.json();
+
+    if (tc.error) throw new Error(tc.error);
+
+    document.getElementById('f_tc').value = tc.valor;
+    calcular();
+    markDirty();
+    meta.textContent = `Venta ₡${tc.valor} · Compra ₡${tc.compra} · ${tc.fecha}${tc.cached ? ' (cache)' : ''}`;
+    meta.style.color = 'var(--green)';
+  } catch (err) {
+    meta.textContent = `Error: ${err.message} — ingresá el valor manual`;
+    meta.style.color = 'var(--red)';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '↻';
+  }
+};
+
+// Cargar tipo de cambio automáticamente al iniciar
+async function autoFetchTC() {
+  // Solo si el campo está en el valor default (530)
+  if (parseInt(document.getElementById('f_tc').value) === 530) {
+    await fetchTipoCambio();
+  }
+}
+
 // ── BOOT ─────────────────────────────────────────────────────
-init();
+init().then(() => autoFetchTC());
 </script>
 </body>
 </html>
