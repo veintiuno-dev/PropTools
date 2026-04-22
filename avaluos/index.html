@@ -161,7 +161,11 @@ input[readonly], select[disabled] { background: var(--surface2); color: var(--in
       <div class="card">
         <div class="card-title">
           <span>Datos generales</span>
-          <div style="display:flex;gap:8px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div style="display:flex;align-items:center;gap:4px">
+              <input type="number" id="f_tc" min="1" value="530" oninput="calcular();markDirty()" style="width:80px;height:28px;font-size:12px;padding:0 6px;border:1px solid var(--border);border-radius:6px;font-family:inherit;color:var(--ink);background:var(--surface2)">
+              <button class="btn btn-sm" id="btnTC" onclick="fetchTipoCambio()" title="Tipo de cambio del día" style="width:28px;height:28px;font-size:14px;padding:0">↻</button>
+            </div>
             <button class="btn btn-sm btn-primary" id="btnGuardar" onclick="guardar()">Guardar</button>
             <button class="btn btn-sm" onclick="exportarPDF()">Exportar PDF</button>
           </div>
@@ -172,28 +176,23 @@ input[readonly], select[disabled] { background: var(--surface2); color: var(--in
           <div class="field"><label>Obra que se valora</label><input type="text" id="f_obra" placeholder="Casa y lote" oninput="markDirty()"></div>
           <div class="field"><label>Fecha del avalúo</label><input type="date" id="f_fecha" oninput="markDirty()"></div>
         </div>
-        <div class="grid3" style="margin-top:10px">
-          <div class="field" style="grid-column:1/3"><label>Ubicación / zona</label><input type="text" id="f_ubicacion" placeholder="San José, Curridabat" oninput="markDirty()"></div>
-          <div class="field">
-            <label>Tipo de cambio (¢)</label>
-            <div style="display:flex;gap:6px">
-              <input type="number" id="f_tc" min="1" value="530" oninput="calcular();markDirty()" style="flex:1">
-              <button class="btn btn-sm" id="btnTC" onclick="fetchTipoCambio()" title="Cargar tipo de cambio del día" style="flex-shrink:0;width:36px;font-size:16px;padding:0">↻</button>
-            </div>
-            <span id="tcMeta" style="font-size:11px;color:var(--muted);margin-top:2px;display:block"></span>
-          </div>
+        <div style="margin-top:10px">
+          <div class="field"><label>Ubicación / zona</label><input type="text" id="f_ubicacion" placeholder="San José, Curridabat" oninput="markDirty()"></div>
         </div>
+        <div style="margin-top:4px"><span id="tcMeta" style="font-size:11px;color:var(--muted);display:block"></span></div>
         <div style="margin-top:10px">
           <div class="field"><label>Notas</label><textarea id="f_notas" rows="1" placeholder="Observaciones…" oninput="markDirty()"></textarea></div>
         </div>
       </div>
 
       <div class="card">
-        <div class="card-title">Construcción</div>
-        <div class="grid4" style="margin-top:0">
+        <div class="card-title">
+          <span>Construcción</span>
+          <span style="font-size:11px;font-weight:400;color:var(--ink-mid)">Coef. Ross-Heidecke: <strong id="r_coef_inline" style="color:var(--blue)">—</strong></span>
+        </div>
+        <div class="grid3">
           <div class="field"><label>Área construcción (m²)</label><input type="number" id="f_areaConst" min="0" value="0" oninput="calcular();markDirty()"></div>
           <div class="field"><label>Años de construcción</label><input type="number" id="f_aniosConst" min="0" max="200" value="0" oninput="calcular();markDirty()"></div>
-          <div class="field"><label>Tipología principal</label><select id="f_tipoPrinc" onchange="syncVidaUtil();calcular();markDirty()"></select></div>
           <div class="field">
             <label>Estado de conservación</label>
             <select id="f_estado" onchange="calcular();markDirty()">
@@ -210,17 +209,14 @@ input[readonly], select[disabled] { background: var(--surface2); color: var(--in
           </div>
         </div>
         <div class="grid3" style="margin-top:10px">
-          <div class="field"><label>Segunda tipología (opc.)</label><select id="f_tipoSeg" onchange="calcular();markDirty()"><option value="">— ninguna —</option></select></div>
+          <div class="field"><label>Tipología principal</label><select id="f_tipoPrinc" onchange="syncVidaUtil();calcular();markDirty()"></select></div>
           <div class="field"><label>Vida útil (años)</label><input type="text" id="f_vidaUtil" readonly></div>
           <div class="field"><label>Edad efectiva (calc.)</label><input type="text" id="f_edadEf" readonly></div>
         </div>
         <div class="grid3" style="margin-top:10px">
           <div class="field"><label>% remodelación</label><input type="number" id="f_pctRemodel" min="0" max="100" step="1" value="0" oninput="calcular();markDirty()"></div>
           <div class="field"><label>Años desde remodelación</label><input type="number" id="f_aniosRemodel" min="0" max="200" value="0" oninput="calcular();markDirty()"></div>
-          <div class="field" style="align-self:end;padding-bottom:2px">
-            <span style="font-size:11px;color:var(--muted)">Coef. Ross-Heidecke</span>
-            <div style="height:36px;display:flex;align-items:center;font-size:15px;font-weight:700;color:var(--blue)" id="r_coef_inline">—</div>
-          </div>
+          <div class="field"><label>Segunda tipología (opc.)</label><select id="f_tipoSeg" onchange="calcular();markDirty()"><option value="">— ninguna —</option></select></div>
         </div>
       </div>
 
@@ -667,16 +663,7 @@ input[readonly], select[disabled] { background: var(--surface2); color: var(--in
             </select>
           </div>
         </div>
-        <div class="grid2" style="margin-top:10px">
-          <div class="field">
-            <label>Tipo de cambio dólar (¢)</label>
-            <div style="display:flex;gap:6px">
-              <input type="number" id="f_tc" min="1" value="530" oninput="calcular();markDirty()" style="flex:1">
-              <button class="btn btn-sm" id="btnTC" onclick="fetchTipoCambio()" title="Cargar tipo de cambio del día" style="flex-shrink:0;width:36px;font-size:16px;padding:0">↻</button>
-            </div>
-            <span id="tcMeta" style="font-size:11px;color:var(--muted);margin-top:2px;display:block"></span>
-          </div>
-        </div>
+
       </div>
 
       <div class="card">
