@@ -173,8 +173,28 @@ input[readonly], select[disabled] { background: var(--surface2); color: var(--in
           <div class="field"><label>Obra que se valora</label><input type="text" id="f_obra" placeholder="Casa y lote" oninput="markDirty()"></div>
           <div class="field"><label>Fecha del avalúo</label><input type="date" id="f_fecha" oninput="markDirty()"></div>
         </div>
-        <div style="margin-top:10px">
-          <div class="field"><label>Ubicación / zona</label><input type="text" id="f_ubicacion" placeholder="San José, Curridabat" oninput="markDirty()"></div>
+        <div class="grid3" style="margin-top:10px">
+          <div class="field">
+            <label>Provincia</label>
+            <select id="f_provincia" onchange="onProvincia();markDirty()">
+              <option value="">— Escoger —</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Cantón</label>
+            <select id="f_canton" onchange="onCanton();markDirty()" disabled>
+              <option value="">— Escoger —</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Distrito</label>
+            <select id="f_distrito" onchange="onDistrito();markDirty()" disabled>
+              <option value="">— Escoger —</option>
+            </select>
+          </div>
+        </div>
+        <div style="margin-top:8px">
+          <div class="field"><label>Detalles adicionales</label><input type="text" id="f_ubicacion" placeholder="Frente al parque, contiguo a…" oninput="markDirty()"></div>
         </div>
         <div style="margin-top:10px">
           <div class="field"><label>Notas</label><textarea id="f_notas" rows="1" placeholder="Observaciones…" oninput="markDirty()"></textarea></div>
@@ -283,6 +303,63 @@ function syncVidaUtil() {
   }
 }
 
+
+// ── DIVISIONES TERRITORIALES CR ─────────────────────────────
+var CR_DATA = {"San José":{"San José":["Carmen","Merced","Hospital","Catedral","Zapote","San Francisco de Dos Ríos","Uruca","Mata Redonda","Pavas","Hatillo","San Sebastián"],"Escazú":["Escazú","San Antonio","San Rafael"],"Desamparados":["Desamparados","San Miguel","San Juan de Dios","San Rafael Arriba","San Antonio","Frailes","Patarrá","San Cristóbal","Rosario","Damas","San Rafael Abajo","Gravilias","Los Guido"],"Puriscal":["Santiago","Mercedes Sur","Barbacoas","Grifo Alto","San Rafael","Candelarita","Desamparaditos","San Antonio","Chires"],"Tarrazú":["San Marcos","San Lorenzo","San Carlos"],"Aserrí":["Aserrí","Tarbaca","Vuelta de Jorco","San Gabriel","La Legua","Monterrey","Salitrillos"],"Mora":["Colón","Guayabo","Tabarcia","Piedras Negras","Picagres","Jaris","Quitirrisí"],"Goicoechea":["Guadalupe","San Francisco","Calle Blancos","Mata de Plátano","Ipís","Rancho Redondo","Purral"],"Santa Ana":["Santa Ana","Salitral","Pozos","Uruca","Piedades","Brasil"],"Alajuelita":["Alajuelita","San Josecito","San Antonio","Concepción","San Felipe"],"Vásquez de Coronado":["San Isidro","San Rafael","Dulce Nombre de Jesús","Patalillo","Cascajal"],"Acosta":["San Ignacio","Guaitil","Palmichal","Cangrejal","Sabanillas"],"Tibás":["San Juan","Cinco Esquinas","Anselmo Llorente","León XIII","Colmena"],"Moravia":["San Vicente","San Jerónimo","La Trinidad"],"Montes de Oca":["San Pedro","Sabanilla","Mercedes","San Rafael"],"Turrubares":["San Pablo","San Pedro","San Juan de Mata","San Luis","Carara"],"Dota":["Santa María","Jardín","Copey"],"Curridabat":["Curridabat","Granadilla","Sánchez","Tirrases"],"Pérez Zeledón":["San Isidro de El General","El General","Daniel Flores","Rivas","San Pedro","Platanares","Pejibaye","Cajón","Barú","Río Nuevo","Páramo","La Amistad"],"León Cortés Castro":["San Pablo","San Andrés","Llano Bonito","San Isidro","Santa Cruz","San Antonio"]},"Alajuela":{"Alajuela":["Alajuela","San José","Carrizal","San Antonio","Guácima","San Isidro","Sabanilla","San Rafael","Río Segundo","Desamparados","Turrúcares","Tambor","Garita","Sarapiquí"],"San Ramón":["San Ramón","Santiago","San Juan","Piedades Norte","Piedades Sur","San Rafael","San Isidro","Los Ángeles","Alfaro","Volio","Concepción","Zapotal","Peñas Blancas","San Lorenzo"],"Grecia":["Grecia","San Isidro","San José","San Roque","Tacares","Río Cuarto","Puente de Piedra","Bolívar"],"San Mateo":["San Mateo","Desmonte","Jesús María","Labrador"],"Atenas":["Atenas","Jesús","Mercedes","San Isidro","Concepción","San José","Santa Eulalia","Escobal"],"Naranjo":["Naranjo","San Miguel","San José","Cirrí Sur","San Jerónimo","San Juan","El Rosario","Palmitos"],"Palmares":["Palmares","Zaragoza","Buenos Aires","Santiago","Candelaria","Esquipulas","La Granja"],"Poás":["San Juan","San Luis","Carrillos","Sabana Redonda","Canoas"],"Orotina":["Orotina","El Mastate","Hacienda Vieja","Coyolar","La Ceiba"],"San Carlos":["Ciudad Quesada","Florencia","Buenavista","Aguas Zarcas","Venecia","Pital","La Fortuna","La Tigra","La Palmera","Venado","Cutris","Monterrey","Pocosol"],"Zarcero":["Zarcero","Laguna","Tapesco","Guadalupe","Palmira","Zapote","Brisas"],"Sarchí":["Sarchí Norte","Sarchí Sur","Toro Amarillo","San Pedro","Rodríguez"],"Upala":["Upala","Aguas Claras","San José","Bijagua","Delicias","Dos Ríos","Yolillal","Canalete"],"Los Chiles":["Los Chiles","Caño Negro","El Amparo","San Jorge"],"Guatuso":["San Rafael","Buenavista","Cote","Katira"],"Río Cuarto":["Río Cuarto","Santa Rita","Santa Isabel"]},"Cartago":{"Cartago":["Oriental","Occidental","Carmen","San Nicolás","Aguacaliente","Guadalupe","Corralillo","Tierra Blanca","Dulce Nombre","Llano Grande","Quebradilla"],"Paraíso":["Paraíso","Santiago","Orosi","Cachí","Llanos de Santa Lucía"],"La Unión":["Tres Ríos","San Diego","San Juan","San Rafael","Concepción","Dulce Nombre","San Ramón","Río Azul"],"Jiménez":["Juan Viñas","Tucurrique","Pejibaye"],"Turrialba":["Turrialba","La Suiza","Peralta","Santa Cruz","Santa Teresita","Pavones","Tuis","Tayutic","Santa Rosa","Tres Equis","La Isabel","Chirripó"],"Alvarado":["Pacayas","Cervantes","Capellades"],"Oreamuno":["San Rafael","Cot","Potrero Cerrado","Cipreses","Santa Rosa"],"El Guarco":["El Tejar","San Isidro","Tobosi","Patio de Agua"]},"Heredia":{"Heredia":["Heredia","Mercedes","San Francisco","Ulloa","Varablanca"],"Barva":["Barva","San Pedro","San Pablo","San Roque","Santa Lucía","San José de la Montaña"],"Santo Domingo":["Santo Domingo","San Vicente","San Miguel","Paracito","Santo Tomás","Santa Rosa","Tures","Pará"],"Santa Bárbara":["Santa Bárbara","San Pedro","San Juan","Jesús","Santo Domingo","Purabá"],"San Rafael":["San Rafael","San Josecito","Santiago","Ángeles","Concepción"],"San Isidro":["San Isidro","San José","Concepción","San Francisco"],"Belén":["San Antonio","La Ribera","La Asunción"],"Flores":["San Joaquín","Barrantes","Llorente"],"San Pablo":["San Pablo","Rincón de Sabanilla"],"Sarapiquí":["Puerto Viejo","La Virgen","Las Horquetas","Llanuras del Gaspar","Cureña"]},"Guanacaste":{"Liberia":["Liberia","Cañas Dulces","Mayorga","Nacascolo","Curubandé"],"Nicoya":["Nicoya","Mansión","San Antonio","Quebrada Honda","Sámara","Nosara","Belén de Nosarita"],"Santa Cruz":["Santa Cruz","Bolsón","Veintisiete de Abril","Tempate","Cartagena","Cuajiniquil","Diriá","Cabo Velas","Tamarindo"],"Bagaces":["Bagaces","La Fortuna","Mogote","Río Naranjo"],"Carrillo":["Filadelfia","Palmira","Sardinal","Belén"],"Cañas":["Cañas","Palmira","San Miguel","Bebedero","Porozal"],"Abangares":["Las Juntas","Sierra","San Juan","Colorado"],"Tilarán":["Tilarán","Quebrada Grande","Tronadora","Santa Rosa","Líbano","Tierras Morenas","Arenal","Cabeceras"],"Nandayure":["Carmona","Santa Rita","Zapotal","San Pablo","Porvenir","Bejuco"],"La Cruz":["La Cruz","Santa Cecilia","La Garita","Santa Elena"],"Hojancha":["Hojancha","Monte Romo","Puerto Carrillo","Huacas","Matambú"]},"Puntarenas":{"Puntarenas":["Puntarenas","Pitahaya","Chomes","Lepanto","Paquera","Manzanillo","Guacimal","Barranca","Monte Verde","Isla del Coco","Cóbano","Chacarita","Chira","Acapulco","El Roble","Arancibia"],"Esparza":["Espíritu Santo","San Juan Grande","Macacona","San Rafael","San Jerónimo","Caldera"],"Buenos Aires":["Buenos Aires","Volcán","Potrero Grande","Boruca","Pilas","Colinas","Chánguena","Biolley","Brunka"],"Montes de Oro":["Miramar","La Unión","San Isidro"],"Osa":["Puerto Cortés","Palmar","Sierpe","Bahía Ballena","Piedras Blancas","Bahía Drake"],"Quepos":["Quepos","Savegre","Naranjito"],"Golfito":["Golfito","Puerto Jiménez","Guaycará","Pavón"],"Coto Brus":["San Vito","Sabalito","Aguabuena","Limoncito","Pittier","Gutiérrez Braun"],"Parrita":["Parrita"],"Corredores":["Corredor","La Cuesta","Canoas","Laurel"],"Garabito":["Jacó","Tárcoles"]},"Limón":{"Limón":["Limón","Valle La Estrella","Río Blanco","Matama"],"Pococí":["Guápiles","Jiménez","Rita","Roxana","Cariari","Colorado","La Colonia"],"Siquirres":["Siquirres","Pacuarito","Florida","Germania","El Cairo","Alegría","Reventazón"],"Talamanca":["Bratsi","Sixaola","Cahuita","Telire"],"Matina":["Matina","Batán","Carrandi"],"Guácimo":["Guácimo","Mercedes","Pocora","Río Jiménez","Duacarí"]}};
+
+function onProvincia() {
+  var prov = document.getElementById('f_provincia').value;
+  var sc = document.getElementById('f_canton');
+  var sd = document.getElementById('f_distrito');
+  sc.innerHTML = '<option value="">— Escoger —</option>';
+  sd.innerHTML = '<option value="">— Escoger —</option>';
+  sc.disabled = !prov; sd.disabled = true;
+  if (prov && CR_DATA[prov]) {
+    Object.keys(CR_DATA[prov]).forEach(function(c) {
+      sc.appendChild(new Option(c, c));
+    });
+  }
+}
+
+function onCanton() {
+  var prov = document.getElementById('f_provincia').value;
+  var cant = document.getElementById('f_canton').value;
+  var sd = document.getElementById('f_distrito');
+  sd.innerHTML = '<option value="">— Escoger —</option>';
+  sd.disabled = !cant;
+  if (prov && cant && CR_DATA[prov] && CR_DATA[prov][cant]) {
+    CR_DATA[prov][cant].forEach(function(d) {
+      sd.appendChild(new Option(d, d));
+    });
+  }
+}
+
+function onDistrito() {
+  // just triggers markDirty via onchange
+}
+
+function initProvincias() {
+  var sp = document.getElementById('f_provincia');
+  Object.keys(CR_DATA).forEach(function(p) {
+    sp.appendChild(new Option(p, p));
+  });
+}
+
+function setUbicacionSelects(prov, cant, dist) {
+  var sp = document.getElementById('f_provincia');
+  var sc = document.getElementById('f_canton');
+  var sd = document.getElementById('f_distrito');
+  if (prov) {
+    sp.value = prov;
+    onProvincia();
+    if (cant) {
+      sc.value = cant;
+      onCanton();
+      if (dist) sd.value = dist;
+    }
+  }
+}
+
 function generarPDF(d, logoUrl) {
   if (typeof jspdf === 'undefined') { alert('jsPDF no disponible'); return; }
   var JP = jspdf.jsPDF;
@@ -347,7 +424,9 @@ function generarPDF(d, logoUrl) {
     row('Referencia', d.ref || '-');
     row('Obra valorada', d.obra || '-');
     row('Fecha del avaluo', d.fecha || '-');
-    row('Ubicacion', d.ubicacion || '-');
+    var locStr = [d.provincia, d.canton, d.distrito].filter(Boolean).join(', ');
+    if (locStr) row('Ubicacion', locStr);
+    if (d.ubicacion) row('Detalles', d.ubicacion);
     if (d.notas) row('Notas', d.notas);
     sep();
 
@@ -858,6 +937,7 @@ async function init() {
   }
 
   poblarSelects();
+  initProvincias();
   // Set today's date as default
   const _d = new Date(); document.getElementById('f_fecha').value = _d.getFullYear()+'-'+String(_d.getMonth()+1).padStart(2,'0')+'-'+String(_d.getDate()).padStart(2,'0');
   await cargarLista();
@@ -1117,6 +1197,9 @@ window.guardar = async function() {
     referencia: document.getElementById('f_ref').value,
     obra:       document.getElementById('f_obra').value,
     fecha_avaluo: document.getElementById('f_fecha').value || null,
+    provincia:  document.getElementById('f_provincia').value,
+    canton:     document.getElementById('f_canton').value,
+    distrito:   document.getElementById('f_distrito').value,
     ubicacion:  document.getElementById('f_ubicacion').value,
     notas:      document.getElementById('f_notas').value,
     tipo_principal:     document.getElementById('f_tipoPrinc').value,
@@ -1205,6 +1288,7 @@ window.cargarAvaluo = async function(id) {
   document.getElementById('f_obra').value      = data.obra || '';
   document.getElementById('f_fecha').value     = data.fecha_avaluo || '';
   document.getElementById('f_ubicacion').value = data.ubicacion || '';
+  setUbicacionSelects(data.provincia || '', data.canton || '', data.distrito || '');
   document.getElementById('f_notas').value     = data.notas || '';
   document.getElementById('f_aniosConst').value  = data.anios_construccion;
   document.getElementById('f_pctRemodel').value  = Math.round((data.pct_remodelacion || 0) * 100);
@@ -1253,6 +1337,11 @@ window.nuevoAvaluo = function() {
   currentAvaluoId = null;
   isDirty = false;
   ['f_ref','f_obra','f_ubicacion','f_notas'].forEach(k => { document.getElementById(k).value = ''; });
+  document.getElementById('f_provincia').value = '';
+  document.getElementById('f_canton').innerHTML = '<option value="">— Escoger —</option>';
+  document.getElementById('f_canton').disabled = true;
+  document.getElementById('f_distrito').innerHTML = '<option value="">— Escoger —</option>';
+  document.getElementById('f_distrito').disabled = true;
   document.getElementById('f_fecha').value = '';
   document.getElementById('f_aniosConst').value = 0;
   document.getElementById('f_pctRemodel').value = 0;
@@ -1283,6 +1372,7 @@ window.exportarPDFId = async function(id) {
   if (!data) return;
   const d = {
     ref: data.referencia, obra: data.obra, fecha: data.fecha_avaluo,
+    provincia: data.provincia, canton: data.canton, distrito: data.distrito,
     ubicacion: data.ubicacion, notas: data.notas,
     tipoPrincipal: data.tipo_principal, tipoSegunda: data.tipo_segunda,
     aniosC: data.anios_construccion, pctR: data.pct_remodelacion,
