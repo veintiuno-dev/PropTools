@@ -153,35 +153,40 @@ input[readonly], select[disabled] { background: var(--surface2); color: var(--in
             <button class="btn btn-sm" onclick="exportarPDF()">Exportar PDF</button>
           </div>
         </div>
-        <div class="status-bar"><div class="dot" id="statusDot"></div><span id="statusMsg">Sin cambios</span></div>
+        <div class="status-bar"><div class="dot" id="statusDot"></div><span id="statusMsg">Sin cambios</span><span id="tcMeta" style="font-size:11px;color:var(--muted);margin-left:16px"></span><div style="display:flex;align-items:center;gap:6px;margin-left:auto"><input type="number" id="f_tc" min="1" value="530" oninput="calcular();markDirty()" style="width:72px;height:24px;font-size:11px;padding:0 6px;border:1px solid var(--border);border-radius:6px;font-family:inherit;color:var(--ink);background:var(--surface2)"><button class="btn btn-sm" id="btnTC" onclick="fetchTipoCambio()" title="Tipo de cambio del día" style="width:24px;height:24px;font-size:13px;padding:0">↻</button></div></div>
         <div class="grid3" style="margin-top:8px">
           <div class="field"><label>Referencia / expediente</label><input type="text" id="f_ref" placeholder="Ej: Avicenia 2026-001" oninput="markDirty()"></div>
-          <div class="field"><label>Obra que se valora</label><input type="text" id="f_obra" placeholder="Ej: Casa y lote" oninput="markDirty()"></div>
+          <div class="field"><label>Obra que se valora</label><input type="text" id="f_obra" placeholder="Casa y lote" oninput="markDirty()"></div>
           <div class="field"><label>Fecha de valoración</label><input type="date" id="f_fecha" oninput="markDirty()"></div>
         </div>
-        <div style="margin-top:10px">
-          <div class="field"><label>Ubicación / zona</label><input type="text" id="f_ubicacion" placeholder="Ej: San José, Curridabat" oninput="markDirty()"></div>
+        <div class="grid3" style="margin-top:10px">
+          <div class="field"><label>Provincia</label><select id="f_provincia" onchange="onProvincia();markDirty()"><option value="">— Escoger —</option></select></div>
+          <div class="field"><label>Cantón</label><select id="f_canton" onchange="onCanton();markDirty()" disabled><option value="">— Escoger —</option></select></div>
+          <div class="field"><label>Distrito</label><select id="f_distrito" onchange="onDistrito();markDirty()" disabled><option value="">— Escoger —</option></select></div>
         </div>
-        <div style="margin-top:10px">
-          <div class="field"><label>Notas</label><textarea id="f_notas" rows="2" placeholder="Observaciones adicionales…" oninput="markDirty()"></textarea></div>
+        <div style="margin-top:8px">
+          <div class="field"><label>Detalles adicionales</label><input type="text" id="f_ubicacion" placeholder="Frente al parque, contiguo a…" oninput="markDirty()"></div>
+        </div>
+        <div style="margin-top:8px">
+          <div class="field"><label>Notas</label><textarea id="f_notas" rows="1" placeholder="Observaciones…" oninput="markDirty()"></textarea></div>
         </div>
       </div>
 
       <div class="card">
-        <div class="card-title">Construcción</div>
-        <div class="grid3">
-          <div class="field"><label>Años de construcción</label><input type="number" id="f_aniosConst" min="0" max="200" value="0" oninput="calcular();markDirty()"></div>
-          <div class="field"><label>% remodelación</label><input type="number" id="f_pctRemodel" min="0" max="100" step="1" value="0" oninput="calcular();markDirty()"></div>
-          <div class="field"><label>Años desde remodelación</label><input type="number" id="f_aniosRemodel" min="0" max="200" value="0" oninput="calcular();markDirty()"></div>
+        <div class="card-title">
+          <span>Construcción</span>
+          <span style="font-size:11px;font-weight:400;color:var(--ink-mid)">Coef. Ross-Heidecke: <strong id="r_coef_inline" style="color:var(--blue)">—</strong></span>
         </div>
-        <div class="grid3" style="margin-top:10px">
-          <div class="field"><label>Vida útil (años)</label><input type="text" id="f_vidaUtil" readonly></div>
+        <div class="grid3">
+          <div class="field"><label>Área construcción (m²)</label><input type="number" id="f_areaConst" min="0" value="0" oninput="calcular();markDirty()"></div>
+          <div class="field"><label>Años de construcción</label><input type="number" id="f_aniosConst" min="0" max="200" value="0" oninput="calcular();markDirty()"></div>
           <div class="field">
             <label>Estado de conservación</label>
             <select id="f_estado" onchange="calcular();markDirty()">
+              <option value="">— Escoger —</option>
               <option value="0">Óptimo — 0%</option>
               <option value="0.32">Muy bueno — 0.32%</option>
-              <option value="2.52" selected>Bueno — 2.52%</option>
+              <option value="2.52">Bueno — 2.52%</option>
               <option value="8.09">Intermedio — 8.09%</option>
               <option value="18.1">Regular — 18.1%</option>
               <option value="31.36">Malo — 31.36%</option>
@@ -190,12 +195,16 @@ input[readonly], select[disabled] { background: var(--surface2); color: var(--in
               <option value="100">Demolición — 100%</option>
             </select>
           </div>
-          <div class="field"><label>Edad efectiva (calc.)</label><input type="text" id="f_edadEf" readonly></div>
         </div>
         <div class="grid3" style="margin-top:10px">
           <div class="field"><label>Tipología principal</label><select id="f_tipoPrinc" onchange="syncVidaUtil();calcular();markDirty()"></select></div>
-          <div class="field"><label>Segunda tipología (opcional)</label><select id="f_tipoSeg" onchange="calcular();markDirty()"><option value="">— ninguna —</option></select></div>
-          <div class="field"><label>Área construcción (m²)</label><input type="number" id="f_areaConst" min="0" value="0" oninput="calcular();markDirty()"></div>
+          <div class="field"><label>Vida útil (años)</label><input type="text" id="f_vidaUtil" readonly></div>
+          <div class="field"><label>Edad efectiva (calc.)</label><input type="text" id="f_edadEf" readonly></div>
+        </div>
+        <div class="grid3" style="margin-top:10px">
+          <div class="field"><label>% remodelación</label><input type="number" id="f_pctRemodel" min="0" max="100" step="1" value="0" oninput="calcular();markDirty()"></div>
+          <div class="field"><label>Años desde remodelación</label><input type="number" id="f_aniosRemodel" min="0" max="200" value="0" oninput="calcular();markDirty()"></div>
+          <div class="field"><label>Segunda tipología (opc.)</label><select id="f_tipoSeg" onchange="calcular();markDirty()"><option value="">— ninguna —</option></select></div>
         </div>
       </div>
 
@@ -643,6 +652,7 @@ window.calcular = function() {
   document.getElementById('f_edadEf').value = edadEf.toFixed(2);
   document.getElementById('r_edad').textContent = edadEf.toFixed(2) + ' años';
   document.getElementById('r_coef').textContent = coefRH.toFixed(2) + '%';
+  var _ci = document.getElementById('r_coef_inline'); if(_ci) _ci.textContent = coefRH.toFixed(2) + '%';
   const inlineCoef = document.getElementById('r_coef_inline');
   if (inlineCoef) inlineCoef.textContent = coefRH.toFixed(2) + '%';
 
@@ -710,6 +720,9 @@ window.guardar = async function() {
     provincia:  document.getElementById('f_provincia').value,
     canton:     document.getElementById('f_canton').value,
     distrito:   document.getElementById('f_distrito').value,
+    provincia:  document.getElementById('f_provincia')?.value || '',
+    canton:     document.getElementById('f_canton')?.value || '',
+    distrito:   document.getElementById('f_distrito')?.value || '',
     ubicacion:  document.getElementById('f_ubicacion').value,
     notas:      document.getElementById('f_notas').value,
     tipo_principal:     document.getElementById('f_tipoPrinc').value,
