@@ -162,16 +162,12 @@ input[readonly], select[disabled] { background: var(--surface2); color: var(--in
         <div class="card-title">
           <span>Datos generales</span>
           <div style="display:flex;align-items:center;gap:8px">
-            <div style="display:flex;align-items:center;gap:4px">
-              <input type="number" id="f_tc" min="1" value="530" oninput="calcular();markDirty()" style="width:80px;height:28px;font-size:12px;padding:0 6px;border:1px solid var(--border);border-radius:6px;font-family:inherit;color:var(--ink);background:var(--surface2)">
-              <button class="btn btn-sm" id="btnTC" onclick="fetchTipoCambio()" title="Tipo de cambio del día" style="width:28px;height:28px;font-size:14px;padding:0">↻</button>
-              <span id="tcMeta" style="font-size:11px;color:var(--muted);white-space:nowrap"></span>
-            </div>
+
             <button class="btn btn-sm btn-primary" id="btnGuardar" onclick="guardar()">Guardar</button>
             <button class="btn btn-sm" onclick="exportarPDF()">Exportar PDF</button>
           </div>
         </div>
-        <div class="status-bar"><div class="dot" id="statusDot"></div><span id="statusMsg">Sin cambios</span></div>
+        <div class="status-bar"><div class="dot" id="statusDot"></div><span id="statusMsg">Sin cambios</span><div style="display:flex;align-items:center;gap:6px;margin-left:auto"><input type="number" id="f_tc" min="1" value="530" oninput="calcular();markDirty()" style="width:72px;height:24px;font-size:11px;padding:0 6px;border:1px solid var(--border);border-radius:6px;font-family:inherit;color:var(--ink);background:var(--surface2)"><button class="btn btn-sm" id="btnTC" onclick="fetchTipoCambio()" title="Tipo de cambio del día" style="width:24px;height:24px;font-size:13px;padding:0">↻</button><span id="tcMeta" style="font-size:11px;color:var(--muted)"></span></div></div>
         <div class="grid3" style="margin-top:8px">
           <div class="field"><label>Referencia / expediente</label><input type="text" id="f_ref" placeholder="Ej: Avicenia 2026-001" oninput="markDirty()"></div>
           <div class="field"><label>Obra que se valora</label><input type="text" id="f_obra" placeholder="Casa y lote" oninput="markDirty()"></div>
