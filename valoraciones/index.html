@@ -251,7 +251,6 @@ input[readonly], select[disabled] { background: var(--surface2); color: var(--in
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="/components.js"></script>
 <script>
 function syncVidaUtil() {
   var VU = {"AP01":65,"AP02":80,"AP03":95,"AP04":105,"AP05":115,"AP06":120,"AT01":20,"AT02":20,"AT03":20,"AT04":20,"BB01":40,"BO01":50,"BO02":50,"BO03":60,"CA01":10,"CA02":10,"CA03":10,"CA04":10,"CA05":10,"CB01":50,"CB02":50,"CB03":60,"CB04":60,"CC01":80,"CC02":100,"CC03":110,"CC04":115,"CC05":120,"CC06":120,"CE01":10,"CE02":20,"CE03":20,"CE04":20,"CE05":14,"CE06":20,"CE07":20,"CE08":20,"CE09":20,"CG01":10,"CG02":10,"CI01":60,"CL01":50,"CL02":60,"CS01":30,"CS02":60,"CP01":60,"DP01":40,"EA01":80,"EA02":90,"EA03":95,"EA04":105,"EA05":110,"EA06":110,"EA07":115,"EA08":120,"EB01":40,"EB02":50,"EC01":80,"EC02":100,"EC03":120,"EL01":70,"EO01":80,"EO02":100,"EO03":105,"EO04":115,"EO05":115,"EO06":120,"EO07":120,"EP01":60,"EP02":60,"ER01":50,"ER02":60,"ER03":60,"EU01":60,"FG01":20,"GA01":40,"GD01":40,"GD02":40,"GD03":40,"GK01":20,"GM01":50,"GM02":50,"GM03":60,"HP01":50,"HP02":60,"HP03":70,"HT01":50,"HT02":60,"HT03":60,"HT04":70,"HT05":70,"IA01":15,"IA02":15,"IB01":20,"IB02":15,"IF01":10,"IF02":10,"IF03":40,"IH01":40,"IQ01":40,"IQ02":40,"IQ03":50,"IS01":30,"IT01":20,"IT02":15,"LC01":45,"LC02":75,"LC03":90,"LC04":95,"LC05":105,"LC06":120,"LI01":20,"LO01":20,"LO02":20,"LO03":20,"LT01":50,"MR00":40,"MR01":40,"MR02":40,"MR03":40,"MR04":40,"MR05":40,"MR06":40,"MT01":50,"MT02":50,"MT03":50,"MT04":50,"NC01":50,"NC02":60,"NC03":70,"NI01":60,"NI02":60,"NI03":60,"NI04":70,"NI05":70,"OE01":10,"OE02":10,"OE03":10,"OV01":10,"OV02":15,"OV03":15,"OV04":15,"OV05":15,"PC01":30,"PC02":40,"PC03":50,"PE01":10,"PE02":10,"PI01":40,"PI02":40,"PI03":40,"PI04":40,"PI05":40,"PI06":20,"PI07":20,"PI08":20,"PI09":20,"PI10":20,"PI11":20,"PI12":20,"PI13":20,"PI14":20,"PO01":50,"PO02":50,"PT01":50,"PT02":50,"PU01":40,"PU02":40,"PU03":40,"PU04":40,"RA01":40,"RE01":50,"RE02":50,"RE03":60,"RE04":70,"SB01":5,"SE01":5,"SR01":3,"SR02":5,"TE01":50,"TE02":60,"TP01":30,"TP02":30,"TP03":30,"TP04":30,"TP05":30,"TP06":30,"TR01":30,"TR02":30,"TR03":30,"TS01":40,"TS02":40,"TS03":40,"TS04":40,"TS05":40,"TS06":40,"TS07":40,"TS08":30,"TS09":30,"TS10":30,"TS11":30,"TS12":30,"TS13":30,"TS14":30,"TS15":30,"TS16":30,"TS17":30,"VA01":115,"VB01":40,"VC01":50,"VC02":55,"VC03":65,"VC04":70,"VC05":90,"VC06":105,"VC07":120,"VC08":120,"VC09":120,"VC10":120,"VJ01":30,"VJ02":30,"VJ03":40,"VJ04":40,"VJ05":40,"VH01":115,"VM01":80,"VM02":100,"VM03":105,"VM04":120,"VL01":115,"VP01":110,"VR01":40,"VR02":50,"VS01":40,"VS02":60,"VV01":120};
@@ -290,6 +289,7 @@ function onCanton() {
 function onDistrito() {}
 function initProvincias() {
   var sp = document.getElementById('f_provincia');
+  if (!sp) return;
   Object.keys(CR_DATA).forEach(function(p) { sp.appendChild(new Option(p, p)); });
 }
 function setUbicacionSelects(prov, cant, dist) {
