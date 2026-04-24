@@ -98,20 +98,6 @@ input[readonly], select[disabled] { background: var(--surface2); color: var(--in
 .spinner { width: 32px; height: 32px; border: 3px solid var(--border); border-top-color: var(--blue); border-radius: 50%; animation: spin .7s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 </style>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<style>
-/* MAPA MODAL */
-.mapa-modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:1000; align-items:center; justify-content:center; }
-.mapa-modal.open { display:flex; }
-.mapa-box { background:var(--surface); border-radius:16px; width:680px; max-width:95vw; overflow:hidden; box-shadow:0 20px 60px rgba(0,0,0,.3); }
-.mapa-header { display:flex; align-items:center; justify-content:space-between; padding:16px 20px; border-bottom:1px solid var(--border); }
-.mapa-title { font-weight:700; font-size:14px; }
-.mapa-body { position:relative; }
-#mapaLeaflet { height:400px; }
-.mapa-footer { padding:12px 20px; border-top:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; gap:12px; }
-.mapa-coords { font-family:'DM Mono',monospace; font-size:11px; color:var(--muted); }
-.mapa-instruccion { font-size:12px; color:var(--ink-mid); }
-</style>
 </head>
 <body>
 
@@ -224,35 +210,19 @@ input[readonly], select[disabled] { background: var(--surface2); color: var(--in
 
       <div class="card">
         <div class="card-title">Terreno</div>
-        <div class="grid4">
+        <div class="grid2">
           <div class="field"><label>Área del lote (m²)</label><input type="number" id="f_areaLote" min="0" value="0" oninput="calcular();markDirty()"></div>
-          <div class="field"><label>Valor tributario m² lote (¢)</label><input type="number" id="f_valMt2" min="0" value="0" oninput="calcular();markDirty()"></div>
           <div class="field">
-            <label>Año mapa homogéneo</label>
-            <select id="f_anioMapa" onchange="calcular();markDirty()">
-              <option value="1999">1999</option><option value="2000">2000</option><option value="2001">2001</option>
-              <option value="2002">2002</option><option value="2003">2003</option><option value="2004">2004</option>
-              <option value="2005">2005</option><option value="2006">2006</option><option value="2007">2007</option>
-              <option value="2008">2008</option><option value="2009">2009</option><option value="2010">2010</option>
-              <option value="2011">2011</option><option value="2012">2012</option><option value="2013">2013</option>
-              <option value="2014">2014</option><option value="2015">2015</option><option value="2016">2016</option>
-              <option value="2017">2017</option><option value="2018">2018</option><option value="2019">2019</option>
-              <option value="2020">2020</option><option value="2021">2021</option><option value="2022">2022</option>
-              <option value="2023" selected>2023</option>
-            </select>
+            <label>Valor tributario m² lote (¢)</label>
+            <div style="display:flex;gap:6px;align-items:center">
+              <input type="number" id="f_valMt2" min="0" value="0" oninput="calcular();markDirty()" style="flex:1">
+              <button class="btn btn-sm" onclick="abrirPDFZonas()" title="Ver mapa de zonas homogéneas (Hacienda)" style="flex-shrink:0;padding:0 8px;font-size:11px;white-space:nowrap;height:36px">
+                Ver zonas
+              </button>
+            </div>
           </div>
-          <div class="field" style="justify-content:flex-end">
-            <label>&nbsp;</label>
-            <button class="btn btn-sm" onclick="abrirMapaValores()" title="Ver mapa de valores de zonas homogéneas" style="gap:6px;display:flex;align-items:center">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/></svg>
-              Ver mapa de valores
-            </button>
-            <button class="btn btn-sm" onclick="abrirMapaInteractivo()" title="Seleccionar ubicación en mapa interactivo" style="gap:6px;display:flex;align-items:center;margin-top:4px">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-              Ubicar en mapa
-            </button>
-            <span id="mapaMsg" style="font-size:10px;color:var(--muted);margin-top:3px;text-align:center"></span>
-          </div>
+
+
         </div>
 
       </div>
@@ -338,15 +308,105 @@ function setUbicacionSelects(prov, cant, dist) {
 }
 
 
-// OPCIÓN 3 — Portal Hacienda ATV zonas homogéneas
-function abrirMapaValores() {
-  var canton = document.getElementById('f_canton') && document.getElementById('f_canton').value;
-  var prov   = document.getElementById('f_provincia') && document.getElementById('f_provincia').value;
-  var msg    = document.getElementById('mapaMsg');
-  if (msg) { msg.textContent = 'Abriendo portal de Hacienda…'; setTimeout(function(){ msg.textContent=''; }, 3000); }
-  // ATV Hacienda — portal oficial de zonas homogéneas con búsqueda por cantón
-  window.open('https://www.hacienda.go.cr/ATV/ZonasHomogeneas.aspx', '_blank');
+
+// MAPA DE VALORES — PDF por cantón (Hacienda ONT)
+var CANTON_PDF = {
+  "San José|San José":           "https://www.hacienda.go.cr/docs/2021_101_PVTZH.pdf",
+  "San José|Escazú":             "https://www.hacienda.go.cr/docs/2021_102_PVTZH.pdf",
+  "San José|Desamparados":       "https://www.hacienda.go.cr/docs/2021_103_PVTZH.pdf",
+  "San José|Puriscal":           "https://www.hacienda.go.cr/docs/2021_104_PVTZH.pdf",
+  "San José|Tarrazú":            "https://www.hacienda.go.cr/docs/2021_105_PVTZH.pdf",
+  "San José|Aserrí":             "https://www.hacienda.go.cr/docs/2021_106_PVTZH.pdf",
+  "San José|Mora":               "https://www.hacienda.go.cr/docs/2021_107_PVTZH.pdf",
+  "San José|Goicoechea":         "https://www.hacienda.go.cr/docs/2021_108_PVTZH.pdf",
+  "San José|Santa Ana":          "https://www.hacienda.go.cr/docs/2021_109_PVTZH.pdf",
+  "San José|Alajuelita":         "https://www.hacienda.go.cr/docs/2021_110_PVTZH.pdf",
+  "San José|Vásquez de Coronado":"https://www.hacienda.go.cr/docs/2021_111_PVTZH.pdf",
+  "San José|Acosta":             "https://www.hacienda.go.cr/docs/2021_112_PVTZH.pdf",
+  "San José|Tibás":              "https://www.hacienda.go.cr/docs/2021_113_PVTZH.pdf",
+  "San José|Moravia":            "https://www.hacienda.go.cr/docs/2021_114_PVTZH.pdf",
+  "San José|Montes de Oca":      "https://www.hacienda.go.cr/docs/2021_115_PVTZH.pdf",
+  "San José|Turrubares":         "https://www.hacienda.go.cr/docs/2021_116_PVTZH.pdf",
+  "San José|Dota":               "https://www.hacienda.go.cr/docs/2021_117_PVTZH.pdf",
+  "San José|Curridabat":         "https://www.hacienda.go.cr/docs/2021_118_PVTZH.pdf",
+  "San José|Pérez Zeledón":      "https://www.hacienda.go.cr/docs/2021_119_PVTZH.pdf",
+  "San José|León Cortés Castro": "https://www.hacienda.go.cr/docs/2021_120_PVTZH.pdf",
+  "Alajuela|Alajuela":           "https://www.hacienda.go.cr/docs/2021_201_PVTZH.pdf",
+  "Alajuela|San Ramón":          "https://www.hacienda.go.cr/docs/2021_202_PVTZH.pdf",
+  "Alajuela|Grecia":             "https://www.hacienda.go.cr/docs/2021_203_PVTZH.pdf",
+  "Alajuela|San Mateo":          "https://www.hacienda.go.cr/docs/2021_204_PVTZH.pdf",
+  "Alajuela|Atenas":             "https://www.hacienda.go.cr/docs/2021_205_PVTZH.pdf",
+  "Alajuela|Naranjo":            "https://www.hacienda.go.cr/docs/2021_206_PVTZH.pdf",
+  "Alajuela|Palmares":           "https://www.hacienda.go.cr/docs/2021_207_PVTZH.pdf",
+  "Alajuela|Poás":               "https://www.hacienda.go.cr/docs/2021_208_PVTZH.pdf",
+  "Alajuela|Orotina":            "https://www.hacienda.go.cr/docs/2021_209_PVTZH.pdf",
+  "Alajuela|San Carlos":         "https://www.hacienda.go.cr/docs/2021_210_PVTZH.pdf",
+  "Alajuela|Zarcero":            "https://www.hacienda.go.cr/docs/2021_212_PVTZH.pdf",
+  "Alajuela|Sarchí":             "https://www.hacienda.go.cr/docs/2021_213_PVTZH.pdf",
+  "Alajuela|Upala":              "https://www.hacienda.go.cr/docs/2021_214_PVTZH.pdf",
+  "Alajuela|Los Chiles":         "https://www.hacienda.go.cr/docs/2021_215_PVTZH.pdf",
+  "Alajuela|Guatuso":            "https://www.hacienda.go.cr/docs/2021_216_PVTZH.pdf",
+  "Alajuela|Río Cuarto":         "https://www.hacienda.go.cr/docs/2021_217_PVTZH.pdf",
+  "Cartago|Cartago":             "https://www.hacienda.go.cr/docs/2024_301_PVTZH.pdf",
+  "Cartago|Paraíso":             "https://www.hacienda.go.cr/docs/2021_302_PVTZH.pdf",
+  "Cartago|La Unión":            "https://www.hacienda.go.cr/docs/2021_303_PVTZH.pdf",
+  "Cartago|Jiménez":             "https://www.hacienda.go.cr/docs/2021_304_PVTZH.pdf",
+  "Cartago|Turrialba":           "https://www.hacienda.go.cr/docs/2021_305_PVTZH.pdf",
+  "Cartago|Alvarado":            "https://www.hacienda.go.cr/docs/2021_306_PVTZH.pdf",
+  "Cartago|Oreamuno":            "https://www.hacienda.go.cr/docs/2021_307_PVTZH.pdf",
+  "Cartago|El Guarco":           "https://www.hacienda.go.cr/docs/2021_308_PVTZH.pdf",
+  "Heredia|Heredia":             "https://www.hacienda.go.cr/docs/2021_401_PVTZH.pdf",
+  "Heredia|Barva":               "https://www.hacienda.go.cr/docs/2021_402_PVTZH.pdf",
+  "Heredia|Santo Domingo":       "https://www.hacienda.go.cr/docs/2021_403_PVTZH.pdf",
+  "Heredia|Santa Bárbara":       "https://www.hacienda.go.cr/docs/2021_404_PVTZH.pdf",
+  "Heredia|San Rafael":          "https://www.hacienda.go.cr/docs/2021_405_PVTZH.pdf",
+  "Heredia|San Isidro":          "https://www.hacienda.go.cr/docs/2021_406_PVTZH.pdf",
+  "Heredia|Belén":               "https://www.hacienda.go.cr/docs/2021_407_PVTZH.pdf",
+  "Heredia|Flores":              "https://www.hacienda.go.cr/docs/2021_408_PVTZH.pdf",
+  "Heredia|San Pablo":           "https://www.hacienda.go.cr/docs/2021_409_PVTZH.pdf",
+  "Heredia|Sarapiquí":           "https://www.hacienda.go.cr/docs/2021_410_PVTZH.pdf",
+  "Guanacaste|Liberia":          "https://www.hacienda.go.cr/docs/2021_501_PVTZH.pdf",
+  "Guanacaste|Nicoya":           "https://www.hacienda.go.cr/docs/2021_502_PVTZH.pdf",
+  "Guanacaste|Santa Cruz":       "https://www.hacienda.go.cr/docs/2021_503_PVTZH.pdf",
+  "Guanacaste|Bagaces":          "https://www.hacienda.go.cr/docs/2021_504_PVTZH.pdf",
+  "Guanacaste|Carrillo":         "https://www.hacienda.go.cr/docs/2021_505_PVTZH.pdf",
+  "Guanacaste|Cañas":            "https://www.hacienda.go.cr/docs/2021_506_PVTZH.pdf",
+  "Guanacaste|Abangares":        "https://www.hacienda.go.cr/docs/2021_507_PVTZH.pdf",
+  "Guanacaste|Tilarán":          "https://www.hacienda.go.cr/docs/2021_508_PVTZH.pdf",
+  "Guanacaste|Nandayure":        "https://www.hacienda.go.cr/docs/2021_509_PVTZH.pdf",
+  "Guanacaste|La Cruz":          "https://www.hacienda.go.cr/docs/2021_510_PVTZH.pdf",
+  "Guanacaste|Hojancha":         "https://www.hacienda.go.cr/docs/2021_511_PVTZH.pdf",
+  "Puntarenas|Puntarenas":       "https://www.hacienda.go.cr/docs/2021_601_PVTZH.pdf",
+  "Puntarenas|Esparza":          "https://www.hacienda.go.cr/docs/2021_602_PVTZH.pdf",
+  "Puntarenas|Buenos Aires":     "https://www.hacienda.go.cr/docs/2021_603_PVTZH.pdf",
+  "Puntarenas|Montes de Oro":    "https://www.hacienda.go.cr/docs/2021_604_PVTZH.pdf",
+  "Puntarenas|Osa":              "https://www.hacienda.go.cr/docs/2021_605_PVTZH.pdf",
+  "Puntarenas|Quepos":           "https://www.hacienda.go.cr/docs/2021_607_PVTZH.pdf",
+  "Puntarenas|Golfito":          "https://www.hacienda.go.cr/docs/2021_608_PVTZH.pdf",
+  "Puntarenas|Coto Brus":        "https://www.hacienda.go.cr/docs/2021_609_PVTZH.pdf",
+  "Puntarenas|Parrita":          "https://www.hacienda.go.cr/docs/2021_610_PVTZH.pdf",
+  "Puntarenas|Corredores":       "https://www.hacienda.go.cr/docs/2021_611_PVTZH.pdf",
+  "Puntarenas|Garabito":         "https://www.hacienda.go.cr/docs/2021_612_PVTZH.pdf",
+  "Limón|Limón":                 "https://www.hacienda.go.cr/docs/2021_701_PVTZH.pdf",
+  "Limón|Pococí":                "https://www.hacienda.go.cr/docs/2021_702_PVTZH.pdf",
+  "Limón|Siquirres":             "https://www.hacienda.go.cr/docs/2021_703_PVTZH.pdf",
+  "Limón|Talamanca":             "https://www.hacienda.go.cr/docs/2021_704_PVTZH.pdf",
+  "Limón|Matina":                "https://www.hacienda.go.cr/docs/2021_705_PVTZH.pdf",
+  "Limón|Guácimo":               "https://www.hacienda.go.cr/docs/2021_706_PVTZH.pdf"
+};
+
+function abrirPDFZonas() {
+  var prov  = document.getElementById('f_provincia')?.value || '';
+  var cant  = document.getElementById('f_canton')?.value   || '';
+  var key   = prov + '|' + cant;
+  var url   = CANTON_PDF[key];
+  if (!url) {
+    alert('Seleccioná provincia y cantón primero para abrir el mapa de valores.');
+    return;
+  }
+  window.open(url, '_blank');
 }
+
 
 function generarPDF(d, logoUrl) {
   if (typeof jspdf === 'undefined') { alert('jsPDF no disponible'); return; }
@@ -675,7 +735,7 @@ window.calcular = function() {
   const areaC    = parseFloat(document.getElementById('f_areaConst').value) || 0;
   const areaL    = parseFloat(document.getElementById('f_areaLote').value) || 0;
   const valMt2   = parseFloat(document.getElementById('f_valMt2').value) || 0;
-  const anioMapa = document.getElementById('f_anioMapa').value;
+  const anioMapa = '2023'; // fijo
 
   const vidaUtil = parseFloat(document.getElementById('f_vidaUtil').value) || 90;
   const edadEf = Math.max(0, aniosC - (pctR * aniosR));
@@ -772,7 +832,7 @@ window.guardar = async function() {
     estado_conservacion:parseFloat(document.getElementById('f_estado').value) || 0,
     area_lote:  parseFloat(document.getElementById('f_areaLote').value) || 0,
     val_mt2_lote: parseFloat(document.getElementById('f_valMt2').value) || 0,
-    anio_mapa:  parseInt(document.getElementById('f_anioMapa').value) || 2023,
+    anio_mapa:  2023,
     tipo_cambio: parseFloat(document.getElementById('f_tc').value) || 530,
     complementarias: complList.map(({ id }) => ({
       tipologia:   document.getElementById(`ct_${id}`)?.value,
@@ -865,8 +925,6 @@ window.cargarAvaluo = async function(id) {
   if (data.tipo_principal) selPrinc.value = data.tipo_principal;
   const selSeg = document.getElementById('f_tipoSeg');
   selSeg.value = data.tipo_segunda || '';
-  const selMapa = document.getElementById('f_anioMapa');
-  selMapa.value = data.anio_mapa || 2023;
 
   // complementarias — store state in complList, renderCompl reads from it
   complList = (data.complementarias || []).map((c, i) => ({
@@ -914,7 +972,7 @@ window.nuevoAvaluo = function() {
   document.getElementById('f_estado').value = '';
   document.getElementById('f_tipoPrinc').value = '';
   document.getElementById('f_tipoSeg').value = '';
-  document.getElementById('f_anioMapa').value = '2023';
+
   complList = [];
   renderCompl();
   calcular();
@@ -1001,82 +1059,6 @@ async function autoFetchTC() {
 
 // ── BOOT ─────────────────────────────────────────────────────
 init().then(() => autoFetchTC());
-</script>
-
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-<!-- OPCIÓN 2: Modal de mapa interactivo -->
-<div class="mapa-modal" id="mapaModal">
-  <div class="mapa-box">
-    <div class="mapa-header">
-      <span class="mapa-title">Seleccionar ubicación en el mapa</span>
-      <button class="btn-del" onclick="cerrarMapa()" style="font-size:22px">×</button>
-    </div>
-    <div class="mapa-body">
-      <div id="mapaLeaflet"></div>
-    </div>
-    <div class="mapa-footer">
-      <span class="mapa-instruccion">Clic en el mapa → abre Google Maps + portal de Hacienda en esa ubicación</span>
-      <div style="display:flex;gap:8px;align-items:center">
-        <span class="mapa-coords" id="mapaCoords">—</span>
-        <button class="btn btn-sm btn-primary" id="btnConsultarZona" onclick="consultarZonaWFS()" disabled>Ver en Hacienda</button>
-        <button class="btn btn-sm" onclick="cerrarMapa()">Cerrar</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<script>
-var _mapaLeaflet = null;
-var _mapaMarker = null;
-var _mapaCoords = null;
-
-function abrirMapaInteractivo() {
-  document.getElementById('mapaModal').classList.add('open');
-  if (!_mapaLeaflet) {
-    setTimeout(function() {
-      var prov = document.getElementById('f_provincia')?.value;
-      var cant = document.getElementById('f_canton')?.value;
-
-      // Center on Costa Rica, zoom to canton if possible
-      _mapaLeaflet = L.map('mapaLeaflet').setView([9.7489, -83.7534], 8);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors', maxZoom: 19
-      }).addTo(_mapaLeaflet);
-
-      _mapaLeaflet.on('click', function(e) {
-        var lat = e.latlng.lat.toFixed(6);
-        var lng = e.latlng.lng.toFixed(6);
-        _mapaCoords = { lat: lat, lng: lng };
-        document.getElementById('mapaCoords').textContent = lat + ', ' + lng;
-        document.getElementById('btnConsultarZona').disabled = false;
-        if (_mapaMarker) _mapaLeaflet.removeLayer(_mapaMarker);
-        _mapaMarker = L.marker([lat, lng]).addTo(_mapaLeaflet);
-      });
-    }, 100);
-  } else {
-    setTimeout(function() { _mapaLeaflet.invalidateSize(); }, 100);
-  }
-}
-
-function cerrarMapa() {
-  document.getElementById('mapaModal').classList.remove('open');
-}
-
-function consultarZonaWFS() {
-  if (!_mapaCoords) return;
-  // SNIT WFS no expone valores de zonas — abrimos el portal de Hacienda
-  // con las coordenadas para que el agente pueda identificar la zona visualmente
-  var lat = _mapaCoords.lat, lng = _mapaCoords.lng;
-  var canton = document.getElementById('f_canton')?.value || '';
-  // Open Google Maps at the clicked location so the agent can see the address
-  window.open('https://www.google.com/maps?q=' + lat + ',' + lng + '&z=17', '_blank');
-  // Also open Hacienda ATV
-  setTimeout(function() {
-    window.open('https://www.hacienda.go.cr/ATV/ZonasHomogeneas.aspx', '_blank');
-  }, 500);
-  document.getElementById('mapaCoords').textContent = 'Buscá esta ubicación en el mapa de Hacienda';
-}
 </script>
 
 </body>
