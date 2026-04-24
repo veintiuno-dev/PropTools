@@ -173,6 +173,25 @@ input[readonly], select[disabled] { background: var(--surface2); color: var(--in
       </div>
 
       <div class="card">
+        <div class="card-title">Terreno</div>
+        <div class="grid2">
+          <div class="field"><label>Área del lote (m²)</label><input type="number" id="f_areaLote" min="0" value="0" oninput="calcular();markDirty()"></div>
+          <div class="field">
+            <label>Valor tributario m² lote (¢)</label>
+            <div style="display:flex;gap:6px;align-items:center">
+              <input type="number" id="f_valMt2" min="0" value="0" oninput="calcular();markDirty()" style="flex:1">
+              <button class="btn btn-sm" onclick="abrirPDFZonas()" title="Ver mapa de zonas homogéneas (Hacienda)" style="flex-shrink:0;padding:0 8px;font-size:11px;white-space:nowrap;height:36px">
+                Ver zonas
+              </button>
+            </div>
+          </div>
+
+
+        </div>
+
+      </div>
+
+      <div class="card">
         <div class="card-title">
           <span>Construcción</span>
           <span style="font-size:11px;font-weight:400;color:var(--ink-mid)">Coef. Ross-Heidecke: <strong id="r_coef_inline" style="color:var(--blue)">—</strong></span>
@@ -206,25 +225,6 @@ input[readonly], select[disabled] { background: var(--surface2); color: var(--in
           <div class="field"><label>Años desde remodelación</label><input type="number" id="f_aniosRemodel" min="0" max="200" value="0" oninput="calcular();markDirty()"></div>
           <div class="field"><label>Segunda tipología (opc.)</label><select id="f_tipoSeg" onchange="calcular();markDirty()"><option value="">— ninguna —</option></select></div>
         </div>
-      </div>
-
-      <div class="card">
-        <div class="card-title">Terreno</div>
-        <div class="grid2">
-          <div class="field"><label>Área del lote (m²)</label><input type="number" id="f_areaLote" min="0" value="0" oninput="calcular();markDirty()"></div>
-          <div class="field">
-            <label>Valor tributario m² lote (¢)</label>
-            <div style="display:flex;gap:6px;align-items:center">
-              <input type="number" id="f_valMt2" min="0" value="0" oninput="calcular();markDirty()" style="flex:1">
-              <button class="btn btn-sm" onclick="abrirPDFZonas()" title="Ver mapa de zonas homogéneas (Hacienda)" style="flex-shrink:0;padding:0 8px;font-size:11px;white-space:nowrap;height:36px">
-                Ver zonas
-              </button>
-            </div>
-          </div>
-
-
-        </div>
-
       </div>
 
       <div class="card">
@@ -310,7 +310,7 @@ function setUbicacionSelects(prov, cant, dist) {
 
 
 // MAPA DE VALORES — PDF por cantón (Hacienda ONT)
-var CANTON_PDF = {
+window.CANTON_PDF = {
   "San José|San José":           "https://www.hacienda.go.cr/docs/2021_101_PVTZH.pdf",
   "San José|Escazú":             "https://www.hacienda.go.cr/docs/2021_102_PVTZH.pdf",
   "San José|Desamparados":       "https://www.hacienda.go.cr/docs/2021_103_PVTZH.pdf",
@@ -395,7 +395,7 @@ var CANTON_PDF = {
   "Limón|Guácimo":               "https://www.hacienda.go.cr/docs/2021_706_PVTZH.pdf"
 };
 
-function abrirPDFZonas() {
+window.abrirPDFZonas = function() {
   var sprov = document.getElementById('f_provincia');
   var scant = document.getElementById('f_canton');
   var prov  = sprov ? sprov.value : '';
@@ -412,7 +412,7 @@ function abrirPDFZonas() {
     return;
   }
   window.open(url, '_blank');
-}
+};
 
 
 function generarPDF(d, logoUrl) {
