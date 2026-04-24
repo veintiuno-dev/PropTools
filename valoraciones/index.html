@@ -178,10 +178,10 @@ input[readonly], select[disabled] { background: var(--surface2); color: var(--in
           <div class="field"><label>Área del lote (m²)</label><input type="number" id="f_areaLote" min="0" value="0" oninput="calcular();markDirty()"></div>
           <div class="field">
             <label>Valor tributario m² lote (¢)</label>
-            <div style="display:flex;gap:6px;align-items:center">
+            <div style="display:flex;gap:6px">
               <input type="number" id="f_valMt2" min="0" value="0" oninput="calcular();markDirty()" style="flex:1">
-              <button class="btn btn-sm" onclick="abrirPDFZonas()" title="Ver mapa de zonas homogéneas (Hacienda)" style="flex-shrink:0;padding:0 8px;font-size:11px;white-space:nowrap;height:36px">
-                Ver zonas
+              <button class="btn btn-sm" onclick="buscarZonas()" title="Buscar zonas homogéneas en Google" style="flex-shrink:0;padding:0 10px">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:3px"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Zonas
               </button>
             </div>
           </div>
@@ -308,111 +308,6 @@ function setUbicacionSelects(prov, cant, dist) {
 }
 
 
-
-// MAPA DE VALORES — PDF por cantón (Hacienda ONT)
-window.CANTON_PDF = {
-  "San José|San José":           "https://www.hacienda.go.cr/docs/2021_101_PVTZH.pdf",
-  "San José|Escazú":             "https://www.hacienda.go.cr/docs/2021_102_PVTZH.pdf",
-  "San José|Desamparados":       "https://www.hacienda.go.cr/docs/2021_103_PVTZH.pdf",
-  "San José|Puriscal":           "https://www.hacienda.go.cr/docs/2021_104_PVTZH.pdf",
-  "San José|Tarrazú":            "https://www.hacienda.go.cr/docs/2021_105_PVTZH.pdf",
-  "San José|Aserrí":             "https://www.hacienda.go.cr/docs/2021_106_PVTZH.pdf",
-  "San José|Mora":               "https://www.hacienda.go.cr/docs/2021_107_PVTZH.pdf",
-  "San José|Goicoechea":         "https://www.hacienda.go.cr/docs/2021_108_PVTZH.pdf",
-  "San José|Santa Ana":          "https://www.hacienda.go.cr/docs/2021_109_PVTZH.pdf",
-  "San José|Alajuelita":         "https://www.hacienda.go.cr/docs/2021_110_PVTZH.pdf",
-  "San José|Vásquez de Coronado":"https://www.hacienda.go.cr/docs/2021_111_PVTZH.pdf",
-  "San José|Acosta":             "https://www.hacienda.go.cr/docs/2021_112_PVTZH.pdf",
-  "San José|Tibás":              "https://www.hacienda.go.cr/docs/2021_113_PVTZH.pdf",
-  "San José|Moravia":            "https://www.hacienda.go.cr/docs/2021_114_PVTZH.pdf",
-  "San José|Montes de Oca":      "https://www.hacienda.go.cr/docs/2021_115_PVTZH.pdf",
-  "San José|Turrubares":         "https://www.hacienda.go.cr/docs/2021_116_PVTZH.pdf",
-  "San José|Dota":               "https://www.hacienda.go.cr/docs/2021_117_PVTZH.pdf",
-  "San José|Curridabat":         "https://www.hacienda.go.cr/docs/2021_118_PVTZH.pdf",
-  "San José|Pérez Zeledón":      "https://www.hacienda.go.cr/docs/2021_119_PVTZH.pdf",
-  "San José|León Cortés Castro": "https://www.hacienda.go.cr/docs/2021_120_PVTZH.pdf",
-  "Alajuela|Alajuela":           "https://www.hacienda.go.cr/docs/2021_201_PVTZH.pdf",
-  "Alajuela|San Ramón":          "https://www.hacienda.go.cr/docs/2021_202_PVTZH.pdf",
-  "Alajuela|Grecia":             "https://www.hacienda.go.cr/docs/2021_203_PVTZH.pdf",
-  "Alajuela|San Mateo":          "https://www.hacienda.go.cr/docs/2021_204_PVTZH.pdf",
-  "Alajuela|Atenas":             "https://www.hacienda.go.cr/docs/2021_205_PVTZH.pdf",
-  "Alajuela|Naranjo":            "https://www.hacienda.go.cr/docs/2021_206_PVTZH.pdf",
-  "Alajuela|Palmares":           "https://www.hacienda.go.cr/docs/2021_207_PVTZH.pdf",
-  "Alajuela|Poás":               "https://www.hacienda.go.cr/docs/2021_208_PVTZH.pdf",
-  "Alajuela|Orotina":            "https://www.hacienda.go.cr/docs/2021_209_PVTZH.pdf",
-  "Alajuela|San Carlos":         "https://www.hacienda.go.cr/docs/2021_210_PVTZH.pdf",
-  "Alajuela|Zarcero":            "https://www.hacienda.go.cr/docs/2021_212_PVTZH.pdf",
-  "Alajuela|Sarchí":             "https://www.hacienda.go.cr/docs/2021_213_PVTZH.pdf",
-  "Alajuela|Upala":              "https://www.hacienda.go.cr/docs/2021_214_PVTZH.pdf",
-  "Alajuela|Los Chiles":         "https://www.hacienda.go.cr/docs/2021_215_PVTZH.pdf",
-  "Alajuela|Guatuso":            "https://www.hacienda.go.cr/docs/2021_216_PVTZH.pdf",
-  "Alajuela|Río Cuarto":         "https://www.hacienda.go.cr/docs/2021_217_PVTZH.pdf",
-  "Cartago|Cartago":             "https://www.hacienda.go.cr/docs/2024_301_PVTZH.pdf",
-  "Cartago|Paraíso":             "https://www.hacienda.go.cr/docs/2021_302_PVTZH.pdf",
-  "Cartago|La Unión":            "https://www.hacienda.go.cr/docs/2021_303_PVTZH.pdf",
-  "Cartago|Jiménez":             "https://www.hacienda.go.cr/docs/2021_304_PVTZH.pdf",
-  "Cartago|Turrialba":           "https://www.hacienda.go.cr/docs/2021_305_PVTZH.pdf",
-  "Cartago|Alvarado":            "https://www.hacienda.go.cr/docs/2021_306_PVTZH.pdf",
-  "Cartago|Oreamuno":            "https://www.hacienda.go.cr/docs/2021_307_PVTZH.pdf",
-  "Cartago|El Guarco":           "https://www.hacienda.go.cr/docs/2021_308_PVTZH.pdf",
-  "Heredia|Heredia":             "https://www.hacienda.go.cr/docs/2021_401_PVTZH.pdf",
-  "Heredia|Barva":               "https://www.hacienda.go.cr/docs/2021_402_PVTZH.pdf",
-  "Heredia|Santo Domingo":       "https://www.hacienda.go.cr/docs/2021_403_PVTZH.pdf",
-  "Heredia|Santa Bárbara":       "https://www.hacienda.go.cr/docs/2021_404_PVTZH.pdf",
-  "Heredia|San Rafael":          "https://www.hacienda.go.cr/docs/2021_405_PVTZH.pdf",
-  "Heredia|San Isidro":          "https://www.hacienda.go.cr/docs/2021_406_PVTZH.pdf",
-  "Heredia|Belén":               "https://www.hacienda.go.cr/docs/2021_407_PVTZH.pdf",
-  "Heredia|Flores":              "https://www.hacienda.go.cr/docs/2021_408_PVTZH.pdf",
-  "Heredia|San Pablo":           "https://www.hacienda.go.cr/docs/2021_409_PVTZH.pdf",
-  "Heredia|Sarapiquí":           "https://www.hacienda.go.cr/docs/2021_410_PVTZH.pdf",
-  "Guanacaste|Liberia":          "https://www.hacienda.go.cr/docs/2021_501_PVTZH.pdf",
-  "Guanacaste|Nicoya":           "https://www.hacienda.go.cr/docs/2021_502_PVTZH.pdf",
-  "Guanacaste|Santa Cruz":       "https://www.hacienda.go.cr/docs/2021_503_PVTZH.pdf",
-  "Guanacaste|Bagaces":          "https://www.hacienda.go.cr/docs/2021_504_PVTZH.pdf",
-  "Guanacaste|Carrillo":         "https://www.hacienda.go.cr/docs/2021_505_PVTZH.pdf",
-  "Guanacaste|Cañas":            "https://www.hacienda.go.cr/docs/2021_506_PVTZH.pdf",
-  "Guanacaste|Abangares":        "https://www.hacienda.go.cr/docs/2021_507_PVTZH.pdf",
-  "Guanacaste|Tilarán":          "https://www.hacienda.go.cr/docs/2021_508_PVTZH.pdf",
-  "Guanacaste|Nandayure":        "https://www.hacienda.go.cr/docs/2021_509_PVTZH.pdf",
-  "Guanacaste|La Cruz":          "https://www.hacienda.go.cr/docs/2021_510_PVTZH.pdf",
-  "Guanacaste|Hojancha":         "https://www.hacienda.go.cr/docs/2021_511_PVTZH.pdf",
-  "Puntarenas|Puntarenas":       "https://www.hacienda.go.cr/docs/2021_601_PVTZH.pdf",
-  "Puntarenas|Esparza":          "https://www.hacienda.go.cr/docs/2021_602_PVTZH.pdf",
-  "Puntarenas|Buenos Aires":     "https://www.hacienda.go.cr/docs/2021_603_PVTZH.pdf",
-  "Puntarenas|Montes de Oro":    "https://www.hacienda.go.cr/docs/2021_604_PVTZH.pdf",
-  "Puntarenas|Osa":              "https://www.hacienda.go.cr/docs/2021_605_PVTZH.pdf",
-  "Puntarenas|Quepos":           "https://www.hacienda.go.cr/docs/2021_607_PVTZH.pdf",
-  "Puntarenas|Golfito":          "https://www.hacienda.go.cr/docs/2021_608_PVTZH.pdf",
-  "Puntarenas|Coto Brus":        "https://www.hacienda.go.cr/docs/2021_609_PVTZH.pdf",
-  "Puntarenas|Parrita":          "https://www.hacienda.go.cr/docs/2021_610_PVTZH.pdf",
-  "Puntarenas|Corredores":       "https://www.hacienda.go.cr/docs/2021_611_PVTZH.pdf",
-  "Puntarenas|Garabito":         "https://www.hacienda.go.cr/docs/2021_612_PVTZH.pdf",
-  "Limón|Limón":                 "https://www.hacienda.go.cr/docs/2021_701_PVTZH.pdf",
-  "Limón|Pococí":                "https://www.hacienda.go.cr/docs/2021_702_PVTZH.pdf",
-  "Limón|Siquirres":             "https://www.hacienda.go.cr/docs/2021_703_PVTZH.pdf",
-  "Limón|Talamanca":             "https://www.hacienda.go.cr/docs/2021_704_PVTZH.pdf",
-  "Limón|Matina":                "https://www.hacienda.go.cr/docs/2021_705_PVTZH.pdf",
-  "Limón|Guácimo":               "https://www.hacienda.go.cr/docs/2021_706_PVTZH.pdf"
-};
-
-window.abrirPDFZonas = function() {
-  var sprov = document.getElementById('f_provincia');
-  var scant = document.getElementById('f_canton');
-  var prov  = sprov ? sprov.value : '';
-  var cant  = scant ? scant.value : '';
-  if (!prov || !cant) {
-    alert('Seleccioná provincia y cantón primero.');
-    return;
-  }
-  var key = prov + '|' + cant;
-  var url = CANTON_PDF[key];
-  if (!url) {
-    // Fallback: open Hacienda ONT page
-    window.open('https://www.hacienda.go.cr/ont/mapavalores.html', '_blank');
-    return;
-  }
-  window.open(url, '_blank');
-};
 
 
 function generarPDF(d, logoUrl) {
