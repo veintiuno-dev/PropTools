@@ -337,6 +337,17 @@ function setUbicacionSelects(prov, cant, dist) {
   }
 }
 
+
+// OPCIÓN 3 — Portal Hacienda ATV zonas homogéneas
+function abrirMapaValores() {
+  var canton = document.getElementById('f_canton') && document.getElementById('f_canton').value;
+  var prov   = document.getElementById('f_provincia') && document.getElementById('f_provincia').value;
+  var msg    = document.getElementById('mapaMsg');
+  if (msg) { msg.textContent = 'Abriendo portal de Hacienda…'; setTimeout(function(){ msg.textContent=''; }, 3000); }
+  // ATV Hacienda — portal oficial de zonas homogéneas con búsqueda por cantón
+  window.open('https://www.hacienda.go.cr/ATV/ZonasHomogeneas.aspx', '_blank');
+}
+
 function generarPDF(d, logoUrl) {
   if (typeof jspdf === 'undefined') { alert('jsPDF no disponible'); return; }
   var JP = jspdf.jsPDF;
@@ -1005,10 +1016,10 @@ init().then(() => autoFetchTC());
       <div id="mapaLeaflet"></div>
     </div>
     <div class="mapa-footer">
-      <span class="mapa-instruccion">Clic en el mapa para seleccionar la ubicación del terreno</span>
+      <span class="mapa-instruccion">Clic en el mapa → abre Google Maps + portal de Hacienda en esa ubicación</span>
       <div style="display:flex;gap:8px;align-items:center">
         <span class="mapa-coords" id="mapaCoords">—</span>
-        <button class="btn btn-sm btn-primary" id="btnConsultarZona" onclick="consultarZonaWFS()" disabled>Consultar zona</button>
+        <button class="btn btn-sm btn-primary" id="btnConsultarZona" onclick="consultarZonaWFS()" disabled>Ver en Hacienda</button>
         <button class="btn btn-sm" onclick="cerrarMapa()">Cerrar</button>
       </div>
     </div>
@@ -1054,43 +1065,17 @@ function cerrarMapa() {
 
 function consultarZonaWFS() {
   if (!_mapaCoords) return;
-  var btn = document.getElementById('btnConsultarZona');
-  btn.textContent = 'Consultando…';
-  btn.disabled = true;
-
-  // Query SNIT WFS via Supabase Edge Function proxy
-  var fnUrl = 'https://zsldwaiwcvziqfajcmph.supabase.co/functions/v1/zona-homogenea';
-
-  window.sb.auth.getSession().then(function(r) {
-    var token = r.data.session?.access_token;
-    return fetch(fnUrl + '?lat=' + _mapaCoords.lat + '&lng=' + _mapaCoords.lng, {
-      headers: { Authorization: 'Bearer ' + token }
-    });
-  }).then(function(r) { return r.json(); })
-  .then(function(data) {
-    btn.textContent = 'Consultar zona';
-    btn.disabled = false;
-    if (data.error) {
-      alert('No se pudo obtener la zona: ' + data.error);
-      return;
-    }
-    // data = { zona: 'U01', valor_m2: 180000, descripcion: '...' }
-    if (data.valor_m2) {
-      document.getElementById('f_valMt2').value = data.valor_m2;
-      if (typeof calcular === 'function') calcular();
-      if (typeof markDirty === 'function') markDirty();
-      var info = 'Zona ' + (data.zona||'') + ': ₡' + Number(data.valor_m2).toLocaleString('es-CR') + '/m²';
-      if (data.descripcion) info += ' — ' + data.descripcion;
-      document.getElementById('mapaCoords').textContent = info;
-      setTimeout(cerrarMapa, 1500);
-    } else {
-      alert('Zona encontrada: ' + JSON.stringify(data) + '\n\nIngresá el valor manualmente.');
-    }
-  }).catch(function(e) {
-    btn.textContent = 'Consultar zona';
-    btn.disabled = false;
-    alert('Error al consultar: ' + e.message);
-  });
+  // SNIT WFS no expone valores de zonas — abrimos el portal de Hacienda
+  // con las coordenadas para que el agente pueda identificar la zona visualmente
+  var lat = _mapaCoords.lat, lng = _mapaCoords.lng;
+  var canton = document.getElementById('f_canton')?.value || '';
+  // Open Google Maps at the clicked location so the agent can see the address
+  window.open('https://www.google.com/maps?q=' + lat + ',' + lng + '&z=17', '_blank');
+  // Also open Hacienda ATV
+  setTimeout(function() {
+    window.open('https://www.hacienda.go.cr/ATV/ZonasHomogeneas.aspx', '_blank');
+  }, 500);
+  document.getElementById('mapaCoords').textContent = 'Buscá esta ubicación en el mapa de Hacienda';
 }
 </script>
 
