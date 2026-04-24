@@ -210,23 +210,11 @@ input[readonly], select[disabled] { background: var(--surface2); color: var(--in
 
       <div class="card">
         <div class="card-title">Terreno</div>
-        <div class="grid3">
+        <div class="grid2">
           <div class="field"><label>Área del lote (m²)</label><input type="number" id="f_areaLote" min="0" value="0" oninput="calcular();markDirty()"></div>
           <div class="field"><label>Valor tributario m² lote (¢)</label><input type="number" id="f_valMt2" min="0" value="0" oninput="calcular();markDirty()"></div>
-          <div class="field">
-            <label>Año mapa homogéneo</label>
-            <select id="f_anioMapa" onchange="calcular();markDirty()">
-              <option value="1999">1999</option><option value="2000">2000</option><option value="2001">2001</option>
-              <option value="2002">2002</option><option value="2003">2003</option><option value="2004">2004</option>
-              <option value="2005">2005</option><option value="2006">2006</option><option value="2007">2007</option>
-              <option value="2008">2008</option><option value="2009">2009</option><option value="2010">2010</option>
-              <option value="2011">2011</option><option value="2012">2012</option><option value="2013">2013</option>
-              <option value="2014">2014</option><option value="2015">2015</option><option value="2016">2016</option>
-              <option value="2017">2017</option><option value="2018">2018</option><option value="2019">2019</option>
-              <option value="2020">2020</option><option value="2021">2021</option><option value="2022">2022</option>
-              <option value="2023" selected>2023</option>
-            </select>
-          </div>
+
+
         </div>
 
       </div>
@@ -310,6 +298,7 @@ function setUbicacionSelects(prov, cant, dist) {
     if (cant) { sc.value = cant; onCanton(); if (dist) sd.value = dist; }
   }
 }
+
 
 function generarPDF(d, logoUrl) {
   if (typeof jspdf === 'undefined') { alert('jsPDF no disponible'); return; }
@@ -638,7 +627,7 @@ window.calcular = function() {
   const areaC    = parseFloat(document.getElementById('f_areaConst').value) || 0;
   const areaL    = parseFloat(document.getElementById('f_areaLote').value) || 0;
   const valMt2   = parseFloat(document.getElementById('f_valMt2').value) || 0;
-  const anioMapa = document.getElementById('f_anioMapa').value;
+  const anioMapa = '2023'; // fijo
 
   const vidaUtil = parseFloat(document.getElementById('f_vidaUtil').value) || 90;
   const edadEf = Math.max(0, aniosC - (pctR * aniosR));
@@ -735,7 +724,7 @@ window.guardar = async function() {
     estado_conservacion:parseFloat(document.getElementById('f_estado').value) || 0,
     area_lote:  parseFloat(document.getElementById('f_areaLote').value) || 0,
     val_mt2_lote: parseFloat(document.getElementById('f_valMt2').value) || 0,
-    anio_mapa:  parseInt(document.getElementById('f_anioMapa').value) || 2023,
+    anio_mapa:  2023,
     tipo_cambio: parseFloat(document.getElementById('f_tc').value) || 530,
     complementarias: complList.map(({ id }) => ({
       tipologia:   document.getElementById(`ct_${id}`)?.value,
@@ -828,8 +817,6 @@ window.cargarAvaluo = async function(id) {
   if (data.tipo_principal) selPrinc.value = data.tipo_principal;
   const selSeg = document.getElementById('f_tipoSeg');
   selSeg.value = data.tipo_segunda || '';
-  const selMapa = document.getElementById('f_anioMapa');
-  selMapa.value = data.anio_mapa || 2023;
 
   // complementarias — store state in complList, renderCompl reads from it
   complList = (data.complementarias || []).map((c, i) => ({
@@ -877,7 +864,7 @@ window.nuevoAvaluo = function() {
   document.getElementById('f_estado').value = '';
   document.getElementById('f_tipoPrinc').value = '';
   document.getElementById('f_tipoSeg').value = '';
-  document.getElementById('f_anioMapa').value = '2023';
+
   complList = [];
   renderCompl();
   calcular();
@@ -965,5 +952,6 @@ async function autoFetchTC() {
 // ── BOOT ─────────────────────────────────────────────────────
 init().then(() => autoFetchTC());
 </script>
+
 </body>
 </html>
