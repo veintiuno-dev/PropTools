@@ -180,8 +180,8 @@ input[readonly], select[disabled] { background: var(--surface2); color: var(--in
             <label>Valor tributario m² lote (¢)</label>
             <div style="display:flex;gap:6px">
               <input type="number" id="f_valMt2" min="0" value="0" oninput="calcular();markDirty()" style="flex:1">
-              <button class="btn btn-sm" onclick="buscarZonas()" title="Buscar zonas homogéneas en Google" style="flex-shrink:0;padding:0 10px">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:3px"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Zonas
+              <button class="btn btn-sm" onclick="buscarZonas()" title="Ver mapa de zonas homogéneas en SNIT" style="flex-shrink:0;padding:0 10px">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:3px"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>SNIT
               </button>
             </div>
           </div>
@@ -961,10 +961,7 @@ async function autoFetchTC() {
 
 // ── BUSCAR ZONAS ─────────────────────────────────────────────
 window.buscarZonas = function() {
-  const prov = document.getElementById('f_provincia')?.value?.trim() || '';
-  const cant = document.getElementById('f_canton')?.value?.trim() || '';
-  const query = [cant, prov, 'zonas homogeneas valores terreno Hacienda Costa Rica'].filter(Boolean).join(' ');
-  window.open('https://www.google.com/search?q=' + encodeURIComponent(query), '_blank');
+  window.open('https://www.snitcr.go.cr/Visor/visor?p=cHJveWVjdG86OmxpbWl0ZXM=', '_blank');
 };
 
 // ── BOOT ─────────────────────────────────────────────────────
