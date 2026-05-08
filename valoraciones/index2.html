@@ -79,11 +79,11 @@ input[readonly], select[disabled] { background: var(--surface2); color: var(--in
 @media (max-width: 600px) { .compl-row { grid-template-columns: 1fr 1fr 1fr 1fr 32px; } }
 
 /* SAVES LIST */
-.save-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: var(--surface2); border-radius: 8px; margin-bottom: 6px; gap: 8px; }
-.save-item-info { flex: 1; min-width: 0; }
-.save-item-name { font-weight: 700; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.save-item-meta { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; margin-top: 2px; }
-.save-item-actions { display: flex; gap: 4px; flex-shrink: 0; }
+.save-item { display: flex; flex-direction: column; padding: 10px 12px; background: var(--surface2); border-radius: 8px; margin-bottom: 6px; gap: 4px; }
+.save-item-info { min-width: 0; }
+.save-item-name { font-weight: 700; font-size: 13px; overflow: hidden; text-overflow: ellipsis; }
+.save-item-meta { font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace; }
+.save-item-actions { display: flex; gap: 4px; }
 .save-empty { font-size: 12px; color: var(--muted); text-align: center; padding: 20px 0; }
 
 /* STATUS */
@@ -792,8 +792,8 @@ async function cargarLista() {
         <div class="save-item-meta">${fecha || '—'} · ${total}</div>
       </div>
       <div class="save-item-actions">
-        <button class="btn btn-sm" onclick="cargarAvaluo('${a.id}')">Cargar</button>
-        <button class="btn btn-sm" onclick="exportarPDFId('${a.id}')">PDF</button>
+        <button class="btn btn-sm" style="flex:1" onclick="cargarAvaluo('${a.id}')">Cargar</button>
+        <button class="btn btn-sm" style="flex:1" onclick="exportarPDFId('${a.id}')">PDF</button>
         <button class="btn btn-sm btn-danger" onclick="borrarAvaluo('${a.id}')">×</button>
       </div>
     </div>`;
