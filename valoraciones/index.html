@@ -1029,7 +1029,7 @@ var TIPS_DATA = {"VC01": {"cat": "Viviendas de Concreto", "vida": "50 años.", "
     </div>
     <div class="tip-modal-body">
       <div class="tip-list" id="tipList"></div>
-      <div class="tip-detail" id="tipDetail"><div class="tip-detail-empty">← Seleccioná una tipología</div></div>
+      <div class="tip-detail" id="tipDetail" style="display:block"><div class="tip-detail-empty">← Seleccioná una tipología</div></div>
     </div>
   </div>
 </div>
@@ -1081,6 +1081,7 @@ window.buildTipList = function(q) {
 window.showTipDetail = function(code) {
   var d = TIPS_DATA[code];
   if (!d) return;
+  document.getElementById('tipDetail').style.display = 'block';
   var rows = [
     ['Vida útil', d.vida, false],
     ['Valor', d.val, true],
