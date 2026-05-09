@@ -1053,7 +1053,7 @@ document.getElementById('tipModal').addEventListener('click', function(e) {
   if (e.target === this) window.closeTipModal();
 });
 
-function buildTipList(q) {
+window.buildTipList = function(q) {
   q = q.toLowerCase();
   var list = document.getElementById('tipList');
   list.innerHTML = '';
@@ -1072,13 +1072,13 @@ function buildTipList(q) {
     el.onclick = function() {
       document.querySelectorAll('.tip-list-item').forEach(function(x) { x.classList.remove('selected'); });
       el.classList.add('selected');
-      showTipDetail(k);
+      window.showTipDetail(k);
     };
     list.appendChild(el);
   });
-}
+};
 
-function showTipDetail(code) {
+window.showTipDetail = function(code) {
   var d = TIPS_DATA[code];
   if (!d) return;
   var rows = [
@@ -1097,9 +1097,9 @@ function showTipDetail(code) {
       return '<div class="tip-detail-row"><div class="tip-detail-key">' + r[0] + '</div><div class="tip-detail-val" style="' + style + '">' + r[1] + '</div></div>';
     }).join('');
   document.getElementById('tipDetail').innerHTML = html;
-}
+};
 
-window.filtrarTips = function(q) { buildTipList(q); };
+window.filtrarTips = function(q) { window.buildTipList(q); };
 
 window.toggleTipPopover = function(code, btnEl) {
   var pop = btnEl.nextElementSibling;
