@@ -111,20 +111,23 @@ input[readonly], select[disabled] { background: var(--surface2); color: var(--in
 .tip-popover-val.val { color:var(--blue);font-weight:700 }
 .tip-modal-wrap { position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:1000;display:none;align-items:center;justify-content:center }
 .tip-modal-wrap.open { display:flex }
-.tip-modal { background:var(--surface);border-radius:14px;width:600px;max-height:85vh;display:flex;flex-direction:column;border:1px solid var(--border) }
-.tip-modal-hdr { padding:1rem 1.25rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between }
+.tip-modal { background:var(--surface);border-radius:14px;width:760px;max-height:85vh;display:flex;flex-direction:column;border:1px solid var(--border) }
+.tip-modal-hdr { padding:.75rem 1.25rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0 }
 .tip-modal-hdr h3 { font-size:13px;font-weight:700;color:var(--ink) }
-.tip-modal-search { padding:.6rem 1.25rem;border-bottom:1px solid var(--border) }
+.tip-modal-search { padding:.5rem 1.25rem;border-bottom:1px solid var(--border);flex-shrink:0 }
 .tip-modal-search input { width:100%;height:32px;padding:0 10px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:12px;color:var(--ink);background:var(--surface2) }
-.tip-list { overflow-y:auto;flex:1 }
-.tip-list-item { padding:.5rem 1.25rem;cursor:pointer;display:flex;align-items:baseline;gap:10px;border-bottom:1px solid var(--border) }
+.tip-modal-body { display:flex;flex:1;min-height:0 }
+.tip-list { overflow-y:auto;width:260px;flex-shrink:0;border-right:1px solid var(--border) }
+.tip-list-item { padding:.45rem 1rem;cursor:pointer;display:flex;align-items:baseline;gap:8px;border-bottom:1px solid var(--border) }
 .tip-list-item:hover { background:var(--surface2) }
-.tip-list-item.selected { background:#EFF6FF }
-.tip-item-code { font-size:11px;font-weight:700;color:var(--blue);min-width:36px;font-family:'DM Mono',monospace }
-.tip-item-cat { font-size:10px;color:var(--muted);min-width:150px }
-.tip-item-vida { font-size:10px;color:var(--muted);margin-left:auto;white-space:nowrap }
-.tip-detail { padding:1rem 1.25rem;border-top:1px solid var(--border);background:var(--surface2);max-height:240px;overflow-y:auto }
-.tip-detail-row { display:flex;flex-direction:column;gap:2px;padding:.4rem 0;border-bottom:1px solid var(--border) }
+.tip-list-item.selected { background:#EFF6FF;border-right:2px solid var(--blue) }
+.tip-item-code { font-size:11px;font-weight:700;color:var(--blue);min-width:34px;font-family:'DM Mono',monospace;flex-shrink:0 }
+.tip-item-cat { font-size:11px;color:var(--ink-mid);overflow:hidden;text-overflow:ellipsis;white-space:nowrap }
+.tip-detail { flex:1;overflow-y:auto;padding:1.25rem }
+.tip-detail-empty { display:flex;align-items:center;justify-content:center;height:100%;font-size:13px;color:var(--muted) }
+.tip-detail-title { font-size:14px;font-weight:700;color:var(--ink);margin-bottom:.25rem }
+.tip-detail-cat { font-size:11px;color:var(--muted);margin-bottom:1rem }
+.tip-detail-row { display:flex;flex-direction:column;gap:2px;padding:.5rem 0;border-bottom:1px solid var(--border) }
 .tip-detail-row:last-child { border-bottom:none }
 .tip-detail-key { font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em }
 .tip-detail-val { font-size:12px;color:var(--ink);line-height:1.5 }
@@ -1024,8 +1027,10 @@ var TIPS_DATA = {"VC01": {"cat": "Viviendas de Concreto", "vida": "50 años.", "
     <div class="tip-modal-search">
       <input type="text" id="tipSearch" placeholder="Buscar por código o categoría… VC05, apartamento, hospital…" oninput="filtrarTips(this.value)">
     </div>
-    <div class="tip-list" id="tipList"></div>
-    <div class="tip-detail" id="tipDetail" style="display:none"></div>
+    <div class="tip-modal-body">
+      <div class="tip-list" id="tipList"></div>
+      <div class="tip-detail" id="tipDetail"><div class="tip-detail-empty">← Seleccioná una tipología</div></div>
+    </div>
   </div>
 </div>
 
@@ -1078,23 +1083,21 @@ function showTipDetail(code) {
   var d = TIPS_DATA[code];
   if (!d) return;
   var rows = [
-    ['Categoría', d.cat],
-    ['Vida útil', d.vida],
-    ['Valor', d.val],
-    ['Estructura', d.est],
-    ['Paredes', d.par],
-    ['Pisos', d.pis],
-    ['Baños', d.ban],
-    ['Otros', d.otr],
+    ['Vida útil', d.vida, false],
+    ['Valor', d.val, true],
+    ['Estructura', d.est, false],
+    ['Paredes', d.par, false],
+    ['Pisos', d.pis, false],
+    ['Baños', d.ban, false],
+    ['Otros', d.otr, false],
   ].filter(function(r) { return r[1]; });
-  var html = rows.map(function(r) {
-    var cls = r[0] === 'Valor' ? 'tip-detail-val' : 'tip-detail-val';
-    var style = r[0] === 'Valor' ? 'color:var(--blue);font-weight:700' : '';
-    return '<div class="tip-detail-row"><div class="tip-detail-key">' + r[0] + '</div><div class="' + cls + '" style="' + style + '">' + r[1] + '</div></div>';
-  }).join('');
-  var det = document.getElementById('tipDetail');
-  det.innerHTML = html;
-  det.style.display = 'block';
+  var html = '<div class="tip-detail-title">' + code + '</div>' +
+    '<div class="tip-detail-cat">' + d.cat + '</div>' +
+    rows.map(function(r) {
+      var style = r[2] ? 'color:var(--blue);font-weight:700' : '';
+      return '<div class="tip-detail-row"><div class="tip-detail-key">' + r[0] + '</div><div class="tip-detail-val" style="' + style + '">' + r[1] + '</div></div>';
+    }).join('');
+  document.getElementById('tipDetail').innerHTML = html;
 }
 
 window.filtrarTips = function(q) { buildTipList(q); };
