@@ -111,7 +111,7 @@ input[readonly], select[disabled] { background: var(--surface2); color: var(--in
 .tip-popover-val.val { color:var(--blue);font-weight:700 }
 .tip-modal-wrap { position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:1000;display:none;align-items:center;justify-content:center }
 .tip-modal-wrap.open { display:flex }
-.tip-modal { background:var(--surface);border-radius:14px;width:760px;max-height:85vh;display:flex;flex-direction:column;border:1px solid var(--border) }
+.tip-modal { background:var(--surface);border-radius:14px;width:760px;height:80vh;display:flex;flex-direction:column;border:1px solid var(--border) }
 .tip-modal-hdr { padding:.75rem 1.25rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0 }
 .tip-modal-hdr h3 { font-size:13px;font-weight:700;color:var(--ink) }
 .tip-modal-search { padding:.5rem 1.25rem;border-bottom:1px solid var(--border);flex-shrink:0 }
@@ -1068,8 +1068,7 @@ function buildTipList(q) {
     var el = document.createElement('div');
     el.className = 'tip-list-item';
     el.innerHTML = '<span class="tip-item-code">' + k + '</span>' +
-      '<span class="tip-item-cat">' + d.cat + '</span>' +
-      '<span class="tip-item-vida">' + d.vida + '</span>';
+      '<span class="tip-item-cat">' + d.cat + '</span>';
     el.onclick = function() {
       document.querySelectorAll('.tip-list-item').forEach(function(x) { x.classList.remove('selected'); });
       el.classList.add('selected');
