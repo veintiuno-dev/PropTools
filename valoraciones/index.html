@@ -1031,6 +1031,8 @@ function setUbicacionSelects(prov, cant, dist) {
   var sp = document.getElementById('f_provincia');
   var sc = document.getElementById('f_canton');
   var sd = document.getElementById('f_distrito');
+  // Asegurar que las opciones de provincia estén cargadas
+  if (sp.options.length <= 1) initProvincias();
   if (prov) {
     sp.value = prov; onProvincia();
     if (cant) { sc.value = cant; onCanton(); if (dist) sd.value = dist; }
